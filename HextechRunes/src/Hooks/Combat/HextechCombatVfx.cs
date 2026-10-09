@@ -1,4 +1,3 @@
-using System.Text;
 using Godot;
 using MegaCrit.Sts2.Core.Helpers;
 using MegaCrit.Sts2.Core.Nodes;
@@ -86,7 +85,7 @@ internal static partial class HextechCombatVfx
 		}
 	}
 
-	// 死者立绘平均色缓存(按怪物类型;null=算不出,回退默认魂色)。
+	// 死者立绘平均色缓存(按怪物类型;节点暂不可用时不缓存失败)。
 	private static readonly Dictionary<Type, Color?> MonsterTintCache = [];
 
 	/// <summary>魂色=死者 Spine 立绘贴图的 alpha 加权平均色(抬亮压灰,魂要发光);失败回退幽青。</summary>
@@ -102,8 +101,11 @@ internal static partial class HextechCombatVfx
 			Type type = monster.GetType();
 			if (!MonsterTintCache.TryGetValue(type, out Color? tint))
 			{
-				tint = ComputeMonsterAverageColor(type.Name);
-				MonsterTintCache[type] = tint;
+				tint = ComputeMonsterAverageColor(source);
+				if (tint.HasValue)
+				{
+					MonsterTintCache[type] = tint;
+				}
 			}
 
 			return tint ?? SoulColor;
@@ -114,33 +116,52 @@ internal static partial class HextechCombatVfx
 		}
 	}
 
-	private static Color? ComputeMonsterAverageColor(string monsterTypeName)
+	private static Color? ComputeMonsterAverageColor(Creature source)
 	{
-		// 原版约定:类名 MechaKnight ↔ 贴图 res://animations/monsters/mecha_knight/mecha_knight.png。
-		string snake = ToSnakeCase(monsterTypeName);
-		if (ResourceLoader.Load($"res://animations/monsters/{snake}/{snake}.png") is not Texture2D texture
-			|| texture.GetImage() is not { } image)
+		NCreatureVisuals? visuals = HextechCreatureNodeRegistry.TryGet(source)?.Visuals;
+		if (!GodotObject.IsInstanceValid(visuals))
 		{
 			return null;
 		}
 
-		if (image.IsCompressed())
+		// 图集文件名不由怪物类名决定(SoulNexus 实际使用 soulnexus.png)。
+		// 沿当前立绘的 Spine 资源引用读取已加载纹理,同时支持多页图集。
+		GodotObject? sprite = visuals!.SpineBody?.BoundObject;
+		if (!GodotObject.IsInstanceValid(sprite) || !sprite!.HasMethod("get_skeleton_data_res")
+			|| sprite.Call("get_skeleton_data_res").AsGodotObject() is not { } skeletonData
+			|| !skeletonData.HasMethod("get_atlas_res")
+			|| skeletonData.Call("get_atlas_res").AsGodotObject() is not { } atlas
+			|| !atlas.HasMethod("get_textures"))
 		{
-			image.Decompress();
+			return null;
 		}
 
 		const int SampleSize = 32;
-		image.Resize(SampleSize, SampleSize, Image.Interpolation.Bilinear);
 		float r = 0f, g = 0f, b = 0f, weight = 0f;
-		for (int y = 0; y < SampleSize; y++)
+		foreach (Variant textureVariant in atlas.Call("get_textures").AsGodotArray())
 		{
-			for (int x = 0; x < SampleSize; x++)
+			if (textureVariant.AsGodotObject() is not Texture2D texture || !GodotObject.IsInstanceValid(texture))
 			{
-				Color pixel = image.GetPixel(x, y);
-				r += pixel.R * pixel.A;
-				g += pixel.G * pixel.A;
-				b += pixel.B * pixel.A;
-				weight += pixel.A;
+				continue;
+			}
+
+			using Image? image = texture.GetImage();
+			if (image == null || image.IsEmpty() || (image.IsCompressed() && image.Decompress() != Error.Ok))
+			{
+				continue;
+			}
+
+			image.Resize(SampleSize, SampleSize, Image.Interpolation.Bilinear);
+			for (int y = 0; y < SampleSize; y++)
+			{
+				for (int x = 0; x < SampleSize; x++)
+				{
+					Color pixel = image.GetPixel(x, y);
+					r += pixel.R * pixel.A;
+					g += pixel.G * pixel.A;
+					b += pixel.B * pixel.A;
+					weight += pixel.A;
+				}
 			}
 		}
 
@@ -151,30 +172,6 @@ internal static partial class HextechCombatVfx
 
 		new Color(r / weight, g / weight, b / weight).ToHsv(out float hue, out float saturation, out float value);
 		return Color.FromHsv(hue, Mathf.Clamp(saturation, 0.3f, 0.8f), Mathf.Max(value, 0.8f));
-	}
-
-	private static string ToSnakeCase(string name)
-	{
-		StringBuilder builder = new(name.Length + 8);
-		for (int i = 0; i < name.Length; i++)
-		{
-			char c = name[i];
-			if (char.IsUpper(c))
-			{
-				if (i > 0)
-				{
-					builder.Append('_');
-				}
-
-				builder.Append(char.ToLowerInvariant(c));
-			}
-			else
-			{
-				builder.Append(c);
-			}
-		}
-
-		return builder.ToString();
 	}
 
 	/// <summary>死亡之环：幽绿光束连接施法者与目标，目标处播放光环与闪光。</summary>
