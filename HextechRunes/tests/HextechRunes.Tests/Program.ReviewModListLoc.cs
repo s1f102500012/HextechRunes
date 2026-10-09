@@ -30,13 +30,13 @@ internal static partial class Program
 	{
 		Dictionary<string, string> table = new(StringComparer.Ordinal)
 		{
-			["HEXTECH_MOD_NAME"] = "Hextech Mayhem",
+			["HEXTECH_MOD_NAME"] = "ARAM: Mayhem",
 			["HEXTECH_SPONSOR_MOD_NAME"] = " ",
 		};
 		string? Lookup(string key) => table.TryGetValue(key, out string? value) ? value : null;
-		const string Vanilla = "Hextech Mayhem / 海克斯大乱斗";
+		const string Vanilla = "ARAM: Mayhem / 海克斯大乱斗";
 
-		Equal("Hextech Mayhem", HextechModListLocalizationHooks.ResolveTitle("HextechRunes", Vanilla, Vanilla, Lookup), "localized main title");
+		Equal("ARAM: Mayhem", HextechModListLocalizationHooks.ResolveTitle("HextechRunes", Vanilla, Vanilla, Lookup), "localized main title");
 		Equal<string?>(null, HextechModListLocalizationHooks.ResolveTitle("HextechRunesSponsorPack", Vanilla, Vanilla, Lookup), "blank translation keeps manifest name");
 		Equal<string?>(null, HextechModListLocalizationHooks.ResolveTitle("HextechRunes", Vanilla, Vanilla, static _ => null), "missing key keeps manifest name, never the key");
 		Equal<string?>(null, HextechModListLocalizationHooks.ResolveTitle("HextechRunes", "Renamed by another mod", Vanilla, Lookup), "another mod's rewrite wins");

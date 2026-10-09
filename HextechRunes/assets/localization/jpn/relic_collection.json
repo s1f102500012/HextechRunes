@@ -53,7 +53,7 @@
   "HEXTECH_MOD_ENABLED_TOGGLE_TITLE": "MODを有効化",
   "HEXTECH_MOD_ENABLED_TOGGLE_DESCRIPTION": "無効にすると、このMODは次のランから無効になり、バニラバージョンと同じ挙動になります（現在進行中のランには影響しません）。マルチプレイでは、ホストの設定に従います。",
   "HEXTECH_SHOW_UPDATE_NOTICE_TOGGLE_TITLE": "バージョン更新通知を表示",
-  "HEXTECH_SHOW_UPDATE_NOTICE_TOGGLE_DESCRIPTION": "有効にすると、メインメニュー左下にヘクステック・メイヘムのバージョン確認通知が表示されます。無効にすると非表示になります。",
+  "HEXTECH_SHOW_UPDATE_NOTICE_TOGGLE_DESCRIPTION": "有効にすると、メインメニュー左下にランダムミッド：メイヘムのバージョン確認通知が表示されます。無効にすると非表示になります。",
   "HEXTECH_COLLAPSE_ENEMY_HEXES_TOGGLE_TITLE": "敵Hexルーンを折りたたむ",
   "HEXTECH_COLLAPSE_ENEMY_HEXES_TOGGLE_DESCRIPTION": "有効にすると、戦闘中の敵Hexルーンはマップボタンの左側にある折りたたみボタンの中に収納されます。クリックすると展開して表示できます。無効にすると、これまでどおりトップバー上に横並びで表示されます。",
   "HEXTECH_CONFIRM_RUNE_SELECTION_TOGGLE_TITLE": "ルーン選択の確認",

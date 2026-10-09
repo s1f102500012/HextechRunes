@@ -1,6 +1,6 @@
 {
   "id": "HextechRunes",
-  "name": "Hextech Mayhem / 海克斯大乱斗",
+  "name": "ARAM: Mayhem / 海克斯大乱斗",
   "author": "Natsuki",
   "description": "At the start of each Act, choose a Hextech Rune to reshape your build, while enemies in that Act gain an enemy hex of the same rarity. Also adds stat forgers, character-specific Hextechs, and new cards. Supports multiplayer.\n每层开始时选择一个海克斯符文来改造构筑，同层敌人也会获得同稀有度的敌方海克斯。另有属性锻造器、角色专属海克斯与新卡牌，支持多人模式。",
   "version": "0.9.7",

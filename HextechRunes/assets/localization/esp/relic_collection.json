@@ -53,7 +53,7 @@
   "HEXTECH_MOD_ENABLED_TOGGLE_TITLE": "Activar mod",
   "HEXTECH_MOD_ENABLED_TOGGLE_DESCRIPTION": "Si se desactiva, este mod deja de aplicarse a partir de la próxima partida y el juego queda igual que el original (la partida en curso no se ve afectada). En multijugador se usa la configuración del anfitrión.",
   "HEXTECH_SHOW_UPDATE_NOTICE_TOGGLE_TITLE": "Mostrar aviso de actualización",
-  "HEXTECH_SHOW_UPDATE_NOTICE_TOGGLE_DESCRIPTION": "Cuando está activado, el menú principal muestra el aviso de versión de Caos hextech en la esquina inferior izquierda. Desactívalo para ocultarlo.",
+  "HEXTECH_SHOW_UPDATE_NOTICE_TOGGLE_DESCRIPTION": "Cuando está activado, el menú principal muestra el aviso de versión de ARAM: Caos en la esquina inferior izquierda. Desactívalo para ocultarlo.",
   "HEXTECH_COLLAPSE_ENEMY_HEXES_TOGGLE_TITLE": "Contraer hexes enemigos",
   "HEXTECH_COLLAPSE_ENEMY_HEXES_TOGGLE_DESCRIPTION": "Al activarlo, durante el combate los hexes enemigos se guardan en un botón plegable a la izquierda del botón del mapa en la barra superior; haz clic en él para desplegarlos y verlos. Al desactivarlo, se muestran como antes, directamente en la barra superior.",
   "HEXTECH_CONFIRM_RUNE_SELECTION_TOGGLE_TITLE": "Confirmar selección de runa",

@@ -1,10 +1,10 @@
 {
   "HEXTECH_CONFIG_BUTTON": "Configuração de Runas Hextech",
   "HEXTECH_CONFIG_BUTTON_TOOLTIP": "Configura as regras de Hextech, hexes inimigos e forjadores de atributos usados ao jogar solo ou criar uma partida multiplayer.",
-  "HEXTECH_UPDATE_CHECKING": "Verificando a versão do mod Caos Hextech...",
-  "HEXTECH_UPDATE_UNAVAILABLE": "A verificação de atualizações do Caos Hextech está indisponível no momento",
-  "HEXTECH_UPDATE_AVAILABLE": "Nova versão do Caos Hextech disponível: {Latest} (versão atual: {Current})",
-  "HEXTECH_UPDATE_LATEST": "O Caos Hextech está atualizado ({Current})",
-  "HEXTECH_MOD_NAME": "Caos Hextech",
+  "HEXTECH_UPDATE_CHECKING": "Verificando a versão do mod ARAM: Desordem...",
+  "HEXTECH_UPDATE_UNAVAILABLE": "A verificação de atualizações do ARAM: Desordem está indisponível no momento",
+  "HEXTECH_UPDATE_AVAILABLE": "Nova versão do ARAM: Desordem disponível: {Latest} (versão atual: {Current})",
+  "HEXTECH_UPDATE_LATEST": "O ARAM: Desordem está atualizado ({Current})",
+  "HEXTECH_MOD_NAME": "ARAM: Desordem",
   "HEXTECH_MOD_DESCRIPTION": "No início de cada ato, escolha uma runa Hextech para transformar seu baralho; os inimigos daquele ato também recebem um hex inimigo da mesma raridade. Inclui ainda forjadores de atributos, Hextechs exclusivos de cada personagem e cartas novas. Suporta multijogador; ajuste as regras em “Configuração de Runas Hextech” no menu principal."
 }

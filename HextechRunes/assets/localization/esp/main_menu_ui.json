@@ -1,10 +1,10 @@
 {
   "HEXTECH_CONFIG_BUTTON": "Configuración de runas hextech",
   "HEXTECH_CONFIG_BUTTON_TOOLTIP": "Configura las reglas de runas Hextech, hexes enemigos y forjadores de atributo para solitario o cuando seas anfitrión.",
-  "HEXTECH_UPDATE_CHECKING": "Comprobando la versión del mod Caos hextech...",
-  "HEXTECH_UPDATE_UNAVAILABLE": "La comprobación de actualizaciones de Caos hextech no está disponible ahora mismo",
-  "HEXTECH_UPDATE_AVAILABLE": "Hay una nueva versión de Caos hextech: {Latest} (versión actual: {Current})",
-  "HEXTECH_UPDATE_LATEST": "Caos hextech está actualizado ({Current})",
-  "HEXTECH_MOD_NAME": "Caos hextech",
+  "HEXTECH_UPDATE_CHECKING": "Comprobando la versión del mod ARAM: Caos...",
+  "HEXTECH_UPDATE_UNAVAILABLE": "La comprobación de actualizaciones de ARAM: Caos no está disponible ahora mismo",
+  "HEXTECH_UPDATE_AVAILABLE": "Ya está disponible ARAM: Caos {Latest} (versión actual: {Current})",
+  "HEXTECH_UPDATE_LATEST": "ARAM: Caos está actualizado ({Current})",
+  "HEXTECH_MOD_NAME": "ARAM: Caos",
   "HEXTECH_MOD_DESCRIPTION": "Al comienzo de cada acto, elige una runa hextech para transformar tu mazo; los enemigos de ese acto también obtienen un hex enemigo de la misma rareza. Incluye además forjadores de atributo, hextech exclusivos de cada personaje y cartas nuevas. Compatible con el modo cooperativo; ajusta las reglas en «Configuración de runas hextech» del menú principal."
 }

@@ -53,7 +53,7 @@
   "HEXTECH_MOD_ENABLED_TOGGLE_TITLE": "Enable mod",
   "HEXTECH_MOD_ENABLED_TOGGLE_DESCRIPTION": "When off, this mod stops affecting runs starting from your next run, matching the vanilla game (your current run is unaffected). In multiplayer this follows the host's setting.",
   "HEXTECH_SHOW_UPDATE_NOTICE_TOGGLE_TITLE": "Show version update notice",
-  "HEXTECH_SHOW_UPDATE_NOTICE_TOGGLE_DESCRIPTION": "When enabled, the main menu shows the Hextech Mayhem version-check notice in the lower-left corner. Disable to hide it.",
+  "HEXTECH_SHOW_UPDATE_NOTICE_TOGGLE_DESCRIPTION": "When enabled, the main menu shows the ARAM: Mayhem version-check notice in the lower-left corner. Disable to hide it.",
   "HEXTECH_COLLAPSE_ENEMY_HEXES_TOGGLE_TITLE": "Collapse enemy hexes",
   "HEXTECH_COLLAPSE_ENEMY_HEXES_TOGGLE_DESCRIPTION": "When enabled, enemy hexes in combat are tucked behind a fold button to the left of the map button; click it to expand and view them. When disabled, they show inline on the top bar as before.",
   "HEXTECH_CONFIRM_RUNE_SELECTION_TOGGLE_TITLE": "Confirm Rune Selection",
