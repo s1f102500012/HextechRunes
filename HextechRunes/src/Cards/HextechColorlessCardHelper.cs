@@ -1,20 +1,11 @@
-using MegaCrit.Sts2.Core.Models.CardPools;
-
 namespace HextechRunes;
 
 internal static class HextechColorlessCardHelper
 {
-	// 本体符文（无瑕、空白支票、三棱镜等）的「无色牌」口径：无色牌池的牌，另把摄政王的衍生牌
-	// （君王之剑与三张仆从牌）也按无色计。
+	// 与原版传家宝锤（HeirloomHammer）选牌条件一致：显示卡池为无色池。0.107.1～0.111.0 中无色池包括
+	// 无色卡池、衍生卡池（君王之剑、仆从牌、小刀等）、事件卡池与废弃卡池；第三方卡池按其自身的 IsColorless。
 	public static bool IsColorlessCard(CardModel card)
 	{
-		return IsRegentGeneratedCard(card)
-			|| card.Pool is ColorlessCardPool
-			|| card.VisualCardPool is ColorlessCardPool;
-	}
-
-	private static bool IsRegentGeneratedCard(CardModel card)
-	{
-		return card is SovereignBlade or MinionStrike or MinionDiveBomb or MinionSacrifice;
+		return card.VisualCardPool.IsColorless;
 	}
 }

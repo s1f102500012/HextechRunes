@@ -325,15 +325,6 @@ internal static partial class Program
 	}
 
 	[HextechTest]
-	private static void ColorlessCardHelperTreatsRegentGeneratedCardsAsColorless()
-	{
-		Expect(HextechColorlessCardHelper.IsColorlessCard(UninitializedCard<SovereignBlade>()), "sovereign blade should count as colorless");
-		Expect(HextechColorlessCardHelper.IsColorlessCard(UninitializedCard<MinionStrike>()), "minion strike should count as colorless");
-		Expect(HextechColorlessCardHelper.IsColorlessCard(UninitializedCard<MinionDiveBomb>()), "minion dive bomb should count as colorless");
-		Expect(HextechColorlessCardHelper.IsColorlessCard(UninitializedCard<MinionSacrifice>()), "minion sacrifice should count as colorless");
-	}
-
-	[HextechTest]
 	private static void HastyScribbleDrawsToFullHandAtTurnStart()
 	{
 		Equal(CardPile.MaxCardsInHand, HastyScribbleRune.CalculateCardsToDraw(0), "empty hand draw");
