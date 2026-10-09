@@ -85,7 +85,7 @@ python3 HextechRunes/tools/hextech_dev.py tests --target 0.111.0 --name HopperEs
 
 | 需求 | 入口 | 使用边界 |
 | --- | --- | --- |
-| 归属、攻击/技能判定、伤害预览 | `src/Relics/Base/HextechRelicBase.CombatHelpers.cs`、`src/Helpers/HextechCardEffectTypes.cs` | `IsOwnedAttack/IsOwnedSkill` 含模组特殊判定；幻影武器等“按效果算攻击/技能”的分类统一走 `HextechCardEffectTypes`；预览不得产生副作用 |
+| 归属、攻击/技能判定、伤害预览 | `src/Relics/Base/HextechRelicBase.CombatHelpers.cs`、`src/Helpers/HextechCardEffectTypes.cs` | `IsOwnedAttack/IsOwnedSkill` 判定持有者的攻击/技能牌，技能按规范实例类型（`HextechCardEffectTypes`）；`IsAttackDamageForRuneEffects` 把持有者技能牌造成的伤害也算作攻击伤害；预览不得产生副作用 |
 | 符文共享基类 | `src/Relics/Base/TurnScopedRelicBase.cs`、`DrawThresholdRuneBase.cs`、`src/Runes/HextechSharedCombatVictoryRune.cs` | 每回合状态只实现 `ResetTurnScopedState()`，由基类在开战/战后/持有者回合开始统一清零；每 N 张阈值与跨阈值计数（`HextechRelicBase.CountThresholdCrossings`）；单机战后共享结算继承 `HextechSharedCombatVictoryRuneBase`。SavedProperty 仍声明在各子类上 |
 | 按回合号防重、每 N 回合 | `src/Combat/HextechRoundInterval.cs` | `IsDue` 按文案里的 N 判定；`TryClaimRound` 替代手写 `_lastProcRound`，仍按 RoundNumber（见设计裁决） |
 | 弹幕与选敌 | `src/Runes/HextechMissileVolley.cs`、`HextechRuneTargeting.cs` | 飞弹类伤害在出牌动作内同步结算；`FirstHittableEnemy` 按 CombatId 取稳定目标 |
@@ -93,7 +93,7 @@ python3 HextechRunes/tools/hextech_dev.py tests --target 0.111.0 --name HopperEs
 | 最大生命基值、数值上限、体型下限 | `src/Combat/HextechMaxHpScaling.cs`、`HextechCreatureStatLimits.cs`、`HextechPlayerBodyScaleHelper.cs` | `EnsureScaledBaseInitialized` 替代手写初始化；`StatHardCap` 替代 `999999999`；`MinCreatureBodyScale` 敌我共用 |
 | 濒死狂宴失血推演 | `src/Combat/HextechNearDeathHpLoss.cs` | 玩家与敌方共用；同步前缀只记债务，力量补差在 `AfterCurrentHpChanged` 里等待执行 |
 | 角色/联网上下文 | `src/Helpers/HextechPlayerContextHelper.cs` | 本地玩家判断不能控制共享战斗结算；“已连接的联机”用 `IsMultiplayerConnected()`，只判断联机类型用 `IsNetworkMultiplayerRun()` |
-| 出牌/抽牌历史和宠物来源 | `src/Helpers/HextechCombatHistoryHelper.cs` | 核对 `firstInSeriesOnly/includeAutoPlay`；历史读取不等于自动保证跨端一致 |
+| 出牌/抽牌历史和宠物来源 | `src/Helpers/HextechCombatHistoryHelper.cs` | 历史计数含重放与自动打出（同原版苦无口径）；历史读取不等于自动保证跨端一致 |
 | 小刀识别 | `src/Helpers/HextechKnifeHelper.cs` | 用当前项目的小刀规则，不到处另写 `card is Shiv` |
 | 敌方三档数值/存活目标 | `src/EnemyHexes/HextechEnemyHexContext.cs` | `TierValue` 按该海克斯强度算；`IsManualPlayerCardPlay`、`FractionOfMaxHp`、`GetAlivePlayersByNetId`、`TryConsumeRoundInterval`/`TryConsumeOncePerRound` 是统一口径；别以幕号替代强度 |
 | 敌方海克斯共享基类 | `src/EnemyHexes/DrawProgressEnemyHexBase.cs`、`AttributeBoostEnemyHexBase.cs`、`EnemyMaxHpStepMultiplier.cs` | 抽牌进度联机补记、属性增益三档、按最大生命阶梯加成；`MonsterHexCatalog` 的阈值保留字面量供 TXT 脚本读取，由测试守一致 |
