@@ -154,8 +154,7 @@ internal static partial class HextechRuneConfiguration
 		return new HashSet<string>(StringComparer.Ordinal)
 		{
 			MonsterHexKind.GetExcited.ToString(),
-			MonsterHexKind.ShoulderVaku.ToString(),
-			MonsterHexKind.NatureIsHealing.ToString()
+			MonsterHexKind.ShoulderVaku.ToString()
 		};
 	}
 

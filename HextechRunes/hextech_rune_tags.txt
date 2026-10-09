@@ -176,7 +176,6 @@
 我方	DuffsVintageRune	达弗的陈酿	标签=运转
 我方	ArchmageRune	大法师	标签=运转
 我方	CorruptedBranchRune	腐化树枝	标签=烧牌
-#我方	NatureIsHealingRune	自然即是治愈	标签=生存
 #我方	PorcupineRune	豪猪	标签=生存
 我方	StarlightSparkleRune	星光闪闪	标签=综合
 我方	ColorDiscoveryRune	色彩发现	标签=综合

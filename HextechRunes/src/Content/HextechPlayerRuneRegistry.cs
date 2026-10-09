@@ -130,7 +130,6 @@ internal static class HextechPlayerRuneRegistry
 		Rune<SonataRune>(HextechRarityTier.Gold, tagKey: "MULTIPLAYER"),
 		Rune<OurHealingRune>(HextechRarityTier.Gold, tagKey: "MULTIPLAYER"),
 		Rune<ArchmageRune>(HextechRarityTier.Gold, tagKey: "RESOURCE"),
-		Rune<NatureIsHealingRune>(HextechRarityTier.Gold, flags: PlayerRuneFlags.Disabled, tagKey: "SURVIVAL"),
 		Rune<PorcupineRune>(HextechRarityTier.Gold, flags: PlayerRuneFlags.Disabled, tagKey: "SURVIVAL"),
 		Rune<ColorDiscoveryRune>(HextechRarityTier.Gold),
 		Rune<HattrickRune>(HextechRarityTier.Gold),

@@ -21,9 +21,7 @@ internal static partial class Program
 			["src/Services/HextechFeaturedConfigs.cs"] = ("DateTime.UtcNow", "只给推荐配置HTTP缓存定时，不驱动战斗状态或共享RNG。"),
 			["src/Selection/UI/HextechGoldenRerollVisual.cs"] = ("Time.GetTicksMsec", "只计算重随机特效进度，不决定抽选结果。"),
 			["src/Selection/UI/HextechRuneSelectionScreen.Interaction.cs"] = ("Time.GetTicksMsec", "仅防本地重复点击，最终选择按模型ID同步。"),
-			["src/Hooks/UI/HextechRelicVisibilityHooks.ToggleUi.cs"] = ("Godot.Timer", "只重定位隐藏遗物按钮，不改模型或共享RNG。"),
-			["src/Runes/NatureIsHealingRune.cs"] = ("Godot.Timer", "BeforeCombatStart仅在非联机创建；联机获取池禁用，旧档使用同步回合Hook。"),
-			["src/EnemyHexes/NatureIsHealingEnemyHex.cs"] = ("Godot.Timer", "ApplyCombatStartToEnemy仅在非联机创建；联机池禁用，旧档使用同步回合Hook。")
+			["src/Hooks/UI/HextechRelicVisibilityHooks.ToggleUi.cs"] = ("Godot.Timer", "只重定位隐藏遗物按钮，不改模型或共享RNG。")
 		};
 		List<string> violations = [];
 		HashSet<string> seenExceptions = new(StringComparer.Ordinal);

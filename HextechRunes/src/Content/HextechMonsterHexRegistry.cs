@@ -58,7 +58,6 @@ internal static class HextechMonsterHexRegistry
 		Monster<MonarchsGazeRune>(MonsterHexKind.MonarchsGaze, HextechRarityTier.Gold),
 		Monster<OmegaRune>(MonsterHexKind.Omega, HextechRarityTier.Gold),
 		Monster<ManipulateRealityRune>(MonsterHexKind.ManipulateReality, HextechRarityTier.Gold),
-		Monster<NatureIsHealingRune>(MonsterHexKind.NatureIsHealing, HextechRarityTier.Gold),
 		Monster<ArchmageRune>(MonsterHexKind.Archmage, HextechRarityTier.Gold),
 
 		Monster<CourageOfColossusRune>(MonsterHexKind.CourageOfColossus, HextechRarityTier.Prismatic),
