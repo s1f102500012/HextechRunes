@@ -546,10 +546,4 @@ internal static partial class Program
 		}
 	}
 
-	[HextechTest]
-	private static void IllusoryWeaponPenNibPrefixesCanReturnSkippedTask()
-	{
-		AssertHarmonyTaskPrefixCanReturnSkippedTask("PenNibBeforeCardPlayedPatch");
-		AssertHarmonyTaskPrefixCanReturnSkippedTask("PenNibAfterCardPlayedPatch");
-	}
 }

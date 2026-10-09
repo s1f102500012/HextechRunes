@@ -9,7 +9,7 @@ public enum HextechRarityTier
 
 internal enum MonsterHexKind
 {
-	// 已移除的数值 18/33/47/64/71/72/82/96 保持空洞，勿复用。
+	// 已移除的数值 18/33/47/64/71/72/82/92/96 保持空洞，勿复用。
 	Slap = 0,
 	EscapePlan = 1,
 	HeavyHitter = 2,
@@ -95,7 +95,6 @@ internal enum MonsterHexKind
 	SolidTime = 89,
 	ForgottenSoul = 90,
 	Cerberus = 91,
-	NatureIsHealing = 92,
 	Archmage = 93,
 	BloodIdol = 94,
 	OmniDragonSoul = 95,

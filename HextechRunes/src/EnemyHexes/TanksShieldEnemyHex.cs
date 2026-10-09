@@ -7,7 +7,7 @@ internal sealed class TanksShieldEnemyHex : HextechEnemyHexEffect
 	internal override async Task AfterCardPlayed(HextechEnemyHexContext context, PlayerChoiceContext choiceContext, CardPlay cardPlay)
 	{
 		if (!context.IsManualPlayerCardPlay(cardPlay, out Player? owner, out HextechCombatState? combatState)
-			|| !HextechCardEffectTypes.IsAttackForEffects(cardPlay.Card, owner))
+			|| cardPlay.Card.Type != CardType.Attack)
 		{
 			return;
 		}

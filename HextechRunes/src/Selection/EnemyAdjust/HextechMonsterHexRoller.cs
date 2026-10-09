@@ -2,12 +2,6 @@ namespace HextechRunes;
 
 internal static class HextechMonsterHexRoller
 {
-	// 联机下禁用的敌方 hex:实时(墙钟)回血「自然即是治愈」在 lockstep 多人下无法确定性同步,
-	// 直接从 roll 池排除,让联机时敌方抽不到。单机不受影响。玩家侧对应排除见
-	// NatureIsHealingRune.IsAvailableForPlayer。只排除 roll 池,不动注册/枚举/效果,保存档兼容。
-	private static readonly IReadOnlySet<MonsterHexKind> MultiplayerDisabledHexes =
-		new HashSet<MonsterHexKind> { MonsterHexKind.NatureIsHealing };
-
 	public static IReadOnlyList<MonsterHexKind> BuildActPool(
 		HextechRarityTier rarity,
 		IEnumerable<MonsterHexKind>? knownHexes,
@@ -106,30 +100,15 @@ internal static class HextechMonsterHexRoller
 		return pool.Count > 0 ? pool : rarityPool.ToArray();
 	}
 
-	/// <summary>本稀有度下本局可抽到的敌方海克斯:去掉联机禁用项与配置禁用项。抽取、重掷与远端校验共用。</summary>
+	/// <summary>本稀有度下本局可抽到的敌方海克斯:去掉配置禁用项。抽取、重掷与远端校验共用。</summary>
 	public static IReadOnlyList<MonsterHexKind> GetConfiguredRarityPool(HextechRarityTier rarity, IReadOnlySet<string>? disabledMonsterHexIds)
 	{
-		return ApplyConfig(FilterMultiplayerDisabled(MonsterHexCatalog.GetMonsterHexesForRarity(rarity)), disabledMonsterHexIds);
+		return ApplyConfig(MonsterHexCatalog.GetMonsterHexesForRarity(rarity), disabledMonsterHexIds);
 	}
 
 	private static HashSet<MonsterHexKind> ToSet(IEnumerable<MonsterHexKind>? hexes)
 	{
 		return hexes?.ToHashSet() ?? [];
-	}
-
-	// 联机时从 rarity 池移除「联机禁用」的 hex。IsNetworkMultiplayerRun() 两端一致 →
-	// 各 peer 得到同一池 → roll 确定性,不引入分叉。为空兜底返回原池(防御性,当前禁用集不会清空 Gold 池)。
-	private static IReadOnlyList<MonsterHexKind> FilterMultiplayerDisabled(IReadOnlyList<MonsterHexKind> rarityPool)
-	{
-		if (!HextechPlayerContextHelper.IsNetworkMultiplayerRun())
-		{
-			return rarityPool;
-		}
-
-		List<MonsterHexKind> filtered = rarityPool
-			.Where(kind => !MultiplayerDisabledHexes.Contains(kind))
-			.ToList();
-		return filtered.Count > 0 ? filtered : rarityPool;
 	}
 
 	private static IReadOnlyList<MonsterHexKind> ApplyConfig(

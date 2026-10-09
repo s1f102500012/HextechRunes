@@ -98,7 +98,7 @@ internal sealed partial class HextechMayhemModifier
 			(effect, context, current) => current + effect.GetBaseEnergyCostIncrease(context, card));
 		decimal cost = originalCost + baseIncrease;
 
-		if (HextechCardEffectTypes.IsAttackForEffects(card, card.Owner)
+		if (card.Type == CardType.Attack
 			&& card.Pile?.Type == PileType.Hand
 			&& originalCost > 0m)
 		{

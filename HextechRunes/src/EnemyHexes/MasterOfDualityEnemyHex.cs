@@ -23,7 +23,7 @@ internal sealed class MasterOfDualityEnemyHex : HextechEnemyHexEffect
 			await MasterOfDualityRune.ApplyTemporaryStat<HextechTemporaryStrengthPower, HextechTemporaryStrengthLossPower>(
 				playerCreature, isGain: false, playerCreature, cardPlay.Card);
 		}
-		if (HextechCardEffectTypes.IsAttackForEffects(cardPlay.Card, cardPlay.Card.Owner))
+		if (cardPlay.Card.Type == CardType.Attack)
 		{
 			await MasterOfDualityRune.ApplyTemporaryStat<HextechTemporaryDexterityPower, HextechTemporaryDexterityLossPower>(
 				playerCreature, isGain: false, playerCreature, cardPlay.Card);

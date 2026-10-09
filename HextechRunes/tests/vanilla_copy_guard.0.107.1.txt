@@ -110,16 +110,6 @@ MegaCrit.Sts2.Core.Models.Powers.StormPower::AfterCardPlayed(MegaCrit.Sts2.Core.
 MegaCrit.Sts2.Core.Models.Powers.StormPower::BeforeCardPlayed(MegaCrit.Sts2.Core.Entities.Cards.CardPlay)=65795ea9168175ded4a7584b6ddc7c64357a9716
 MegaCrit.Sts2.Core.Models.Relics.DustyTome+<AfterObtained>d__13::MoveNext()=033dae47aae7faef0b8d1e32ef8f2e86c0458c15
 MegaCrit.Sts2.Core.Models.Relics.DustyTome::AfterObtained()=c28b1ae8ee6cd538143559297a29d220fceddebf
-MegaCrit.Sts2.Core.Models.Relics.Kunai+<AfterCardPlayed>d__20::MoveNext()=bd58c306f423487cf08d5b2bea934d7611f8b3c2
-MegaCrit.Sts2.Core.Models.Relics.Kunai::AfterCardPlayed(MegaCrit.Sts2.Core.GameActions.Multiplayer.PlayerChoiceContext,MegaCrit.Sts2.Core.Entities.Cards.CardPlay)=0ef277c3e4a56e3fbfd1167675678f7b6151c0dd
-MegaCrit.Sts2.Core.Models.Relics.Nunchaku+<AfterCardPlayed>d__19::MoveNext()=c9b67a1aaccbedb080920cf22b117e6398b33500
-MegaCrit.Sts2.Core.Models.Relics.Nunchaku::AfterCardPlayed(MegaCrit.Sts2.Core.GameActions.Multiplayer.PlayerChoiceContext,MegaCrit.Sts2.Core.Entities.Cards.CardPlay)=da80c23af1060f366ab04177626f261e79713f41
-MegaCrit.Sts2.Core.Models.Relics.OrnamentalFan+<AfterCardPlayed>d__20::MoveNext()=4771ec166766cb23d03550559377c2c42dfe5817
-MegaCrit.Sts2.Core.Models.Relics.OrnamentalFan::AfterCardPlayed(MegaCrit.Sts2.Core.GameActions.Multiplayer.PlayerChoiceContext,MegaCrit.Sts2.Core.Entities.Cards.CardPlay)=df91c631091e8f342ce43abfb2979744dbfc5eaf
-MegaCrit.Sts2.Core.Models.Relics.PenNib::AfterCardPlayed(MegaCrit.Sts2.Core.GameActions.Multiplayer.PlayerChoiceContext,MegaCrit.Sts2.Core.Entities.Cards.CardPlay)=2e96d5c1002dd8b06a5b348cf5f3d829f6cffc3f
-MegaCrit.Sts2.Core.Models.Relics.PenNib::BeforeCardPlayed(MegaCrit.Sts2.Core.Entities.Cards.CardPlay)=7e4e868c436983c9a44a39633f84ca13845e2cd5
-MegaCrit.Sts2.Core.Models.Relics.Shuriken+<AfterCardPlayed>d__20::MoveNext()=abb1a2c52e846cf715adb1537e9e992ecd0237d2
-MegaCrit.Sts2.Core.Models.Relics.Shuriken::AfterCardPlayed(MegaCrit.Sts2.Core.GameActions.Multiplayer.PlayerChoiceContext,MegaCrit.Sts2.Core.Entities.Cards.CardPlay)=bcb8728e1c8f040057da409f41cfc50e621c6203
 MegaCrit.Sts2.Core.MonsterMoves.Intents.AbstractIntent::GetHoverTip(System.Collections.Generic.IEnumerable`1[[MegaCrit.Sts2.Core.Entities.Creatures.Creature, sts2, Version=0.1.0.0, Culture=neutral, PublicKeyToken=null]],MegaCrit.Sts2.Core.Entities.Creatures.Creature)=49845c421bf88d76cecb700f80372c237281ee3a
 MegaCrit.Sts2.Core.Nodes.Combat.NCardPlayQueue::BeforeRemoteCardPlayResumedAfterPlayerChoice(MegaCrit.Sts2.Core.GameActions.GameAction)=176db02afb754f87f853eb7570e3936ec42868d9
 MegaCrit.Sts2.Core.Nodes.Combat.NHealthBar::RefreshForeground()=807308e430454a4a04f3561af10d5a196ffa9141

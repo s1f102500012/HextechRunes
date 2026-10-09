@@ -1,10 +1,10 @@
 {
   "HEXTECH_CONFIG_BUTTON": "Hexルーン構成",
   "HEXTECH_CONFIG_BUTTON_TOOLTIP": "ソロまたはマルチプレイのホスト時に使うHexルーン、敵Hexルーン、ステータス金床のルールを設定します。",
-  "HEXTECH_UPDATE_CHECKING": "ヘクステック・メイヘムのMODバージョンを確認中…",
-  "HEXTECH_UPDATE_UNAVAILABLE": "ヘクステック・メイヘムの更新確認は現在利用できません",
-  "HEXTECH_UPDATE_AVAILABLE": "ヘクステック・メイヘムの新バージョン {Latest} があります（現在のバージョン：{Current}）",
-  "HEXTECH_UPDATE_LATEST": "ヘクステック・メイヘムは最新バージョンです（{Current}）",
-  "HEXTECH_MOD_NAME": "ヘクステック・メイヘム",
+  "HEXTECH_UPDATE_CHECKING": "ランダムミッド：メイヘムのMODバージョンを確認中…",
+  "HEXTECH_UPDATE_UNAVAILABLE": "ランダムミッド：メイヘムの更新確認は現在利用できません",
+  "HEXTECH_UPDATE_AVAILABLE": "ランダムミッド：メイヘムの新バージョン {Latest} があります（現在のバージョン：{Current}）",
+  "HEXTECH_UPDATE_LATEST": "ランダムミッド：メイヘムは最新バージョンです（{Current}）",
+  "HEXTECH_MOD_NAME": "ランダムミッド：メイヘム",
   "HEXTECH_MOD_DESCRIPTION": "各層の開始時にHexルーンを1つ選んでデッキ構築を変化させ、その層の敵も同じレアリティの敵Hexルーンを得ます。ステータス鍛造器、キャラクター専用Hexルーン、新カードも追加。マルチプレイに対応し、メインメニューの「Hexルーン構成」でルールを調整できます。"
 }

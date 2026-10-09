@@ -53,7 +53,6 @@ internal static class HextechEnemyHexEffects
 		new MonarchsGazeEnemyHex(),
 		new OmegaEnemyHex(),
 		new ManipulateRealityEnemyHex(),
-		new NatureIsHealingEnemyHex(),
 		new ArchmageEnemyHex(),
 		new PhantasmalGardenerEnemyHex(),
 		new AncientWineEnemyHex(),

@@ -15,7 +15,7 @@ public sealed class ViolenceRune : HextechRelicBase
 		}
 
 		List<CardModel> attacks = PileType.Draw.GetPile(Owner).Cards
-			.Where(card => card.Owner == Owner && HextechCardEffectTypes.IsAttackForEffects(card, Owner))
+			.Where(card => card.Owner == Owner && card.Type == CardType.Attack)
 			.ToList();
 		if (attacks.Count == 0)
 		{

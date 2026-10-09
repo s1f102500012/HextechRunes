@@ -53,7 +53,7 @@
   "HEXTECH_MOD_ENABLED_TOGGLE_TITLE": "เปิดใช้งานม็อด",
   "HEXTECH_MOD_ENABLED_TOGGLE_DESCRIPTION": "เมื่อปิด ม็อดนี้จะหยุดมีผลตั้งแต่การเดินทางครั้งถัดไป และเกมจะเหมือนต้นฉบับทุกประการ (การเดินทางที่กำลังเล่นอยู่จะไม่ได้รับผลกระทบ) ในโหมดหลายคนจะใช้การตั้งค่าของเจ้าของห้อง",
   "HEXTECH_SHOW_UPDATE_NOTICE_TOGGLE_TITLE": "แสดงประกาศอัปเดตเวอร์ชัน",
-  "HEXTECH_SHOW_UPDATE_NOTICE_TOGGLE_DESCRIPTION": "เมื่อเปิดใช้งาน เมนูหลักจะแสดงประกาศตรวจสอบเวอร์ชันของความโกลาหลเฮกซ์เทคที่มุมล่างซ้าย ปิดเพื่อซ่อน",
+  "HEXTECH_SHOW_UPDATE_NOTICE_TOGGLE_DESCRIPTION": "เมื่อเปิดใช้งาน เมนูหลักจะแสดงประกาศตรวจสอบเวอร์ชันของ ARAM: Mayhem ที่มุมล่างซ้าย ปิดเพื่อซ่อน",
   "HEXTECH_COLLAPSE_ENEMY_HEXES_TOGGLE_TITLE": "พับเฮกซ์ศัตรู",
   "HEXTECH_COLLAPSE_ENEMY_HEXES_TOGGLE_DESCRIPTION": "เมื่อเปิดใช้งาน ระหว่างการต่อสู้ เฮกซ์ศัตรูจะถูกเก็บไว้ในปุ่มพับทางซ้ายของปุ่มแผนที่บนแถบด้านบน คลิกเพื่อขยายดู เมื่อปิด เฮกซ์ศัตรูจะแสดงเรียงบนแถบด้านบนโดยตรงเหมือนเดิม",
   "HEXTECH_CONFIRM_RUNE_SELECTION_TOGGLE_TITLE": "ยืนยันการเลือกรูน",

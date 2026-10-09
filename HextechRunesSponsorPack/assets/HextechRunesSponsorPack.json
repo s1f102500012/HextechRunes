@@ -1,8 +1,8 @@
 {
   "id": "HextechRunesSponsorPack",
-  "name": "Hextech Mayhem: Extra Expansion Pack / 海克斯大乱斗：额外拓展包",
+  "name": "ARAM: Mayhem: Extra Expansion Pack / 海克斯大乱斗：额外拓展包",
   "author": "Natsuki",
-  "description": "Adds more distinctive supporter-created content to Hextech Mayhem: extra Hextech Runes, forgers, enchantments, and an event. Requires the Hextech Mayhem main mod.\n为海克斯大乱斗加入一批风格更独立的赞助者内容，包括额外的海克斯符文、锻造器、附魔与事件。需要同时启用海克斯大乱斗本体。",
+  "description": "Adds more distinctive supporter-created content to ARAM: Mayhem, including extra Hextech Runes, forgers, enchantments, and an event. Requires the ARAM: Mayhem main mod.\n为海克斯大乱斗加入一批风格更独立的赞助者内容，包括额外的海克斯符文、锻造器、附魔与事件。需要同时启用海克斯大乱斗本体。",
   "version": "0.9.2",
   "min_game_version": "0.107.1",
   "has_pck": true,

@@ -171,7 +171,7 @@ public sealed class HextechAttackReplayPower : HextechPowerBase
 	{
 		return Amount > 0m
 			&& card.Owner?.Creature == Owner
-			&& HextechCardEffectTypes.IsAttackForEffects(card, card.Owner);
+			&& card.Type == CardType.Attack;
 	}
 }
 
