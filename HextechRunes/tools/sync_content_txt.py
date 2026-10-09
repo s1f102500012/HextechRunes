@@ -99,9 +99,15 @@ def class_sources(roots: tuple[Path, ...]) -> dict[str, str]:
     return result
 
 
-def canonical_values(source: str) -> dict[str, str]:
-    """只解释声明里的数值/常量算式，不执行 C#，也不猜测运行时变量。"""
-    constants = dict(re.findall(r"\bconst\s+\w+\s+(\w+)\s*=\s*([^;]+);", source))
+def canonical_values(source: str, inherited: tuple[str, ...] = ()) -> dict[str, str]:
+    """只解释声明里的数值/常量算式，不执行 C#，也不猜测运行时变量。
+
+    inherited 是基类源码（由近到远）：本类没有 CanonicalVars 时用最近一个声明了它的基类；
+    子类里 `override int X => 2;` 这类表达式体属性和 const 一样参与求值（子类优先）。"""
+    constants: dict[str, str] = {}
+    for text in reversed((source, *inherited)):
+        constants.update(re.findall(r"\bconst\s+\w+\s+(\w+)\s*=\s*([^;]+);", text))
+        constants.update(re.findall(r"\boverride\s+(?:int|decimal)\s+(\w+)\s*=>\s*([^;]+);", text))
 
     def number(expression: str, resolving: frozenset[str] = frozenset()) -> Decimal:
         expression = expression.strip()
@@ -135,10 +141,29 @@ def canonical_values(source: str) -> dict[str, str]:
         return evaluate(tree)
 
     values: dict[str, str] = {}
-    canonical = re.search(r"\bCanonicalVars\s*=>\s*\[(.*?)\];", source, re.S)
-    if canonical is None:
+    declarations = None
+    for text in (source, *inherited):
+        literal = re.search(r"\bCanonicalVars\s*=>\s*\[(.*?)\];", text, re.S)
+        if literal is not None:
+            declarations = literal.group(1)
+            break
+        # `CanonicalVars => CreateXxxVars(7.5m);`：到基类里找这个静态辅助，把实参代入它返回的数组。
+        call = re.search(r"\bCanonicalVars\s*=>\s*(\w+)\(([^()]*)\);", text)
+        if call is not None:
+            helper_name, arguments = call.groups()
+            for base in (text, *inherited):
+                helper = re.search(
+                    rf"\bstatic\s+IEnumerable<DynamicVar>\s+{helper_name}\s*\(([^()]*)\)\s*\{{\s*return\s*\[(.*?)\];",
+                    base, re.S)
+                if helper is not None:
+                    parameters = [part.split()[-1] for part in helper.group(1).split(",") if part.strip()]
+                    constants.update(zip(parameters, (arg.strip() for arg in arguments.split(","))))
+                    declarations = helper.group(2)
+                    break
+            break
+    if declarations is None:
         return values
-    for match in re.finditer(r"new\s+(\w+Var)(?:<(\w+)>)?\s*\(([^()]*)\)", canonical.group(1)):
+    for match in re.finditer(r"new\s+(\w+Var)(?:<(\w+)>)?\s*\(((?:[^()]|\([^()]*\))*)\)", declarations):
         kind, power, arguments = match.groups()
         args = [arg.strip() for arg in arguments.split(",")]
         first_argument = constants.get(args[0], args[0]).strip()
@@ -287,7 +312,7 @@ class Truth:
         if not hasattr(self, "_class_sources"):
             self._class_sources = class_sources((ROOT / "src", SPONSOR / "src"))
         source = self._class_sources.get(cls.replace("_", "").casefold(), "")
-        values = canonical_values(source)
+        values = canonical_values(source, self._base_sources(source))
         if cls == "FlyingKickRune":
             # 当前 ExecutePercent 在获得玩家实例后刷新，离线不能冒充玩家实际阈值。
             values["ExecutePercent"] = (
@@ -295,6 +320,19 @@ class Truth:
                 f"{values['OwnerMaxHpToExecutePercent']}%）"
             )
         return self.render_placeholders(cls, text, values)
+
+    def _base_sources(self, source: str) -> tuple[str, ...]:
+        """沿 `class X : Base` 找本仓库里的基类源码；到原版或外部类型为止。"""
+        bases: list[str] = []
+        seen: set[str] = set()
+        while (match := re.search(r"\bclass\s+\w+\s*:\s*(\w+)", source)) is not None:
+            key = match.group(1).replace("_", "").casefold()
+            if key in seen or key not in self._class_sources:
+                break
+            seen.add(key)
+            source = self._class_sources[key]
+            bases.append(source)
+        return tuple(bases)
 
     @staticmethod
     def render_placeholders(cls: str, text: str, values: dict[str, str]) -> str:
