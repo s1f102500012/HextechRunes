@@ -168,6 +168,34 @@
       "table": "relics.json",
       "key": "COSPLAY_RUNE.title",
       "reason": "中文原名就是拉丁字母 COSPLAY；西语、葡语也通用这个外来词，其余语言为音译。"
+    },
+    {
+      "pack": "HextechRunes",
+      "language": "rus",
+      "table": "main_menu_ui.json",
+      "key": "HEXTECH_MOD_NAME",
+      "reason": "模组名品牌名：创意工坊该语言没有单独标题、显示英文 ARAM: Mayhem，游戏内与工坊保持一致。"
+    },
+    {
+      "pack": "HextechRunes",
+      "language": "rus",
+      "table": "modifiers.json",
+      "key": "HEXTECH_MAYHEM.title",
+      "reason": "模组名品牌名：创意工坊该语言没有单独标题、显示英文 ARAM: Mayhem，游戏内与工坊保持一致。"
+    },
+    {
+      "pack": "HextechRunes",
+      "language": "tha",
+      "table": "main_menu_ui.json",
+      "key": "HEXTECH_MOD_NAME",
+      "reason": "模组名品牌名：创意工坊该语言没有单独标题、显示英文 ARAM: Mayhem，游戏内与工坊保持一致。"
+    },
+    {
+      "pack": "HextechRunes",
+      "language": "tha",
+      "table": "modifiers.json",
+      "key": "HEXTECH_MAYHEM.title",
+      "reason": "模组名品牌名：创意工坊该语言没有单独标题、显示英文 ARAM: Mayhem，游戏内与工坊保持一致。"
     }
   ]
 }
