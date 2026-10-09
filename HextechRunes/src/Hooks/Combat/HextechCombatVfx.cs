@@ -85,7 +85,7 @@ internal static partial class HextechCombatVfx
 		}
 	}
 
-	// 死者立绘平均色缓存(按怪物类型;节点暂不可用时不缓存失败)。
+	// 死者立绘平均色缓存(按怪物类型;null=立绘在但算不出,回退默认魂色)。
 	private static readonly Dictionary<Type, Color?> MonsterTintCache = [];
 
 	/// <summary>魂色=死者 Spine 立绘贴图的 alpha 加权平均色(抬亮压灰,魂要发光);失败回退幽青。</summary>
@@ -99,15 +99,21 @@ internal static partial class HextechCombatVfx
 			}
 
 			Type type = monster.GetType();
-			if (!MonsterTintCache.TryGetValue(type, out Color? tint))
+			if (MonsterTintCache.TryGetValue(type, out Color? cached))
 			{
-				tint = ComputeMonsterAverageColor(source);
-				if (tint.HasValue)
-				{
-					MonsterTintCache[type] = tint;
-				}
+				return cached ?? SoulColor;
 			}
 
+			// 立绘节点暂不可用时不缓存，留给下一次死亡再取；节点在却算不出颜色是确定的失败，
+			// 缓存下来，免得同种怪物每死一只都重读一遍全部贴图页。
+			NCreatureVisuals? visuals = HextechCreatureNodeRegistry.TryGet(source)?.Visuals;
+			if (!GodotObject.IsInstanceValid(visuals))
+			{
+				return SoulColor;
+			}
+
+			Color? tint = ComputeMonsterAverageColor(visuals!);
+			MonsterTintCache[type] = tint;
 			return tint ?? SoulColor;
 		}
 		catch
@@ -116,17 +122,11 @@ internal static partial class HextechCombatVfx
 		}
 	}
 
-	private static Color? ComputeMonsterAverageColor(Creature source)
+	private static Color? ComputeMonsterAverageColor(NCreatureVisuals visuals)
 	{
-		NCreatureVisuals? visuals = HextechCreatureNodeRegistry.TryGet(source)?.Visuals;
-		if (!GodotObject.IsInstanceValid(visuals))
-		{
-			return null;
-		}
-
 		// 图集文件名不由怪物类名决定(SoulNexus 实际使用 soulnexus.png)。
 		// 沿当前立绘的 Spine 资源引用读取已加载纹理,同时支持多页图集。
-		GodotObject? sprite = visuals!.SpineBody?.BoundObject;
+		GodotObject? sprite = visuals.SpineBody?.BoundObject;
 		if (!GodotObject.IsInstanceValid(sprite) || !sprite!.HasMethod("get_skeleton_data_res")
 			|| sprite.Call("get_skeleton_data_res").AsGodotObject() is not { } skeletonData
 			|| !skeletonData.HasMethod("get_atlas_res")
