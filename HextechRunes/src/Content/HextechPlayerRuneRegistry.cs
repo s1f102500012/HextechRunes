@@ -119,7 +119,6 @@ internal static class HextechPlayerRuneRegistry
 		Rune<PiggyBankRune>(HextechRarityTier.Gold, flags: PlayerRuneFlags.Disabled, tagKey: "ECONOMY"),
 		Rune<OrobasBlessingRune>(HextechRarityTier.Gold),
 		Rune<CrossOrbRune>(HextechRarityTier.Gold),
-		Rune<IllusoryWeaponRune>(HextechRarityTier.Gold, flags: PlayerRuneFlags.Disabled, tagKey: "OUTPUT"),
 		Rune<NeowsGrudgeRune>(HextechRarityTier.Gold, flags: PlayerRuneFlags.Disabled, tagKey: "OUTPUT"),
 		Rune<SuperBrainRune>(HextechRarityTier.Gold, flags: PlayerRuneFlags.Disabled),
 		Rune<OverflowRune>(HextechRarityTier.Gold),

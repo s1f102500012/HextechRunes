@@ -8,7 +8,7 @@ internal static class HextechCombatHistoryHelper
 	{
 		return CountOwnedCardsPlayed(
 			owner,
-			card => HextechCardEffectTypes.IsAttackForEffects(card, owner));
+			static card => card.Type == CardType.Attack);
 	}
 
 	public static int CountOwnedCardsPlayed(Player? owner, Func<CardModel, bool> matches)
@@ -38,7 +38,7 @@ internal static class HextechCombatHistoryHelper
 			.Count(entry =>
 				entry.HappenedThisTurn(combatState)
 				&& entry.CardPlay.Card.Owner?.NetId == ownerId
-				&& HextechCardEffectTypes.IsAttackForEffects(entry.CardPlay.Card, owner));
+				&& entry.CardPlay.Card.Type == CardType.Attack);
 	}
 
 	public static int CountOwnedCardsDrawn(Player? owner)

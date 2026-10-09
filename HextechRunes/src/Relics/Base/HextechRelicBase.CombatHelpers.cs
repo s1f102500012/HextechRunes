@@ -26,7 +26,7 @@ public abstract partial class HextechRelicBase
 
 	protected bool IsOwnedAttack(CardModel? card)
 	{
-		return card?.Owner == Owner && HextechCardEffectTypes.IsAttackForEffects(card, Owner);
+		return card != null && card.Owner == Owner && card.Type == CardType.Attack;
 	}
 
 	protected bool IsOwnedSkill(CardModel? card)

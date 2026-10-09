@@ -40,7 +40,6 @@ internal static partial class HextechRuneConfiguration
 		new(30, [ typeof(AdvanceToRetreatRune) ], []),
 		// 歪打正着重做为回合开始时按消耗牌堆状态牌生成充能球，转为默认启用。
 		new(31, [ typeof(HappyAccidentRune) ], []),
-		new(34, [], [ typeof(IllusoryWeaponRune) ]),
 		new(35, [], [ typeof(AutoPatrolRune) ]),
 		// 只禁用我方；敌方"无本万利"不受影响。
 		new(37, [], [ typeof(SomethingForNothingRune), typeof(SoulCallingRune) ]),

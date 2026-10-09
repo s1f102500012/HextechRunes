@@ -313,26 +313,6 @@ internal static partial class Program
 			.SetValue(dustyTome, (ModelId?)ancientCard);
 	}
 
-	private static void AssertHarmonyTaskPrefixCanReturnSkippedTask(string patchClassName)
-	{
-		string methodName = $"{patchClassName}.Prefix";
-		MethodInfo? method = typeof(IllusoryWeaponRune)
-			.GetNestedType(patchClassName, BindingFlags.NonPublic | BindingFlags.Public)
-			?.GetMethod("Prefix", BindingFlags.NonPublic | BindingFlags.Public | BindingFlags.Static);
-		if (method == null)
-		{
-			throw new InvalidOperationException($"{methodName} should exist");
-		}
-
-		ParameterInfo? resultParameter = method.GetParameters().SingleOrDefault(static parameter => parameter.Name == "__result");
-		if (resultParameter == null)
-		{
-			throw new InvalidOperationException($"{methodName} should expose Harmony __result");
-		}
-
-		Equal(typeof(Task).MakeByRefType(), resultParameter.ParameterType, $"{methodName} __result type");
-	}
-
 	private sealed class ExternalRegistrationTestRune : HextechRelicBase
 	{
 	}

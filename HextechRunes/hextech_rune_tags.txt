@@ -67,7 +67,6 @@
 #我方	PiggyBankRune	小猪存钱罐	标签=经济
 我方	OrobasBlessingRune	欧洛巴斯的祝福	标签=综合
 我方	CrossOrbRune	十字圣球	标签=综合
-#我方	IllusoryWeaponRune	虚幻武器	标签=输出
 #我方	NeowsGrudgeRune	涅奥的怨恨	标签=输出
 #我方	SuperBrainRune	超强大脑	标签=综合
 我方	OverflowRune	溢流	标签=综合

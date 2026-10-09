@@ -73,7 +73,7 @@ internal sealed partial class HextechMayhemModifier
 
 			foreach (CardModel card in PileType.Hand.GetPile(player).Cards)
 			{
-				if (HextechCardEffectTypes.IsAttackForEffects(card, player) && !card.EnergyCost.CostsX)
+				if (card.Type == CardType.Attack && !card.EnergyCost.CostsX)
 				{
 					HextechPresentation.TryRun("AttackCostPreview", $"Cost visual refresh failed for {card.Id}", card.InvokeEnergyCostChanged);
 				}
