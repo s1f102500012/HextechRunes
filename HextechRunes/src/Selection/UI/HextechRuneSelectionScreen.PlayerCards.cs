@@ -35,6 +35,13 @@ internal sealed partial class HextechRuneSelectionScreen
 			rerollButton.OffsetTop = rerollButton.OffsetBottom - PlayerRerollButtonSize.Y;
 			slot.AddChild(rerollButton);
 			_rerollButtons.Add(rerollButton);
+			foreach (Node child in rerollButton.GetChildren())
+			{
+				if (child is HextechGoldenRerollVisual goldenVisual)
+				{
+					goldenVisual.AnchorCardSpaceTo(button);
+				}
+			}
 		}
 
 		return slot;

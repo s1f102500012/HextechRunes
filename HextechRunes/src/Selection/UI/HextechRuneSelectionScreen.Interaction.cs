@@ -75,10 +75,23 @@ internal sealed partial class HextechRuneSelectionScreen : Control, IOverlayScre
 
 		_choiceLocked = true;
 		_pendingPlayerRuneSlot = null;
+		_selectedSlotIndex = _relics.FindIndex(candidate => ReferenceEquals(candidate, relic));
 		UpdatePlayerRuneActionButtons();
-		foreach (Button holder in _holders)
+		for (int i = 0; i < _holders.Count; i++)
 		{
-			holder.Disabled = true;
+			// 选中的卡不进禁用样式、保留选中描边，界面关闭时以选中态渐隐；只是不再接收输入。
+			if (i == _selectedSlotIndex)
+			{
+				_holders[i].MouseFilter = MouseFilterEnum.Ignore;
+				_holders[i].FocusMode = FocusModeEnum.None;
+				if (i < _pendingSelectionOutlines.Count)
+				{
+					_pendingSelectionOutlines[i].Visible = true;
+				}
+				continue;
+			}
+
+			_holders[i].Disabled = true;
 		}
 		foreach (Button rerollButton in _rerollButtons)
 		{
@@ -236,7 +249,9 @@ internal sealed partial class HextechRuneSelectionScreen : Control, IOverlayScre
 		// RebuildCards 会在当前输入事件内销毁并重建按钮。重新开启确认保护，避免鼠标、
 		// 手柄确认键或键盘重复输入落到新生成的卡片上，表现为“刷新后直接跳过”。
 		RestartSelectionConfirmGuard();
+		List<CardVfxAttachment> keptVfx = DetachCardVfx(slotIndex);
 		RebuildCards();
+		ReattachCardVfx(keptVfx);
 		PlayRerollVfx(slotIndex, goldenRerollWasActive);
 		if (restoreControllerFocus)
 		{

@@ -12,6 +12,17 @@ internal sealed partial class HextechKiwiVfxPlayer : Control
 {
 	private const int MaxParticlesPerEmitter = 256;
 
+	// 每个实例在 MultiMesh 缓冲里的浮点数：Transform2D 8 + 颜色 4 + 自定义 4。
+	private const int FloatsPerInstance = 16;
+
+	// 原版在英雄联盟的场景里显得刚好，叠在本模组的卡面上偏亮、偏闪，整体压一档。加法混合的光更刺眼，压得更多。
+	private const float AdditiveIntensity = 0.55f;
+	private const float MixIntensity = 0.8f;
+
+	// 原版金色重随特效以按钮为原点，画在卡上的发射器按"卡牌中心在按钮上方 200 单位"摆放
+	// （Sparklies_CENTER 位于 y=200、范围覆盖整张卡；扫光贴图的卡底边也与此吻合）。
+	private const float OriginalCardCenterAboveButtonUnits = 200f;
+
 	private const string ShaderTemplate = """
 		shader_type canvas_item;
 		render_mode BLEND_MODE, unshaded;
@@ -37,6 +48,7 @@ internal sealed partial class HextechKiwiVfxPlayer : Control
 		uniform float mult_rotation = 0.0;
 		uniform float mult_rotate_rate = 0.0;
 		uniform float erosion_slice = 0.1;
+		uniform float intensity = 1.0;
 		uniform vec4 erosion_mixer = vec4(1.0, 0.0, 0.0, 0.0);
 
 		// x 寿命进度, y 已存活秒数, z 溶解阈值, w 粒子种子
@@ -46,9 +58,11 @@ internal sealed partial class HextechKiwiVfxPlayer : Control
 			particle = INSTANCE_CUSTOM;
 		}
 
-		vec2 address(vec2 uv, int mode) {
+		vec2 address(vec2 uv, int mode, vec2 size) {
 			if (mode == 1) {
-				return clamp(uv, vec2(0.002), vec2(0.998));
+				// 采样器是 repeat，夹到半个纹素以内，双线性过滤才不会混入对边像素。
+				vec2 half_texel = vec2(0.5) / max(size, vec2(1.0));
+				return clamp(uv, half_texel, vec2(1.0) - half_texel);
 			}
 			if (mode == 2) {
 				return vec2(1.0) - abs(mod(uv, vec2(2.0)) - vec2(1.0));
@@ -63,14 +77,14 @@ internal sealed partial class HextechKiwiVfxPlayer : Control
 		void fragment() {
 			vec2 base_seed = vec2(seeded(particle.w, 1.0), seeded(particle.w, 2.0));
 			vec2 uv = UV * uv_scale + mix(uv_offset_min, uv_offset_max, base_seed) + uv_scroll * particle.y;
-			vec4 result = texture(base_texture, address(uv, base_address));
+			vec4 result = texture(base_texture, address(uv, base_address, vec2(textureSize(base_texture, 0))));
 			if (use_mult) {
 				vec2 m = UV - vec2(0.5);
 				float angle = mult_rotation + mult_rotate_rate * particle.y;
 				m = vec2(m.x * cos(angle) - m.y * sin(angle), m.x * sin(angle) + m.y * cos(angle));
 				vec2 mult_seed = vec2(seeded(particle.w, 3.0), seeded(particle.w, 4.0));
 				m = m * mult_scale + vec2(0.5) + mix(mult_offset_min, mult_offset_max, mult_seed) + mult_scroll * particle.y;
-				result *= texture(mult_texture, address(m, mult_address));
+				result *= texture(mult_texture, address(m, mult_address, vec2(textureSize(mult_texture, 0))));
 			}
 			vec4 tint = COLOR;
 			if (use_color_texture) {
@@ -81,11 +95,13 @@ internal sealed partial class HextechKiwiVfxPlayer : Control
 				float erosion = dot(texture(erosion_texture, UV), erosion_mixer);
 				result.a *= smoothstep(particle.z, particle.z + erosion_slice, erosion);
 			}
-			COLOR = vec4(max(result.rgb, vec3(0.0)), clamp(result.a, 0.0, 1.0));
+			COLOR = vec4(max(result.rgb, vec3(0.0)), clamp(result.a * intensity, 0.0, 1.0));
 		}
 		""";
 
-	private static readonly Lazy<HextechKiwiVfxLibrary?> Library = new(LoadLibrary);
+	private static readonly HashSet<string> WarnedMissingSystems = new(StringComparer.Ordinal);
+	private static Task<HextechKiwiVfxWarmData>? _warmup;
+	private static HextechKiwiVfxWarmData? _warmData;
 	private static readonly Lazy<Shader> AdditiveShader = new(() => new Shader { Code = ShaderTemplate.Replace("BLEND_MODE", "blend_add") });
 	private static readonly Lazy<Shader> MixShader = new(() => new Shader { Code = ShaderTemplate.Replace("BLEND_MODE", "blend_mix") });
 	private static readonly Lazy<ArrayMesh> UnitQuad = new(BuildUnitQuad);
@@ -93,13 +109,18 @@ internal sealed partial class HextechKiwiVfxPlayer : Control
 	private readonly List<EmitterState> _emitters = [];
 	private HextechKiwiVfxRng _rng;
 	private float _time;
-	private float _startDelay;
 	private bool _loop;
+	private bool _finished;
+	private Control? _cardAnchor;
 
 	private HextechKiwiVfxPlayer()
 	{
 		MouseFilter = MouseFilterEnum.Ignore;
 		ProcessMode = ProcessModeEnum.Always;
+		// 模组程序集没有经过 Godot 源码生成器，引擎看不到这里覆写的 _Process（HasMethod("_process") 为 false），
+		// 所以改为在场景树里订阅 ProcessFrame 推进。
+		TreeEntered += OnTreeEntered;
+		TreeExiting += OnTreeExiting;
 		ClipContents = false;
 		SetAnchorsAndOffsetsPreset(LayoutPreset.FullRect);
 	}
@@ -112,24 +133,24 @@ internal sealed partial class HextechKiwiVfxPlayer : Control
 		string systemName,
 		float cardPixelsPerUnit,
 		float buttonPixelsPerUnit,
-		bool loop = false,
-		float delay = 0f)
+		bool loop = false)
 	{
-		HextechKiwiVfxLibrary? library = Library.Value;
+		HextechKiwiVfxLibrary? library = GetWarmData().Library;
 		if (library == null || !library.Systems.TryGetValue(systemName, out List<HextechKiwiVfxEmitter>? definitions))
 		{
-			HextechLog.Warn("UI", $"Kiwi vfx system missing: {systemName}");
+			if (WarnedMissingSystems.Add(systemName))
+			{
+				HextechLog.Warn("UI", $"Kiwi vfx system missing: {systemName}");
+			}
 			return null;
 		}
 
 		HextechKiwiVfxPlayer player = new()
 		{
 			Name = systemName,
-			_loop = loop,
-			_startDelay = delay
+			_loop = loop
 		};
 		player._rng = new HextechKiwiVfxRng(player.GetInstanceId());
-		player._time = -delay;
 		foreach (HextechKiwiVfxEmitter definition in definitions.OrderBy(static emitter => emitter.Pass))
 		{
 			float pixelsPerUnit = definition.Space == "button" ? buttonPixelsPerUnit : cardPixelsPerUnit;
@@ -150,30 +171,74 @@ internal sealed partial class HextechKiwiVfxPlayer : Control
 		return player;
 	}
 
+	/// <summary>
+	/// 挂在重随按钮上的系统里，按卡缩放的发射器改以这张卡的中心定位：本模组按钮与卡的相对位置和原版不同，
+	/// 直接从按钮量原版的偏移会整体偏离卡框。
+	/// </summary>
+	internal void AnchorCardSpaceTo(Control card)
+	{
+		_cardAnchor = card;
+	}
+
 	/// <summary>从头重播（按钮常驻光重新激活时用）。</summary>
 	internal void Restart()
 	{
-		_time = -_startDelay;
+		_time = 0f;
 		foreach (EmitterState state in _emitters)
 		{
 			state.Reset();
 		}
 	}
 
-	public override void _Process(double delta)
+	private void OnTreeEntered()
 	{
-		Advance((float)Math.Min(delta, 0.1));
+		GetTree().ProcessFrame += OnProcessFrame;
+	}
+
+	private void OnTreeExiting()
+	{
+		GetTree().ProcessFrame -= OnProcessFrame;
+		// 重随时特效会被临时摘下再挂回（见 HextechRuneSelectionScreen.Vfx），只在真正随节点释放时清理。
+		if (IsBeingFreed())
+		{
+			foreach (EmitterState state in _emitters)
+			{
+				state.Release();
+			}
+			_emitters.Clear();
+		}
+	}
+
+	private bool IsBeingFreed()
+	{
+		for (Node? node = this; node != null; node = node.GetParent())
+		{
+			if (node.IsQueuedForDeletion())
+			{
+				return true;
+			}
+		}
+		return false;
+	}
+
+	private void OnProcessFrame()
+	{
+		// ProcessFrame 信号不看 ProcessMode，暂停（金色重随光关闭）和隐藏时这里自己跳过。
+		if (_finished || !CanProcess() || !IsVisibleInTree())
+		{
+			return;
+		}
+
+		Advance((float)Math.Min(GetProcessDeltaTime(), 0.1));
 	}
 
 	private void Advance(float delta)
 	{
 		_time += delta;
-		if (_time < 0f)
-		{
-			return;
-		}
-
 		Vector2 origin = Size * 0.5f;
+		Vector2? cardCenter = _cardAnchor != null && GodotObject.IsInstanceValid(_cardAnchor) && _cardAnchor.IsInsideTree()
+			? GetGlobalTransform().AffineInverse() * _cardAnchor.GetGlobalRect().GetCenter()
+			: null;
 		bool finished = true;
 		foreach (EmitterState state in _emitters)
 		{
@@ -181,7 +246,7 @@ internal sealed partial class HextechKiwiVfxPlayer : Control
 			{
 				finished = false;
 			}
-			state.Upload(origin);
+			state.Upload(state.ResolveOrigin(origin, cardCenter));
 		}
 
 		if (!finished)
@@ -195,6 +260,7 @@ internal sealed partial class HextechKiwiVfxPlayer : Control
 		}
 		else
 		{
+			_finished = true;
 			QueueFree();
 		}
 	}
@@ -212,6 +278,7 @@ internal sealed partial class HextechKiwiVfxPlayer : Control
 			Shader = definition.Additive ? AdditiveShader.Value : MixShader.Value
 		};
 		material.SetShaderParameter("base_texture", baseTexture);
+		material.SetShaderParameter("intensity", definition.Additive ? AdditiveIntensity : MixIntensity);
 		material.SetShaderParameter("base_address", definition.AddressBase);
 		material.SetShaderParameter("uv_scale", ToVector2(definition.UvScale, 1f));
 		if (definition.UvScroll != null)
@@ -265,35 +332,85 @@ internal sealed partial class HextechKiwiVfxPlayer : Control
 		{
 			Name = definition.Name,
 			Multimesh = multiMesh,
-			Texture = baseTexture,
 			Material = material
 		};
-		return new EmitterState(definition, node, multiMesh, pixelsPerUnit);
+		return new EmitterState(definition, node, multiMesh, material, pixelsPerUnit);
 	}
 
 	private static Texture2D? LoadTexture(string relativePath)
 	{
-		return HextechTextures.LoadUiTexture(HextechAssets.ImageRoot + relativePath + ".png");
+		HextechKiwiVfxWarmData data = GetWarmData();
+		if (data.Textures.TryGetValue(relativePath, out ImageTexture? cached) && HextechTextures.IsTextureUsable(cached))
+		{
+			return cached;
+		}
+
+		if (data.Images.Remove(relativePath, out Image? image))
+		{
+			ImageTexture texture = ImageTexture.CreateFromImage(image);
+			data.Textures[relativePath] = texture;
+			return texture;
+		}
+
+		return HextechTextures.LoadUiTexture(TexturePath(relativePath));
 	}
 
-	private static HextechKiwiVfxLibrary? LoadLibrary()
+	private static string TexturePath(string relativePath)
 	{
+		return HextechAssets.ImageRoot + relativePath + ".png";
+	}
+
+	/// <summary>
+	/// 模组初始化时调用：在主线程读出数据与贴图字节，在后台线程解析 JSON、解码 PNG，
+	/// 免得第一次打开选择界面时在主线程上一次性做完。建纹理（上传显卡）仍在主线程、用到时才做。
+	/// </summary>
+	internal static void BeginWarmup()
+	{
+		if (_warmup != null || _warmData != null)
+		{
+			return;
+		}
+
 		try
 		{
 			string json = Godot.FileAccess.GetFileAsString(HextechAssets.KiwiSelectionVfxDataPath);
-			if (string.IsNullOrEmpty(json))
-			{
-				HextechLog.Warn("UI", $"Kiwi vfx data missing: {HextechAssets.KiwiSelectionVfxDataPath}");
-				return null;
-			}
-
-			return HextechKiwiVfxLibrary.Parse(json);
+			_warmup = Task.Run(() => HextechKiwiVfxWarmData.Decode(json, ReadTextureBytes));
 		}
 		catch (Exception ex)
 		{
-			HextechLog.Warn("UI", $"Kiwi vfx data failed to load: {ex.Message}");
-			return null;
+			HextechLog.Warn("UI", $"Kiwi vfx warmup failed to start: {ex.Message}");
 		}
+	}
+
+	// 只在后台线程用到的读取：Godot 的 FileAccess 读 PCK 内文件是线程安全的。
+	private static byte[] ReadTextureBytes(string relativePath)
+	{
+		return Godot.FileAccess.GetFileAsBytes(TexturePath(relativePath));
+	}
+
+	private static HextechKiwiVfxWarmData GetWarmData()
+	{
+		if (_warmData != null)
+		{
+			return _warmData;
+		}
+
+		BeginWarmup();
+		try
+		{
+			_warmData = _warmup?.GetAwaiter().GetResult() ?? HextechKiwiVfxWarmData.Empty("warmup not started");
+		}
+		catch (Exception ex)
+		{
+			_warmData = HextechKiwiVfxWarmData.Empty(ex.Message);
+		}
+
+		_warmup = null;
+		if (_warmData.Error != null)
+		{
+			HextechLog.Warn("UI", $"Kiwi vfx data failed to load: {_warmData.Error}");
+		}
+		return _warmData;
 	}
 
 	private static ArrayMesh BuildUnitQuad()
@@ -355,18 +472,42 @@ internal sealed partial class HextechKiwiVfxPlayer : Control
 	{
 		private readonly HextechKiwiVfxEmitter _definition;
 		private readonly MultiMesh _multiMesh;
+		private readonly ShaderMaterial _material;
 		private readonly float _pixelsPerUnit;
 		private readonly List<Particle> _particles = [];
+		private float[] _buffer = [];
+		private int _uploadedCount;
 		private float _accumulator;
 		private bool _fired;
 
-		public EmitterState(HextechKiwiVfxEmitter definition, MultiMeshInstance2D node, MultiMesh multiMesh, float pixelsPerUnit)
+		public EmitterState(HextechKiwiVfxEmitter definition, MultiMeshInstance2D node, MultiMesh multiMesh, ShaderMaterial material, float pixelsPerUnit)
 		{
 			_definition = definition;
 			Node = node;
 			_multiMesh = multiMesh;
+			_material = material;
 			_pixelsPerUnit = pixelsPerUnit;
 			Reset();
+		}
+
+		/// <summary>按卡缩放的发射器在指定了卡牌参照时，从卡牌中心往下还原原版的按钮位置作为原点。</summary>
+		public Vector2 ResolveOrigin(Vector2 origin, Vector2? cardCenter)
+		{
+			return _definition.Space != "button" && cardCenter is { } center
+				? center + new Vector2(0f, OriginalCardCenterAboveButtonUnits * _pixelsPerUnit)
+				: origin;
+		}
+
+		/// <summary>节点释放时立刻放掉原生资源，不等 C# 包装对象被 GC。</summary>
+		public void Release()
+		{
+			if (GodotObject.IsInstanceValid(Node))
+			{
+				Node.Multimesh = null;
+				Node.Material = null;
+			}
+			_multiMesh.Dispose();
+			_material.Dispose();
 		}
 
 		public MultiMeshInstance2D Node { get; }
@@ -448,16 +589,36 @@ internal sealed partial class HextechKiwiVfxPlayer : Control
 			return !emitting && _particles.Count == 0;
 		}
 
+		/// <summary>
+		/// 每帧把所有粒子写进一块缓冲、一次性交给 MultiMesh。逐实例 Set* 每个粒子要 3 次原生调用，
+		/// 金色重随常驻光三份同时开时每帧上千次。
+		/// </summary>
 		public void Upload(Vector2 origin)
 		{
-			if (_particles.Count > _multiMesh.InstanceCount)
+			int count = Math.Min(_particles.Count, MaxParticlesPerEmitter);
+			if (count == 0)
 			{
-				_multiMesh.InstanceCount = Math.Min(MaxParticlesPerEmitter, Math.Max(_particles.Count, _multiMesh.InstanceCount * 2));
+				if (_uploadedCount != 0)
+				{
+					_multiMesh.VisibleInstanceCount = 0;
+					_uploadedCount = 0;
+				}
+				return;
+			}
+
+			if (count > _multiMesh.InstanceCount)
+			{
+				_multiMesh.InstanceCount = Math.Min(MaxParticlesPerEmitter, Math.Max(count, _multiMesh.InstanceCount * 2));
+			}
+
+			int bufferLength = _multiMesh.InstanceCount * FloatsPerInstance;
+			if (_buffer.Length != bufferLength)
+			{
+				_buffer = new float[bufferLength];
 			}
 
 			HextechKiwiVfxEmitter definition = _definition;
 			Span<float> value = stackalloc float[4];
-			int count = Math.Min(_particles.Count, _multiMesh.InstanceCount);
 			for (int i = 0; i < count; i++)
 			{
 				Particle particle = _particles[i];
@@ -479,15 +640,34 @@ internal sealed partial class HextechKiwiVfxPlayer : Control
 				float erosionThreshold = definition.Erosion?.Drive?.SampleScalar(lifeProgress) ?? lifeProgress;
 				// 原版粒子 Y 轴朝上，界面 Y 轴朝下；四边形尺寸是出生缩放的两倍（半宽）。
 				Vector2 position = origin + new Vector2(particle.Position.X, -particle.Position.Y) * _pixelsPerUnit;
-				Vector2 size = new(
-					Math.Max(0f, scale.X) * 2f * _pixelsPerUnit,
-					Math.Max(0f, scale.Y) * 2f * _pixelsPerUnit);
-				_multiMesh.SetInstanceTransform2D(i, new Transform2D(-particle.Rotation, size, 0f, position));
-				_multiMesh.SetInstanceColor(i, color);
-				_multiMesh.SetInstanceCustomData(i, new Color(lifeProgress, particle.Age, erosionThreshold, particle.Seed));
+				float width = Math.Max(0f, scale.X) * 2f * _pixelsPerUnit;
+				float height = Math.Max(0f, scale.Y) * 2f * _pixelsPerUnit;
+				float cos = MathF.Cos(-particle.Rotation);
+				float sin = MathF.Sin(-particle.Rotation);
+
+				// Transform2D 在缓冲里的布局：(x.x, y.x, 0, origin.x, x.y, y.y, 0, origin.y)。
+				int o = i * FloatsPerInstance;
+				_buffer[o] = cos * width;
+				_buffer[o + 1] = -sin * height;
+				_buffer[o + 2] = 0f;
+				_buffer[o + 3] = position.X;
+				_buffer[o + 4] = sin * width;
+				_buffer[o + 5] = cos * height;
+				_buffer[o + 6] = 0f;
+				_buffer[o + 7] = position.Y;
+				_buffer[o + 8] = color.R;
+				_buffer[o + 9] = color.G;
+				_buffer[o + 10] = color.B;
+				_buffer[o + 11] = color.A;
+				_buffer[o + 12] = lifeProgress;
+				_buffer[o + 13] = particle.Age;
+				_buffer[o + 14] = erosionThreshold;
+				_buffer[o + 15] = particle.Seed;
 			}
 
+			_multiMesh.Buffer = _buffer;
 			_multiMesh.VisibleInstanceCount = count;
+			_uploadedCount = count;
 		}
 
 		private void Spawn(HextechKiwiVfxPlayer player, float progress)

@@ -81,7 +81,10 @@ internal sealed partial class HextechRuneSelectionScreen : Control, IOverlayScre
 			_completionSource.TrySetCanceled();
 		}
 
-		QueueFree();
+		if (!TryPlaySelectedCardFadeOut())
+		{
+			QueueFree();
+		}
 	}
 
 	public void AfterOverlayShown()

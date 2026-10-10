@@ -111,6 +111,13 @@ internal static partial class Program
 		string[] missingSystems = expected.Where(name => !library.Systems.TryGetValue(name, out List<HextechKiwiVfxEmitter>? emitters) || emitters.Count == 0).ToArray();
 		Expect(missingSystems.Length == 0, "missing vfx systems: " + string.Join(", ", missingSystems));
 
+		// 只有挂在重随按钮上的系统才按按钮缩放；挂在卡上的系统误标成 button 会让粒子放大约 1.6 倍、飞出卡外。
+		string[] cardSystemsWithButtonSpace = library.Systems
+			.Where(system => !system.Key.StartsWith(HextechKiwiVfxLibrary.GoldenRerollIdle, StringComparison.Ordinal))
+			.SelectMany(system => system.Value.Where(emitter => emitter.Space == "button").Select(emitter => $"{system.Key}/{emitter.Name}"))
+			.ToArray();
+		Expect(cardSystemsWithButtonSpace.Length == 0, "card systems with button-space emitters: " + string.Join(", ", cardSystemsWithButtonSpace));
+
 		string[] referenced = library.ReferencedTextures().Distinct(StringComparer.Ordinal).ToArray();
 		string[] missingTextures = referenced.Where(path => !File.Exists(Path.Combine(images, path + ".png"))).ToArray();
 		Expect(missingTextures.Length == 0, "vfx textures missing from assets: " + string.Join(", ", missingTextures));

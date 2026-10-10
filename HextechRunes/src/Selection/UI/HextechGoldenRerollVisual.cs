@@ -38,6 +38,12 @@ internal sealed partial class HextechGoldenRerollVisual : Control
 		return visual;
 	}
 
+	/// <summary>常驻光里扫过卡面的部分以这张卡定位。</summary>
+	internal void AnchorCardSpaceTo(Control card)
+	{
+		_player?.AnchorCardSpaceTo(card);
+	}
+
 	public void SetVisualState(bool active, bool hovered, bool disabled)
 	{
 		bool shouldPlay = active && !disabled;

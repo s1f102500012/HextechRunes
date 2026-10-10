@@ -37,6 +37,8 @@ HextechRunes.HextechGoldenRerollDebug._forceNextEligible : Boolean
 HextechRunes.HextechGoldrendSync._trackedRunState : RunState
 HextechRunes.HextechIntegratedStrategyEventsCompat._extraActMethodResolved : Boolean
 HextechRunes.HextechIntegratedStrategyEventsCompat._getCurrentExtraActId : MethodInfo
+HextechRunes.HextechKiwiVfxPlayer._warmData : HextechKiwiVfxWarmData
+HextechRunes.HextechKiwiVfxPlayer._warmup : Task`1
 HextechRunes.HextechMultiplayerScalingCompat._warnedClientExtraScaling : Boolean
 HextechRunes.HextechMultiplayerScalingCompat._warnedHostOnlyScaling : Boolean
 HextechRunes.HextechRelicVisibilityHooks._drawPileAnchor : NDrawPileButton
