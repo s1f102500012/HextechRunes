@@ -82,7 +82,7 @@ Platform/Hooks/Config/Localization/Telemetry
 
 ## 共享边界（2026-09 代码审查整理）
 
-- **加载器单源码**：`HextechRunes/loader/` 是两个包唯一的加载器源码，拓展包 loader 以链接方式编译并用 `HEXTECH_SPONSOR_LOADER` 保持命名空间；宿主版本已知却没有不高于它的变体时两个包都停止加载。变体没能加载（含 Windows 智能应用控制拦截 `0x800711C7`）时，加载器在主菜单用原版 `NErrorPopup` 弹一次说明；文字写死在加载器里，因为变体的本地化同样不可用。拓展包变体引用本体程序集，本体程序集出现前不交给游戏（`RequiredAssemblyName`），本体始终没加载时拓展包不加载并提示，本体已弹窗则不再重复。
+- **加载器单源码**：`HextechRunes/loader/` 是两个包唯一的加载器源码，拓展包 loader 以链接方式编译并用 `HEXTECH_SPONSOR_LOADER` 保持命名空间；宿主版本已知却没有不高于它的变体时两个包都停止加载。变体没能加载（含 Windows 智能应用控制拦截 `0x800711C7`）时，加载器在主菜单用原版 `NErrorPopup` 弹一次说明；文字按九种语言写死在加载器里（其余语言回退英文），因为变体的本地化同样不可用；游戏版本早于所有变体时单独提示更新游戏。拓展包变体引用本体程序集，本体程序集出现前不交给游戏（`RequiredAssemblyName`），本体始终没加载时拓展包不加载并提示，本体已弹窗则不再重复。
 - **拓展包只走公开 API**：售价修正（`RegisterForgeShopPriceModifier`）、归属判定（`IsHextechRelic`）、稳定哈希（`StableIndex`）都经 `HextechRunesApi`，不反射 internal 类型、不复制实现。`SponsorPatcher` 仍独立实现（公开 `HextechPatcher` 会把大量内部类型带进 API 面），约定对齐本体，由声明完整性测试守护。
 - **选择同步**：锻造选择与遗物选项选择共用 `HextechSyncedRelicChoice` 事务和 `HextechChoiceCodec.RelicChoice`（消息类型 5/7，线格式不变）；远端核对候选 ID 后返回本端同位置的候选实例。远端载荷先做内容校验：符文候选必须是已登记的玩家符文；敌方调整校验槽位数、海克斯来源与每槽重掷上限。任何一项不通过都走 `CreateProtocolFailure`——协议失败的唯一出口，只记录一次。
 - **外部扩展点**：`HextechRuneGeneration` 对第三方混沌变换的结果做校验（同条数、全部是已登记玩家符文），异常或不合法时回退原候选并告警；外部 API 登记本体内置的符文/锻造在任何副作用之前被拒绝。

@@ -75,14 +75,15 @@ public static partial class LoaderBootstrap
 				"using the newest bundled variant.");
 		}
 
-		VariantCandidate? variant = PickVariant(loaderDirectory, libRoot, host.Numeric);
+		VariantCandidate? variant = PickVariant(loaderDirectory, libRoot, host.Numeric, out bool hostOlderThanAllVariants);
 		if (variant == null)
 		{
 			// 变体全部无效,或已知宿主没有不高于它的有效变体(对应变体缺失/哈希不符/宿主早于最低支持版本):显式停止。
 			Log.Error(
 				$"{LogPrefix}No valid variant under {libRoot} compatible with host " +
 				$"{host.ReleaseLabel ?? host.Numeric?.ToString() ?? "unknown"}; refusing to load a newer variant.");
-			ReportLoadFailure(LoadFailureKind.Other);
+			_hostVersionLabel = host.ReleaseLabel ?? host.Numeric?.ToString();
+			ReportLoadFailure(hostOlderThanAllVariants ? LoadFailureKind.UnsupportedGameVersion : LoadFailureKind.Other);
 			return;
 		}
 
@@ -361,10 +362,23 @@ public static partial class LoaderBootstrap
 		string libRoot,
 		Version? host)
 	{
+		return PickVariant(loaderDirectory, libRoot, host, out _);
+	}
+
+	/// <param name="hostOlderThanAllVariants">宿主已知且早于清单里所有有效变体,即游戏版本太旧;用于给玩家正确的提示。</param>
+	internal static VariantCandidate? PickVariant(
+		string loaderDirectory,
+		string libRoot,
+		Version? host,
+		out bool hostOlderThanAllVariants)
+	{
 		List<VariantCandidate> variants =
 			LoadVariantManifest(loaderDirectory, libRoot)
 				.OrderBy(candidate => candidate.Version)
 				.ToList();
+		hostOlderThanAllVariants = host != null
+			&& variants.Count > 0
+			&& variants.All(candidate => candidate.Version > host);
 
 		// 只对选中的变体算 SHA256;不符就剔除后重选,结果与"先剔除所有不符的变体再选"相同。
 		while (SelectVariant(variants, host) is { } selected)
