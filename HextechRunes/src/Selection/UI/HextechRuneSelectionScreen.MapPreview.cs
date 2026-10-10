@@ -25,10 +25,7 @@ internal sealed partial class HextechRuneSelectionScreen : Control, IOverlayScre
 		EnsureMapButtonEnabled();
 		Modulate = Colors.White;
 		Visible = true;
-		foreach (HextechGoldenRerollVisual visual in _goldenRerollVisuals)
-		{
-			visual.StartAnimationLoop();
-		}
+		PlayCardFlashInVfx();
 		TryGrabOverlayFocus();
 	}
 
@@ -84,7 +81,10 @@ internal sealed partial class HextechRuneSelectionScreen : Control, IOverlayScre
 			_completionSource.TrySetCanceled();
 		}
 
-		QueueFree();
+		if (!TryPlaySelectedCardFadeOut())
+		{
+			QueueFree();
+		}
 	}
 
 	public void AfterOverlayShown()

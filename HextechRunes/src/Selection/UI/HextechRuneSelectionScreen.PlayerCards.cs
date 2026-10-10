@@ -21,6 +21,7 @@ internal sealed partial class HextechRuneSelectionScreen
 		button.SetAnchorsAndOffsetsPreset(LayoutPreset.FullRect);
 		slot.AddChild(button);
 		_holders.Add(button);
+		HookCardHoverVfx(button, slotIndex);
 
 		if (_rerollFunc != null)
 		{
@@ -35,6 +36,13 @@ internal sealed partial class HextechRuneSelectionScreen
 			rerollButton.OffsetTop = rerollButton.OffsetBottom - PlayerRerollButtonSize.Y;
 			slot.AddChild(rerollButton);
 			_rerollButtons.Add(rerollButton);
+			foreach (Node child in rerollButton.GetChildren())
+			{
+				if (child is HextechGoldenRerollVisual goldenVisual)
+				{
+					goldenVisual.AnchorCardSpaceTo(button);
+				}
+			}
 		}
 
 		return slot;
@@ -245,18 +253,12 @@ internal sealed partial class HextechRuneSelectionScreen
 			return null;
 		}
 
-		Texture2D? outerMask = HextechTextures.LoadUiTexture(GoldenRerollOuterMaskPath);
-		Texture2D? fillMask = HextechTextures.LoadUiTexture(GoldenRerollFillMaskPath);
 		HextechGoldenRerollVisual? visual = HextechGoldenRerollVisual.Create(
-			outerMask,
-			fillMask,
-			PlayerRerollButtonSize,
-			GoldenRerollSourceScale);
+			KiwiVfxCardPixelsPerUnit,
+			KiwiVfxButtonPixelsPerUnit);
 		if (visual == null)
 		{
-			HextechLog.Warn(
-				"Mayhem", $"SelectionScreen.CreateGoldenRerollVisual: " +
-				$"failed to load masks outer={GoldenRerollOuterMaskPath} fill={GoldenRerollFillMaskPath}");
+			HextechLog.Warn("Mayhem", "SelectionScreen.CreateGoldenRerollVisual: failed to create golden reroll vfx");
 			return null;
 		}
 

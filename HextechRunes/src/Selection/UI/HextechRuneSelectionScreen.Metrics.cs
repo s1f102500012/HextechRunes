@@ -16,8 +16,6 @@ internal sealed partial class HextechRuneSelectionScreen
 	private const string UndoButtonHoverTexturePath = "res://HextechRunes/images/ui/hextechUndoButtonHover.png";
 	private const string UndoButtonPressedTexturePath = "res://HextechRunes/images/ui/hextechUndoButtonPressed.png";
 	private const string UndoButtonDisabledTexturePath = "res://HextechRunes/images/ui/hextechUndoButtonDisabled.png";
-	private const string GoldenRerollOuterMaskPath = "res://HextechRunes/images/ui/reroll_button_gold_1.png";
-	private const string GoldenRerollFillMaskPath = "res://HextechRunes/images/ui/reroll_button_gold_2.png";
 	private const string RerollButtonSfxPath = "res://HextechRunes/audio/hextechReroll.wav";
 	private const string SelectSilverSfxPath = "res://HextechRunes/audio/hextechSelectSilver.wav";
 	private const string SelectGoldSfxPath = "res://HextechRunes/audio/hextechSelectGold.wav";
@@ -36,7 +34,10 @@ internal sealed partial class HextechRuneSelectionScreen
 	private static readonly Vector2 EnemyRerollButtonSize = new(EnemyRerollButtonHeight * PlayerRerollButtonTextureWidth / PlayerRerollButtonTextureHeight, EnemyRerollButtonHeight);
 	private static readonly Vector2 EnemyRemoveButtonSize = EnemyRerollButtonSize;
 	private static readonly Vector2 EnemyUndoButtonSize = EnemyRerollButtonSize;
-	private const float GoldenRerollSourceScale = PlayerRerollButtonHeight / PlayerRerollButtonTextureHeight;
+	// 原版选取界面粒子单位到本界面像素的换算：卡框四边形高 2×187 单位对应整张卡高；
+	// 原版重随按钮高 48 像素、每单位 1.575 像素，按本界面按钮高度等比放大。
+	private static readonly float KiwiVfxCardPixelsPerUnit = PlayerRuneCardSize.Y / 374f;
+	private const float KiwiVfxButtonPixelsPerUnit = PlayerRerollButtonHeight * 1.575f / 48f;
 	private const float PlayerRerollButtonBottomInset = 38f;
 	private const float RerollButtonSfxVolumeScale = 0.42f;
 	private const float SelectSfxVolumeScale = 0.40f;

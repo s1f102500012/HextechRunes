@@ -85,4 +85,70 @@ internal static partial class Program
 			Format("[gold][font_size=28][b]Starter:[/b][/font_size][/gold] Body", "Plain text"),
 			"loc text without the gold title falls back unchanged");
 	}
+
+	/// <summary>
+	/// 选择界面原版特效的数据文件：界面会按稀有度拼系统名，接入的各类特效都要齐，且只有这些；引用的贴图都要在 assets 里，
+	/// kiwi_selection 目录也不留无人引用的贴图。
+	/// </summary>
+	[HextechTest]
+	private static void KiwiSelectionVfxDataIsCompleteAndAssetsExist()
+	{
+		string images = Path.Combine(AuditRoot, "assets", "images");
+		string dataPath = Path.Combine(images, "effects", "kiwi_selection", "kiwi_selection_vfx.json");
+		Expect(
+			HextechAssets.KiwiSelectionVfxDataPath == HextechAssets.ImageRoot + "effects/kiwi_selection/kiwi_selection_vfx.json",
+			"vfx data constant should point at the checked-in json");
+		HextechKiwiVfxLibrary library = HextechKiwiVfxLibrary.Parse(File.ReadAllText(dataPath));
+
+		string[] rarityKeys = ["SILVER", "GOLD", "PRISMATIC"];
+		List<string> expected = [HextechKiwiVfxLibrary.GoldenRerollIdle, HextechKiwiVfxLibrary.GoldenRerollClick, HextechKiwiVfxLibrary.NotPicked];
+		foreach (string suffix in new[] { "FlashInVFX", "RefreshVFX", "RefreshOverlayVFX", "SelectedVFX", "HoverVFX", "IdleVFX" })
+		{
+			foreach (string rarityKey in rarityKeys)
+			{
+				expected.Add(HextechKiwiVfxLibrary.TierSystemName(rarityKey, suffix));
+			}
+		}
+		string[] missingSystems = expected.Where(name => !library.Systems.TryGetValue(name, out List<HextechKiwiVfxEmitter>? emitters) || emitters.Count == 0).ToArray();
+		Expect(missingSystems.Length == 0, "missing vfx systems: " + string.Join(", ", missingSystems));
+		string[] unexpectedSystems = library.Systems.Keys.Except(expected, StringComparer.Ordinal).ToArray();
+		Expect(unexpectedSystems.Length == 0, "vfx systems exported but not wired into the screen: " + string.Join(", ", unexpectedSystems));
+
+		// 关闭界面时选中卡要等选中特效播完再渐隐，未选中特效随卡淡出：两者都必须是会结束的一次性特效。
+		foreach (string name in rarityKeys.Select(key => HextechKiwiVfxLibrary.TierSystemName(key, "SelectedVFX")).Append(HextechKiwiVfxLibrary.NotPicked))
+		{
+			float duration = library.EstimateDurationSeconds(name);
+			Expect(duration > 0f && float.IsFinite(duration), $"{name} should finish on its own, estimated {duration}s");
+		}
+
+		// 悬停光与常驻光靠寿命为 -1 的常驻粒子撑住，离开悬停或界面释放时才收掉。
+		foreach (string name in rarityKeys.SelectMany(key => new[] { TierName(key, "HoverVFX"), TierName(key, "IdleVFX") }))
+		{
+			Expect(float.IsPositiveInfinity(library.EstimateDurationSeconds(name)), $"{name} should keep running until stopped");
+		}
+
+		// 常驻光去掉重画卡底与卡框的发射器后：银色不剩发射器（不挂常驻光），金色与棱彩留下柔光与火花。
+		int RemainingIdleEmitters(string key) => library.Systems[TierName(key, "IdleVFX")].Count(emitter => !HextechKiwiVfxLibrary.DrawsCardBase(emitter));
+		Equal(0, RemainingIdleEmitters("SILVER"), "silver idle only redraws the card base");
+		Expect(RemainingIdleEmitters("GOLD") > 0 && RemainingIdleEmitters("PRISMATIC") > 0, "gold and prismatic idle keep the glow and sparkles");
+
+		// 只有挂在重随按钮上的系统才按按钮缩放；挂在卡上的系统误标成 button 会让粒子放大约 1.6 倍、飞出卡外。
+		string[] cardSystemsWithButtonSpace = library.Systems
+			.Where(system => !system.Key.StartsWith(HextechKiwiVfxLibrary.GoldenRerollIdle, StringComparison.Ordinal))
+			.SelectMany(system => system.Value.Where(emitter => emitter.Space == "button").Select(emitter => $"{system.Key}/{emitter.Name}"))
+			.ToArray();
+		Expect(cardSystemsWithButtonSpace.Length == 0, "card systems with button-space emitters: " + string.Join(", ", cardSystemsWithButtonSpace));
+
+		string[] referenced = library.ReferencedTextures().Distinct(StringComparer.Ordinal).ToArray();
+		string[] missingTextures = referenced.Where(path => !File.Exists(Path.Combine(images, path + ".png"))).ToArray();
+		Expect(missingTextures.Length == 0, "vfx textures missing from assets: " + string.Join(", ", missingTextures));
+
+		string[] unused = Directory.EnumerateFiles(Path.Combine(images, "effects", "kiwi_selection"), "*.png")
+			.Select(file => "effects/kiwi_selection/" + Path.GetFileNameWithoutExtension(file))
+			.Except(referenced, StringComparer.Ordinal)
+			.ToArray();
+		Expect(unused.Length == 0, "unreferenced kiwi_selection textures: " + string.Join(", ", unused));
+
+		static string TierName(string rarityKey, string suffix) => HextechKiwiVfxLibrary.TierSystemName(rarityKey, suffix);
+	}
 }
