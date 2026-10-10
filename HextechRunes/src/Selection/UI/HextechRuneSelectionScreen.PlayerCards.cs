@@ -245,18 +245,12 @@ internal sealed partial class HextechRuneSelectionScreen
 			return null;
 		}
 
-		Texture2D? outerMask = HextechTextures.LoadUiTexture(GoldenRerollOuterMaskPath);
-		Texture2D? fillMask = HextechTextures.LoadUiTexture(GoldenRerollFillMaskPath);
 		HextechGoldenRerollVisual? visual = HextechGoldenRerollVisual.Create(
-			outerMask,
-			fillMask,
-			PlayerRerollButtonSize,
-			GoldenRerollSourceScale);
+			KiwiVfxCardPixelsPerUnit,
+			KiwiVfxButtonPixelsPerUnit);
 		if (visual == null)
 		{
-			HextechLog.Warn(
-				"Mayhem", $"SelectionScreen.CreateGoldenRerollVisual: " +
-				$"failed to load masks outer={GoldenRerollOuterMaskPath} fill={GoldenRerollFillMaskPath}");
+			HextechLog.Warn("Mayhem", "SelectionScreen.CreateGoldenRerollVisual: failed to create golden reroll vfx");
 			return null;
 		}
 

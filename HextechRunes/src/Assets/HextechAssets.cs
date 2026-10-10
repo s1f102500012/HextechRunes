@@ -15,6 +15,11 @@ internal static class HextechAssets
 
 	private const string SlowCookEffectImages = EffectImages + "slow_cook/";
 
+	/// <summary>图片资源根；海克斯选择界面原版特效的数据文件按相对此目录的路径引用贴图（不含扩展名）。</summary>
+	public const string ImageRoot = ResourceRoot + "images/";
+
+	public const string KiwiSelectionVfxDataPath = EffectImages + "kiwi_selection/kiwi_selection_vfx.json";
+
 	public const string HextechSubcategoryKey = "HEXTECH_RUNES_SUBCATEGORY";
 
 	public const string ForgeSubcategoryKey = "HEXTECH_FORGES_SUBCATEGORY";

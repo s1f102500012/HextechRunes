@@ -100,6 +100,7 @@
 - **表现节点不进战斗状态、不调用共享 RNG。** 死亡或脱离濒死时隐藏，角色节点销毁时释放。
 - **灼烧常驻火焰保持程序化渐变粒子(沿骨骼发射的火焰、烟与火星);每次灼烧结算额外升起原版地面火 `NGroundFireVfx`(状态牌"灼伤"同款)。** 实机试过三种替代都被否决:原版火把 4 帧翻页图放大后像多边形碎片,整团着色器火焰摆在脚下像站在一排篝火上,着色器火苗无论撒在身上还是从脚底窜起都像火焰贴纸。`HextechBurnVisual`
 - **夺金命中爆金币复用原版小鬼佣兵的 `vfx_coin_explosion_regular` 场景，挂到被命中生物的父节点、定位到碰撞框中心，并在主线程读取坐标。** 挂 `CombatVfxContainer` + 读 `VfxSpawnPosition` 的原版组合在实机上把金币放到了屏幕左上角；Godot 在非主线程读全局坐标会得到原点。不用 `VfxCmd.PlayOnCreatureCenter`，它会跳过已死目标。`HextechCombatVfx.CoinBurst`
+- **海克斯选择界面的金色重随按钮光、金色重随点击、卡牌弹出与重随特效按原版海克斯大乱斗选取界面的粒子定义播放，不再手调着色器。** 数据和贴图来自英雄联盟 16.20 `UI.wad.client` 的 `KiwiAugmentSelection/Particles`（11 个系统、118 个发射器），出处与换算见 `assets/images/effects/kiwi_selection/SOURCE.md`；每个发射器一个 `MultiMeshInstance2D`，曲线在 CPU 推进，贴图合成在着色器。本模组重随按钮相对卡牌比原版大，所以按钮外框一类发射器按按钮缩放、其余按卡牌缩放（数据里的 `space` 字段），卡牌比例取卡框高 = 2×187 单位。贴图寻址 0/1/2 按重复/夹紧/镜像、溶解默认读红通道、混合模式 4 视为加法，都是按原版用法推断的，实机效果不对先查这几处。随机数用节点 id 播种的本地序列、计时用 `_Process`，不进共享 RNG。`HextechKiwiVfxPlayer`、`HextechGoldenRerollVisual`、`HextechRuneSelectionScreen.Vfx`
 
 ## 生成与权重
 

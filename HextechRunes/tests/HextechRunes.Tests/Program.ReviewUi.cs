@@ -85,4 +85,40 @@ internal static partial class Program
 			Format("[gold][font_size=28][b]Starter:[/b][/font_size][/gold] Body", "Plain text"),
 			"loc text without the gold title falls back unchanged");
 	}
+
+	/// <summary>
+	/// 选择界面原版特效的数据文件：界面会按稀有度拼系统名，四类特效都要齐；引用的贴图都要在 assets 里，
+	/// kiwi_selection 目录也不留无人引用的贴图。
+	/// </summary>
+	[HextechTest]
+	private static void KiwiSelectionVfxDataIsCompleteAndAssetsExist()
+	{
+		string images = Path.Combine(AuditRoot, "assets", "images");
+		string dataPath = Path.Combine(images, "effects", "kiwi_selection", "kiwi_selection_vfx.json");
+		Expect(
+			HextechAssets.KiwiSelectionVfxDataPath == HextechAssets.ImageRoot + "effects/kiwi_selection/kiwi_selection_vfx.json",
+			"vfx data constant should point at the checked-in json");
+		HextechKiwiVfxLibrary library = HextechKiwiVfxLibrary.Parse(File.ReadAllText(dataPath));
+
+		List<string> expected = [HextechKiwiVfxLibrary.GoldenRerollIdle, HextechKiwiVfxLibrary.GoldenRerollClick];
+		foreach (string suffix in new[] { "FlashInVFX", "RefreshVFX", "RefreshOverlayVFX" })
+		{
+			foreach (string rarityKey in new[] { "SILVER", "GOLD", "PRISMATIC" })
+			{
+				expected.Add(HextechKiwiVfxLibrary.TierSystemName(rarityKey, suffix));
+			}
+		}
+		string[] missingSystems = expected.Where(name => !library.Systems.TryGetValue(name, out List<HextechKiwiVfxEmitter>? emitters) || emitters.Count == 0).ToArray();
+		Expect(missingSystems.Length == 0, "missing vfx systems: " + string.Join(", ", missingSystems));
+
+		string[] referenced = library.ReferencedTextures().Distinct(StringComparer.Ordinal).ToArray();
+		string[] missingTextures = referenced.Where(path => !File.Exists(Path.Combine(images, path + ".png"))).ToArray();
+		Expect(missingTextures.Length == 0, "vfx textures missing from assets: " + string.Join(", ", missingTextures));
+
+		string[] unused = Directory.EnumerateFiles(Path.Combine(images, "effects", "kiwi_selection"), "*.png")
+			.Select(file => "effects/kiwi_selection/" + Path.GetFileNameWithoutExtension(file))
+			.Except(referenced, StringComparer.Ordinal)
+			.ToArray();
+		Expect(unused.Length == 0, "unreferenced kiwi_selection textures: " + string.Join(", ", unused));
+	}
 }

@@ -237,6 +237,7 @@ internal sealed partial class HextechRuneSelectionScreen : Control, IOverlayScre
 		// 手柄确认键或键盘重复输入落到新生成的卡片上，表现为“刷新后直接跳过”。
 		RestartSelectionConfirmGuard();
 		RebuildCards();
+		PlayRerollVfx(slotIndex, goldenRerollWasActive);
 		if (restoreControllerFocus)
 		{
 			RestorePlayerRerollFocus(slotIndex);
@@ -253,7 +254,6 @@ internal sealed partial class HextechRuneSelectionScreen : Control, IOverlayScre
 		for (int i = 0; i < _goldenRerollVisuals.Count; i++)
 		{
 			bool disabled = i >= _rerollButtons.Count || _rerollButtons[i].Disabled;
-			_goldenRerollVisuals[i].StartAnimationLoop();
 			_goldenRerollVisuals[i].SetVisualState(
 				active: true,
 				hovered: false,
