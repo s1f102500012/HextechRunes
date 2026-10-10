@@ -43,6 +43,17 @@ internal static partial class Program
 		Expect(MainLoader.SelectVariant([], null) == null, "no variants");
 	}
 
+	// 智能应用控制拦截时 LoadFromAssemblyPath 抛带 0x800711C7 的 FileLoadException;
+	// 初始化器经反射调用时还会被 TargetInvocationException 包一层,两种都要认出来。
+	[HextechTest]
+	private static void LoaderRecognizesApplicationControlBlock()
+	{
+		var blocked = new FileLoadException("blocked") { HResult = unchecked((int)0x800711C7) };
+		Equal(MainLoader.LoadFailureKind.ApplicationControlBlocked, MainLoader.ClassifyLoadFailure(blocked), "direct block");
+		Equal(MainLoader.LoadFailureKind.ApplicationControlBlocked, MainLoader.ClassifyLoadFailure(new TargetInvocationException(blocked)), "wrapped block");
+		Equal(MainLoader.LoadFailureKind.Other, MainLoader.ClassifyLoadFailure(new FileLoadException("other")), "other load failure");
+	}
+
 	// 拓展包加载器只认自己的变体清单名与程序集名。
 	// 只走不写日志的成功/拒绝路径:加载器的 Log.Error 在测试进程里会触碰 Godot 原生层。
 	[HextechTest]
