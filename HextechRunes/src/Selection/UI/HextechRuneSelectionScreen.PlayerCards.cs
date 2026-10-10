@@ -21,6 +21,7 @@ internal sealed partial class HextechRuneSelectionScreen
 		button.SetAnchorsAndOffsetsPreset(LayoutPreset.FullRect);
 		slot.AddChild(button);
 		_holders.Add(button);
+		HookCardHoverVfx(button, slotIndex);
 
 		if (_rerollFunc != null)
 		{

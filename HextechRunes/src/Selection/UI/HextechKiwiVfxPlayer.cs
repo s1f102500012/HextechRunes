@@ -3,7 +3,7 @@ using Godot;
 namespace HextechRunes;
 
 /// <summary>
-/// 按原版海克斯大乱斗增强选取界面的粒子定义播放一个特效系统（按钮常驻光、金色重随点击、卡牌弹出与重随）。
+/// 按原版海克斯大乱斗增强选取界面的粒子定义播放一个特效系统（金色重随按钮光与点击，卡牌的弹出、重随、常驻、悬停、选中与未选中）。
 /// 每个原版发射器对应一个 <see cref="MultiMeshInstance2D"/>：粒子的位置、尺寸、旋转、颜色由 CPU 按曲线推进，
 /// 主贴图 × 乘法贴图、溶解和颜色贴图在着色器里合成。挂在父节点的 FullRect 内，以父节点中心为原点。
 /// 纯表现层：随机数取本地序列，不读写共享状态；非循环特效播完后自行释放。
@@ -111,6 +111,8 @@ internal sealed partial class HextechKiwiVfxPlayer : Control
 	private float _time;
 	private bool _loop;
 	private bool _finished;
+	private bool _fadingOut;
+	private float _intensityScale = 1f;
 	private Control? _cardAnchor;
 
 	private HextechKiwiVfxPlayer()
@@ -133,7 +135,9 @@ internal sealed partial class HextechKiwiVfxPlayer : Control
 		string systemName,
 		float cardPixelsPerUnit,
 		float buttonPixelsPerUnit,
-		bool loop = false)
+		bool loop = false,
+		float intensityScale = 1f,
+		Func<HextechKiwiVfxEmitter, bool>? include = null)
 	{
 		HextechKiwiVfxLibrary? library = GetWarmData().Library;
 		if (library == null || !library.Systems.TryGetValue(systemName, out List<HextechKiwiVfxEmitter>? definitions))
@@ -148,11 +152,17 @@ internal sealed partial class HextechKiwiVfxPlayer : Control
 		HextechKiwiVfxPlayer player = new()
 		{
 			Name = systemName,
-			_loop = loop
+			_loop = loop,
+			_intensityScale = intensityScale
 		};
 		player._rng = new HextechKiwiVfxRng(player.GetInstanceId());
 		foreach (HextechKiwiVfxEmitter definition in definitions.OrderBy(static emitter => emitter.Pass))
 		{
+			if (include != null && !include(definition))
+			{
+				continue;
+			}
+
 			float pixelsPerUnit = definition.Space == "button" ? buttonPixelsPerUnit : cardPixelsPerUnit;
 			EmitterState? state = player.CreateEmitter(definition, pixelsPerUnit);
 			if (state != null)
@@ -179,6 +189,42 @@ internal sealed partial class HextechKiwiVfxPlayer : Control
 	{
 		_cardAnchor = card;
 	}
+
+	/// <summary>原版界面节点的 Layer，同一宿主里按它排先后（数值小的画在下面）。</summary>
+	internal int UiLayer { get; set; }
+
+	/// <summary>已播放的秒数。</summary>
+	internal float ElapsedSeconds => _time;
+
+	internal static float EstimateDurationSeconds(string systemName)
+	{
+		return GetWarmData().Library?.EstimateDurationSeconds(systemName) ?? 0f;
+	}
+
+	/// <summary>
+	/// 整体淡出后释放（悬停离开等）。常驻粒子不会自己结束，所以不等发射器播完，直接按透明度收尾；
+	/// 不在场景树里时立即释放。
+	/// </summary>
+	internal void FadeOutAndFree(float seconds)
+	{
+		if (_fadingOut || IsQueuedForDeletion())
+		{
+			return;
+		}
+
+		_fadingOut = true;
+		if (!IsInsideTree() || seconds <= 0f)
+		{
+			QueueFree();
+			return;
+		}
+
+		Tween tween = CreateTween();
+		tween.TweenProperty(this, "modulate:a", 0f, seconds);
+		tween.TweenCallback(Callable.From(QueueFree));
+	}
+
+	internal bool IsFadingOut => _fadingOut;
 
 	/// <summary>从头重播（按钮常驻光重新激活时用）。</summary>
 	internal void Restart()
@@ -278,7 +324,7 @@ internal sealed partial class HextechKiwiVfxPlayer : Control
 			Shader = definition.Additive ? AdditiveShader.Value : MixShader.Value
 		};
 		material.SetShaderParameter("base_texture", baseTexture);
-		material.SetShaderParameter("intensity", definition.Additive ? AdditiveIntensity : MixIntensity);
+		material.SetShaderParameter("intensity", (definition.Additive ? AdditiveIntensity : MixIntensity) * _intensityScale);
 		material.SetShaderParameter("base_address", definition.AddressBase);
 		material.SetShaderParameter("uv_scale", ToVector2(definition.UvScale, 1f));
 		if (definition.UvScroll != null)
@@ -561,7 +607,7 @@ internal sealed partial class HextechKiwiVfxPlayer : Control
 			{
 				Particle particle = _particles[i];
 				particle.Age += delta;
-				float lifeProgress = particle.Age / particle.Lifetime;
+				float lifeProgress = LifeProgress(particle);
 				if (lifeProgress >= 1f)
 				{
 					_particles.RemoveAt(i);
@@ -622,7 +668,7 @@ internal sealed partial class HextechKiwiVfxPlayer : Control
 			for (int i = 0; i < count; i++)
 			{
 				Particle particle = _particles[i];
-				float lifeProgress = Math.Clamp(particle.Age / particle.Lifetime, 0f, 1f);
+				float lifeProgress = Math.Clamp(LifeProgress(particle), 0f, 1f);
 				Vector2 scale = particle.Scale;
 				if (definition.Scale != null)
 				{
@@ -705,9 +751,16 @@ internal sealed partial class HextechKiwiVfxPlayer : Control
 
 			definition.BirthColor.SampleBirth(progress, ref rng, value);
 			particle.BirthColor = new Color(value[0], value[1], value[2], value[3]);
-			particle.Lifetime = Math.Max(0.01f, definition.ParticleLifetime.SampleBirthScalar(progress, ref rng));
+			float lifetime = definition.ParticleLifetime.SampleBirthScalar(progress, ref rng);
+			particle.Lifetime = lifetime < 0f ? -1f : Math.Max(0.01f, lifetime);
 			particle.Seed = rng.NextUnit();
 			_particles.Add(particle);
+		}
+
+		/// <summary>寿命进度；原版寿命为负（-1）表示常驻粒子，一直停在曲线起点、不会消亡，直到整个特效被释放。</summary>
+		private static float LifeProgress(in Particle particle)
+		{
+			return particle.Lifetime < 0f ? 0f : particle.Age / particle.Lifetime;
 		}
 
 		private static Vector2 SpawnOffset(HextechKiwiVfxShape? shape, ref HextechKiwiVfxRng rng)

@@ -102,6 +102,7 @@ internal sealed partial class HextechRuneSelectionScreen : Control, IOverlayScre
 			visual.SetVisualState(active: false, hovered: false, disabled: true);
 		}
 		LockSelfPickControls();
+		PlaySelectionVfx();
 
 		HextechLog.Info("Mayhem", $"SelectionScreen.OnHolderSelected: relic={relic.CanonicalId().Entry}");
 		PlayRuneSelectSfx(relic);

@@ -11,6 +11,11 @@ internal sealed class HextechKiwiVfxLibrary
 {
 	public const string GoldenRerollIdle = "Augment_GoldReroll";
 	public const string GoldenRerollClick = "Augment_GoldReroll_Click";
+	public const string NotPicked = "Augment_StaticVFX";
+
+	// 原版卡牌的底板与边框本身就是 IdleVFX 里的粒子；本模组卡牌按钮自己画边框（RarityFrame），接入时跳过这两类发射器。
+	private const string CardBaseTexture = "effects/kiwi_selection/augmentcard_bg";
+	private const string CardFrameTexturePrefix = "ui/augmentcard_frame_";
 
 	private static readonly JsonSerializerOptions JsonOptions = new()
 	{
@@ -37,6 +42,59 @@ internal sealed class HextechKiwiVfxLibrary
 			_ => "Gold"
 		};
 		return $"Augment_{tier}_{suffix}";
+	}
+
+	/// <summary>重画原版卡底或卡框的发射器（主贴图就是卡底/卡框）。</summary>
+	internal static bool DrawsCardBase(HextechKiwiVfxEmitter emitter)
+	{
+		return emitter.Texture == CardBaseTexture
+			|| emitter.Texture.StartsWith(CardFrameTexturePrefix, StringComparison.Ordinal);
+	}
+
+	/// <summary>
+	/// 按数据估算一个系统从开始到最后一个粒子消失的秒数：延迟 + 发射时长 + 最长粒子寿命（含概率表倍率）。
+	/// 有一直发射或常驻粒子（寿命为负）的系统返回正无穷；系统不存在返回 0。
+	/// </summary>
+	internal float EstimateDurationSeconds(string systemName)
+	{
+		if (!Systems.TryGetValue(systemName, out List<HextechKiwiVfxEmitter>? emitters))
+		{
+			return 0f;
+		}
+
+		float duration = 0f;
+		foreach (HextechKiwiVfxEmitter emitter in emitters)
+		{
+			float particleLifetime = MaxParticleLifetime(emitter.ParticleLifetime);
+			if (particleLifetime < 0f || (!emitter.Single && emitter.Lifetime == null))
+			{
+				return float.PositiveInfinity;
+			}
+
+			float emitting = emitter.Single ? 0f : emitter.Lifetime ?? 0f;
+			duration = Math.Max(duration, emitter.Delay + emitting + particleLifetime);
+		}
+		return duration;
+	}
+
+	private static float MaxParticleLifetime(HextechKiwiVfxValue lifetime)
+	{
+		float max = float.MinValue;
+		foreach (float[] key in lifetime.V)
+		{
+			float value = key.Length > 0 ? key[0] : 0f;
+			if (value < 0f)
+			{
+				return -1f;
+			}
+			max = Math.Max(max, value);
+		}
+
+		if (lifetime.P is { Length: > 0 } tables && tables[0] is { Length: 2 } table && table[1].Length > 0)
+		{
+			max *= table[1].Max();
+		}
+		return Math.Max(0f, max);
 	}
 
 	internal IEnumerable<string> ReferencedTextures()
