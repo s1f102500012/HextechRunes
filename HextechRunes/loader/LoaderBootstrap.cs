@@ -41,6 +41,7 @@ public static partial class LoaderBootstrap
 
 	private static readonly FieldInfo? LegacyModAssemblyField = typeof(Mod).GetField("assembly", InstanceMembers);
 
+	private static VariantCandidate? _deferredVariant;
 	private static Assembly? _selectedVariantAssembly;
 	private static Type[] _selectedVariantTypes = [];
 	private static bool _reflectionBridgeInstalled;
@@ -54,6 +55,7 @@ public static partial class LoaderBootstrap
 		if (string.IsNullOrWhiteSpace(loaderDirectory))
 		{
 			Log.Error($"{LogPrefix}Could not resolve loader directory.");
+			ReportLoadFailure(LoadFailureKind.Other);
 			return;
 		}
 
@@ -61,6 +63,7 @@ public static partial class LoaderBootstrap
 		if (!Directory.Exists(libRoot))
 		{
 			Log.Error($"{LogPrefix}Missing lib directory: {libRoot}");
+			ReportLoadFailure(LoadFailureKind.Other);
 			return;
 		}
 
@@ -72,13 +75,15 @@ public static partial class LoaderBootstrap
 				"using the newest bundled variant.");
 		}
 
-		VariantCandidate? variant = PickVariant(loaderDirectory, libRoot, host.Numeric);
+		VariantCandidate? variant = PickVariant(loaderDirectory, libRoot, host.Numeric, out bool hostOlderThanAllVariants);
 		if (variant == null)
 		{
 			// 变体全部无效,或已知宿主没有不高于它的有效变体(对应变体缺失/哈希不符/宿主早于最低支持版本):显式停止。
 			Log.Error(
 				$"{LogPrefix}No valid variant under {libRoot} compatible with host " +
 				$"{host.ReleaseLabel ?? host.Numeric?.ToString() ?? "unknown"}; refusing to load a newer variant.");
+			_hostVersionLabel = host.ReleaseLabel ?? host.Numeric?.ToString();
+			ReportLoadFailure(hostOlderThanAllVariants ? LoadFailureKind.UnsupportedGameVersion : LoadFailureKind.Other);
 			return;
 		}
 
@@ -86,6 +91,22 @@ public static partial class LoaderBootstrap
 			$"{LogPrefix}Host version label={host.ReleaseLabel ?? "<none>"} " +
 			$"numeric={host.Numeric?.ToString() ?? "<none>"}; picked variant {variant.CompatTarget}.");
 
+		// 拓展包的变体引用本体程序集:本体没加载就把它交给游戏,游戏扫描类型时会因找不到本体类型而崩溃。
+		// 所以等本体程序集出现再加载;本体始终没出现时拓展包只是不加载,并在主菜单提示。
+		if (RequiredAssemblyName != null && !IsAssemblyLoaded(RequiredAssemblyName))
+		{
+			Log.Info($"{LogPrefix}{RequiredAssemblyName} is not loaded yet; deferring variant load until it loads.");
+			_deferredVariant = variant;
+			AppDomain.CurrentDomain.AssemblyLoad += OnRequiredAssemblyLoaded;
+			ReportLoadFailure(LoadFailureKind.RequiredModMissing);
+			return;
+		}
+
+		LoadVariant(variant);
+	}
+
+	private static void LoadVariant(VariantCandidate variant)
+	{
 		try
 		{
 			AssemblyLoadContext context =
@@ -96,13 +117,54 @@ public static partial class LoaderBootstrap
 
 			AssociateVariantAssemblyWithGame(realAssembly);
 			InvokeRealInitializer(realAssembly);
+			ClearLoadFailure();
 		}
 		catch (Exception exception)
 		{
+			LoadFailureKind kind = ClassifyLoadFailure(exception);
+			if (kind == LoadFailureKind.ApplicationControlBlocked)
+			{
+				Log.Error(
+					$"{LogPrefix}Windows Application Control (Smart App Control) blocked " +
+					$"{variant.DllPath}. The mod is not loaded; disable Smart App Control to use it.");
+			}
+
 			Log.Error(
 				$"{LogPrefix}Failed to load or initialize " +
 				$"{variant.DllPath}: {exception}");
+			ReportLoadFailure(kind);
 		}
+	}
+
+	private static void OnRequiredAssemblyLoaded(object? sender, AssemblyLoadEventArgs args)
+	{
+		if (!string.Equals(args.LoadedAssembly.GetName().Name, RequiredAssemblyName, StringComparison.Ordinal))
+		{
+			return;
+		}
+
+		AppDomain.CurrentDomain.AssemblyLoad -= OnRequiredAssemblyLoaded;
+		VariantCandidate? variant = _deferredVariant;
+		_deferredVariant = null;
+		if (variant == null)
+		{
+			return;
+		}
+
+		// 初始化全部结束后再交给游戏,类型不会进入模型注册;保持未加载并照常提示。
+		if (ModManager.State != ModManagerState.None)
+		{
+			Log.Error($"{LogPrefix}{RequiredAssemblyName} loaded after mod initialization finished; variant not loaded.");
+			return;
+		}
+
+		LoadVariant(variant);
+	}
+
+	private static bool IsAssemblyLoaded(string name)
+	{
+		return AppDomain.CurrentDomain.GetAssemblies()
+			.Any(assembly => string.Equals(assembly.GetName().Name, name, StringComparison.Ordinal));
 	}
 
 	private static void ValidateVariantAssembly(
@@ -218,6 +280,13 @@ public static partial class LoaderBootstrap
 		}
 
 		InstallReflectionBridge();
+		// 拓展包延迟加载时,自己的 OnModDetected 早已触发,直接替换记录里的程序集。
+		if (LegacyModAssemblyField != null && TryFindMod(out Mod? detectedMod) && detectedMod.state != ModLoadState.None)
+		{
+			OnLegacyModDetected(detectedMod);
+			return;
+		}
+
 		if (LegacyModAssemblyField != null && !_legacyAssociationCallbackInstalled)
 		{
 			ModManager.OnModDetected += OnLegacyModDetected;
@@ -293,10 +362,23 @@ public static partial class LoaderBootstrap
 		string libRoot,
 		Version? host)
 	{
+		return PickVariant(loaderDirectory, libRoot, host, out _);
+	}
+
+	/// <param name="hostOlderThanAllVariants">宿主已知且早于清单里所有有效变体,即游戏版本太旧;用于给玩家正确的提示。</param>
+	internal static VariantCandidate? PickVariant(
+		string loaderDirectory,
+		string libRoot,
+		Version? host,
+		out bool hostOlderThanAllVariants)
+	{
 		List<VariantCandidate> variants =
 			LoadVariantManifest(loaderDirectory, libRoot)
 				.OrderBy(candidate => candidate.Version)
 				.ToList();
+		hostOlderThanAllVariants = host != null
+			&& variants.Count > 0
+			&& variants.All(candidate => candidate.Version > host);
 
 		// 只对选中的变体算 SHA256;不符就剔除后重选,结果与"先剔除所有不符的变体再选"相同。
 		while (SelectVariant(variants, host) is { } selected)

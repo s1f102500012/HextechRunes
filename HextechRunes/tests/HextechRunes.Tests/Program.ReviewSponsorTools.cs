@@ -43,6 +43,43 @@ internal static partial class Program
 		Expect(MainLoader.SelectVariant([], null) == null, "no variants");
 	}
 
+	// 智能应用控制拦截时 LoadFromAssemblyPath 抛带 0x800711C7 的 FileLoadException;
+	// 初始化器经反射调用时还会被 TargetInvocationException 包一层,两种都要认出来。
+	[HextechTest]
+	private static void LoaderRecognizesApplicationControlBlock()
+	{
+		var blocked = new FileLoadException("blocked") { HResult = unchecked((int)0x800711C7) };
+		Equal(MainLoader.LoadFailureKind.ApplicationControlBlocked, MainLoader.ClassifyLoadFailure(blocked), "direct block");
+		Equal(MainLoader.LoadFailureKind.ApplicationControlBlocked, MainLoader.ClassifyLoadFailure(new TargetInvocationException(blocked)), "wrapped block");
+		Equal(MainLoader.LoadFailureKind.Other, MainLoader.ClassifyLoadFailure(new FileLoadException("other")), "other load failure");
+	}
+
+	// 弹窗文字写死在加载器里:每种语言都要有文案,模组名与各语言 main_menu_ui 里的名称一致;
+	// 没覆盖的语言回退英文,版本过旧的正文带上游戏版本。
+	[HextechTest]
+	private static void LoaderFailureNoticeCoversModLanguages()
+	{
+		string repoRoot = Path.GetFullPath(Path.Combine(FindTestsSourceDirectory(), "..", "..", ".."));
+		foreach (string language in ModListLocLanguages)
+		{
+			string mainName = ReadMainMenuString(Path.Combine(repoRoot, "HextechRunes", "assets"), language, "HEXTECH_MOD_NAME");
+			string sponsorName = ReadMainMenuString(Path.Combine(repoRoot, "HextechRunesSponsorPack", "assets"), language, "HEXTECH_SPONSOR_MOD_NAME");
+			Expect(MainLoader.BuildFailureNotice(MainLoader.LoadFailureKind.Other, language, null).Title.Contains(mainName), $"main notice title for {language} uses {mainName}");
+			Expect(SponsorLoader.BuildFailureNotice(SponsorLoader.LoadFailureKind.RequiredModMissing, language, null).Title.Contains(sponsorName), $"sponsor notice title for {language} uses {sponsorName}");
+		}
+
+		Equal(MainLoader.BuildFailureNotice(MainLoader.LoadFailureKind.Other, "eng", null), MainLoader.BuildFailureNotice(MainLoader.LoadFailureKind.Other, "deu", null), "unlisted language falls back to English");
+		Expect(MainLoader.BuildFailureNotice(MainLoader.LoadFailureKind.UnsupportedGameVersion, "zhs", "v0.106.0").Body.Contains("v0.106.0"), "game version appears in the too-old notice");
+	}
+
+	private static string ReadMainMenuString(string assetsRoot, string language, string key)
+	{
+		string path = Path.Combine(assetsRoot, "localization", language, "main_menu_ui.json");
+		Dictionary<string, string> table = JsonSerializer.Deserialize<Dictionary<string, string>>(File.ReadAllText(path))
+			?? throw new InvalidOperationException($"{path} is not a string table");
+		return table[key];
+	}
+
 	// 拓展包加载器只认自己的变体清单名与程序集名。
 	// 只走不写日志的成功/拒绝路径:加载器的 Log.Error 在测试进程里会触碰 Godot 原生层。
 	[HextechTest]
