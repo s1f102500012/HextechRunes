@@ -170,7 +170,7 @@ internal static partial class Program
 		Equal(0m, HextechPlayerSlowPower.ResolveDamageMultiplier(-120m), "negative Slow damage multiplier should floor at zero");
 		Expect(!FrostWraithEnemyHex.ShouldTriggerForRound(1), "enemy Frost Wraith should not trigger on round one");
 		Expect(!FrostWraithEnemyHex.ShouldTriggerForRound(2), "enemy Frost Wraith should wait for three player turns");
-		Expect(FrostWraithEnemyHex.ShouldTriggerForRound(3), "enemy Frost Wraith should trigger before the third enemy turn");
+		Expect(FrostWraithEnemyHex.ShouldTriggerForRound(3), "enemy Frost Wraith should trigger at the start of the third player turn");
 		Expect(FrostWraithEnemyHex.ShouldTriggerForRound(6), "enemy Frost Wraith should trigger every three rounds afterward");
 		Equal(3, AncientStatueEnemyHex.ResolveCardSlowGain(0), "Ancient Statue tier zero fallback Slow gain");
 		Equal(3, AncientStatueEnemyHex.ResolveCardSlowGain(1), "Ancient Statue tier one Slow gain");
@@ -552,23 +552,27 @@ internal static partial class Program
 	}
 
 	[HextechTest]
-	private static void NightstalkingDrawProgressIsIndependentAndSurvivesReload()
+	private static void EnemyDrawProgressPoolsTheWholeTeamAndSurvivesReload()
 	{
 		HextechMayhemCombatTrackingState state = new();
 		Dictionary<ulong, int> counts = state.NightstalkingPlayerCardsDrawnThisCombat;
 		int threshold = NightstalkingEnemyHex.CardsPerSlippery;
-		Equal(0, HextechEnemyDrawProgress.RecordTotal(counts, 1, 11, threshold), "eleven draws do not trigger");
-		Equal(0, HextechEnemyDrawProgress.RecordTotal(counts, 2, 11, threshold), "teammates do not pool incomplete groups");
-		Equal(1, HextechEnemyDrawProgress.RecordTotal(counts, 1, 12, threshold), "twelfth draw grants one proc");
-		Equal(0, HextechEnemyDrawProgress.RecordTotal(counts, 1, 12, threshold), "repeated multiplayer settlement does not repeat rewards");
+		Equal(0, HextechEnemyDrawProgress.RecordTotal(counts, 11, threshold), "eleven team draws do not trigger");
+		Equal(1, HextechEnemyDrawProgress.RecordTotal(counts, 20, threshold), "teammates' draws pool into one counter (4 players x 5 cards crosses 12)");
+		Equal(0, HextechEnemyDrawProgress.RecordTotal(counts, 20, threshold), "repeated multiplayer settlement does not repeat rewards");
 		Equal(0, state.WarmogsSpiritPlayerCardsDrawnThisCombat.Count, "Warmog counter remains separate");
 		HextechMayhemCombatTrackingState restored = new();
 		HextechMayhemCombatTrackingSerializer.Restore(restored, HextechMayhemCombatTrackingSerializer.Serialize(state));
-		Equal(1, HextechEnemyDrawProgress.RecordTotal(restored.NightstalkingPlayerCardsDrawnThisCombat, 2, 12, threshold), "teammate carries eleven draws through save/load");
-		Equal(2, HextechEnemyDrawProgress.RecordTotal(restored.NightstalkingPlayerCardsDrawnThisCombat, 1, 36, threshold), "batched draw history grants each crossed threshold once");
+		Equal(1, HextechEnemyDrawProgress.RecordDraw(restored.NightstalkingPlayerCardsDrawnThisCombat, 7), "local draws continue from the restored team total (20 -> 21 crosses 21)");
+		Equal(2, HextechEnemyDrawProgress.RecordTotal(restored.NightstalkingPlayerCardsDrawnThisCombat, 36, threshold), "batched draw history grants each crossed threshold once");
 		restored.PreparePlayerSideTurnStart();
-		Equal(36, restored.NightstalkingPlayerCardsDrawnThisCombat[1], "draw counter spans turns");
+		Equal(36, restored.NightstalkingPlayerCardsDrawnThisCombat[HextechEnemyDrawProgress.TeamCountKey], "draw counter spans turns");
 		restored.Reset();
 		Equal(0, restored.NightstalkingPlayerCardsDrawnThisCombat.Count, "next combat resets draws");
+
+		// 旧版本按玩家分别存的进度（战斗中途读档）按合计接上，不会重复发奖。
+		Dictionary<ulong, int> legacy = new() { [101UL] = 11, [202UL] = 11 };
+		Equal(0, HextechEnemyDrawProgress.RecordTotal(legacy, 22, threshold), "legacy per-player progress is read as the team total");
+		Equal(1, HextechEnemyDrawProgress.RecordTotal(legacy, 24, threshold), "pooling continues after the legacy total");
 	}
 }

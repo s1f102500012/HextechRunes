@@ -1,4 +1,5 @@
 ﻿# 由 HEXTECH_WRITE_PATCH_MANIFEST=1 生成;每行 = 类型.字段 : 字段类型(可变静态字段)。
+HextechRunes.CompensationEnemyHex._lastQuerySplit : PendingCompensation
 HextechRunes.DeathHarvestRune._isOwnHeal : Boolean
 HextechRunes.HextechBurnVisual._particleTexture : Texture2D
 HextechRunes.HextechCatalog._configurablePlayerRuneIds : IReadOnlySet`1
@@ -74,4 +75,3 @@ HextechRunes.ModEntry._harmony : Harmony
 HextechRunes.ModEntry._initialized : Boolean
 HextechRunes.SlowCookAuraVisual._flowShader : Shader
 HextechRunes.StokeRestSiteOption._icon : Texture2D
-HextechRunes.CompensationEnemyHex._lastQuerySplit : PendingCompensation

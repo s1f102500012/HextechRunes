@@ -31,7 +31,8 @@ public sealed class CerberusRune : TurnScopedRelicBase
 		new DynamicVar("FreeAttacks", 3m)
 	];
 
-	public override bool TryModifyEnergyCostInCombat(CardModel card, decimal originalCost, out decimal modifiedCost)
+	// 免费在 Late 阶段定为 0（同原版免费攻击/技能），晚于溢流等常规阶段的加费。
+	public override bool TryModifyEnergyCostInCombatLate(CardModel card, decimal originalCost, out decimal modifiedCost)
 	{
 		modifiedCost = originalCost;
 		if (!ShouldPlayAttackForFree(card))

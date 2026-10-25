@@ -164,5 +164,6 @@
   "HEXTECH_CHAOS_RUNE_CHANCE_DESCRIPTION": "Cada candidata tem, de forma independente, esta chance de virar uma runa do caos. 0% desativa a conversão; 100% converte todas as candidatas. Rerolar sorteia de novo; receitas já obtidas não mudam. Vale a partir da próxima partida e, no multiplayer, usa a configuração do anfitrião.",
   "HEXTECH_CHAOS_RUNE_CHANCE_VALUE_LABEL": "Chance de conversão",
   "HEXTECH_TRANSMUTE_NOTICE": "{From} [color=#F0C850]se transformou em[/color] {To}.",
-  "HEXTECH_ENEMY_TRANSMUTE_NOTICE": "{From} do inimigo [color=#F0C850]se transformou em[/color] {To}."
+  "HEXTECH_ENEMY_TRANSMUTE_NOTICE": "{From} do inimigo [color=#F0C850]se transformou em[/color] {To}.",
+  "HEXTECH_CONFIG_POOL_FILTER_ALL": "Todos"
 }

@@ -12,6 +12,7 @@ internal static class HextechSelectionCapstoneHooks
 	private static class ReopenMapPatch
 	{
 		[HarmonyPrefix]
+		[HarmonyPriority(Priority.Low)]
 		private static bool Prefix()
 		{
 			if (!HextechRuneSelectionScreen.ShouldReturnToSelectionAfterCapstone())

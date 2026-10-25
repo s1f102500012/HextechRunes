@@ -37,6 +37,8 @@ internal sealed partial class HextechMayhemCombatTrackingState
 	public readonly Dictionary<uint, int> MikaelsBlessingTriggers = new();
 	public readonly HashSet<uint> GoliathApplied = new();
 	public readonly HashSet<uint> ProtectiveVeilApplied = new();
+	public readonly HashSet<uint> MindToMatterApplied = new();
+	public readonly HashSet<uint> ScrollOfBitingApplied = new();
 	public readonly HashSet<uint> ThornmailApplied = new();
 	public readonly HashSet<uint> SuperBrainApplied = new();
 	public readonly HashSet<uint> AstralBodyApplied = new();
@@ -68,6 +70,8 @@ internal sealed partial class HextechMayhemCombatTrackingState
 	public readonly HashSet<ulong> MindOverMatterPlayersTriggeredThisTurn = new();
 	[CombatTrackingClear(CombatTrackingClearPhase.EveryTurnBoundary)]
 	public readonly Dictionary<uint, int> EnemyPorcupineTemporaryThornsThisTurn = new();
+	// 升级：棘刺蟾蜍在玩家回合开始时给的临时荆棘，按敌人 CombatId 记实际给出的层数，玩家回合结束时撤回。
+	public readonly Dictionary<uint, int> EnemySpinyToadTemporaryThorns = new();
 	// 豪猪/百炼成钢按"每 N 次未被格挡伤害"触发:计数按敌人 CombatId 跨回合累积,余数带到下回合,只在战斗结束清空。
 	public readonly Dictionary<uint, int> EnemyPorcupineUnblockedHitsThisCombat = new();
 	public readonly Dictionary<uint, int> EnemyHundredRefinementsUnblockedHitsThisCombat = new();
@@ -76,8 +80,8 @@ internal sealed partial class HextechMayhemCombatTrackingState
 	// 原版的玩家回合判定从回合开始 hook 起即为 true；单独记录进入出牌阶段前的窗口。
 	[CombatTrackingTransient]
 	public readonly HashSet<ulong> PlayersAwaitingPlayPhase = new();
-	[CombatTrackingClear(CombatTrackingClearPhase.PlayerTurnStart)]
-	public readonly HashSet<ulong> GripPlayersTriggeredThisTurn = new();
+	// 我紧握(敌方)按每名玩家手动打出的牌数计数，满阈值失去 1 点能量；余数跨回合累积，只在战斗结束清空。
+	public readonly Dictionary<ulong, int> GripPlayerCardsPlayedThisCombat = new();
 	[CombatTrackingTransient]
 	public string? LastEnemyThresholdTriggerKey;
 	[CombatTrackingTransient]

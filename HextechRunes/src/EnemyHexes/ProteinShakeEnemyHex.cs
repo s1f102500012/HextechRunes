@@ -1,26 +1,34 @@
+using MegaCrit.Sts2.Core.Hooks;
+
 namespace HextechRunes;
 
 internal sealed class ProteinShakeEnemyHex : HextechEnemyHexEffect
 {
-	internal const int HpPerPercentPerPlayer = 5;
-
 	internal override MonsterHexKind Kind => MonsterHexKind.ProteinShake;
 
-	internal override int EnemyHealOrder => 30;
-
-	internal override decimal ModifyBlockMultiplicative(HextechEnemyHexContext context, Creature target, decimal block, ValueProp props, CardModel? cardSource, CardPlay? cardPlay)
+	// 敌人获得格挡时改为回复等量生命：combat.protein-shake.gain-block 前缀接管原版 CreatureCmd.GainBlock，
+	// 照原版走前置回调与格挡修正算出最终格挡量（各种格挡加成都已计入），不加格挡、不触发获得格挡后的钩子，改为回复这么多生命。
+	internal static async Task<decimal> HealInsteadOfBlock(Creature creature, decimal amount, ValueProp props, CardPlay? cardPlay)
 	{
-		return ResolveMultiplier(target.MaxHp, context.ScalingPlayerCount);
-	}
+		if (creature.CombatState is not { } combatState)
+		{
+			return 0m;
+		}
 
-	internal override decimal ModifyEnemyHealMultiplicative(HextechEnemyHexContext context, Creature creature, decimal amount)
-	{
-		return ResolveMultiplier(creature.MaxHp, context.ScalingPlayerCount);
-	}
+		// 保留原版的前置回调：可能有模型在这里为本次格挡设倍率；等待之后重新确认还在战斗中、还活着。
+		await Hook.BeforeBlockGained(combatState, creature, amount, props, cardPlay?.Card);
+		if (CombatManager.Instance.IsOverOrEnding || creature.IsDead || creature.CombatState != combatState)
+		{
+			return 0m;
+		}
 
-	// 没有上限。
-	internal static decimal ResolveMultiplier(decimal maxHp, int playerCount = 1)
-	{
-		return EnemyMaxHpStepMultiplier.Resolve(maxHp, HpPerPercentPerPlayer, playerCount);
+		decimal converted = Math.Max(0m, Hook.ModifyBlock(combatState, creature, amount, props, cardPlay?.Card, cardPlay, out IEnumerable<AbstractModel> modifiers));
+		await Hook.AfterModifyingBlockAmount(combatState, converted, cardPlay?.Card, cardPlay, modifiers);
+		if (converted > 0m && !creature.IsDead)
+		{
+			await CreatureCmd.Heal(creature, converted);
+		}
+
+		return 0m;
 	}
 }

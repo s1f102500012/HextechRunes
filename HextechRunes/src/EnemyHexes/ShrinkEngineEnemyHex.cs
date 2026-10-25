@@ -12,7 +12,8 @@ internal sealed class ShrinkEngineEnemyHex : HextechEnemyHexEffect
 		{
 			if (enemy.GetPowerAmount<SlipperyPower>() <= 0m)
 			{
-				await HextechEnemyPowerScalingHooks.ApplyExact<SlipperyPower>(enemy, context.TierValue(Kind, 0, 1, 2), enemy, null);
+				// 0/N/2N 层（N=联机人数）：层数已按人数算好，绕过原版对敌方滑溜的联机缩放。
+				await HextechEnemyPowerScalingHooks.ApplyExact<SlipperyPower>(enemy, context.TierValue(Kind, 0, 1, 2) * context.ScalingPlayerCount, enemy, null);
 			}
 		}
 	}

@@ -491,6 +491,19 @@ internal static partial class Program
 	}
 
 	[HextechTest]
+	private static void MonsterHexPoolDropsSinglePlayerOnlyHexesInMultiplayer()
+	{
+		HextechRarityTier rarity = MonsterHexCatalog.GetMonsterHexRarity(MonsterHexKind.TestSubject);
+		Expect(MonsterHexCatalog.IsSinglePlayerOnly(MonsterHexKind.TestSubject), "test subject should be single-player only");
+		Expect(
+			HextechMonsterHexRoller.GetConfiguredRarityPool(rarity, null, networkMultiplayer: false).Contains(MonsterHexKind.TestSubject),
+			"single-player pool should keep test subject");
+		Expect(
+			!HextechMonsterHexRoller.GetConfiguredRarityPool(rarity, null, networkMultiplayer: true).Contains(MonsterHexKind.TestSubject),
+			"multiplayer pool should drop test subject");
+	}
+
+	[HextechTest]
 	private static void MonsterHexRollerResolveNewHexesPreservesPrimaryAndAvoidsDuplicates()
 	{
 		MonsterHexKind[] kinds = Enum.GetValues<MonsterHexKind>()

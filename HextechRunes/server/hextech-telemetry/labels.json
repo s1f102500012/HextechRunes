@@ -663,7 +663,15 @@
     "BadTaste": "恶趣味",
     "TransmuteSilver": "质变：白银阶",
     "TransmuteGold": "质变：黄金阶",
-    "SpinToWin": "转出胜利"
+    "SpinToWin": "转出胜利",
+    "Bloodthirst": "渴血",
+    "AnthonyBias": "安东尼的偏见",
+    "Overflow": "溢流",
+    "MindToMatter": "由心及物",
+    "Chomper": "升级：啃咬机",
+    "VineShambler": "升级：藤蔓蹒跚者",
+    "SpinyToad": "升级：棘刺蟾蜍",
+    "ScrollOfBiting": "升级：咬人卷轴"
   },
   "characters": {
     "IRONCLAD": "战士",

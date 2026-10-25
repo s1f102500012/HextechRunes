@@ -2,22 +2,20 @@ namespace HextechRunes;
 
 public sealed class MindToMatterRune : HextechRelicBase
 {
-	public override bool HasUponPickupEffect => true;
-
 	protected override IEnumerable<DynamicVar> CanonicalVars =>
 	[
-		new MaxHpVar(1m)
+		new MaxHpVar(2m)
 	];
 
-	public override Task AfterObtained()
+	// 与原版幸运鱼同一判定：自己的卡牌落入牌组时触发。
+	public override async Task AfterCardChangedPiles(CardModel card, PileType oldPileType, AbstractModel? clonedBy)
 	{
-		int maxHpGain = Owner.Deck.Cards.Count;
-		if (maxHpGain <= 0)
+		if (card.Pile?.Type != PileType.Deck || card.Owner != Owner)
 		{
-			return Task.CompletedTask;
+			return;
 		}
 
 		Flash();
-		return CreatureCmd.GainMaxHp(Owner.Creature, maxHpGain);
+		await CreatureCmd.GainMaxHp(Owner.Creature, DynamicVars.MaxHp.BaseValue);
 	}
 }

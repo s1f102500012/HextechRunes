@@ -44,11 +44,13 @@ internal static partial class Program
 		{
 			[MonsterHexKind.HeavyHitter] = ("HpPerPercent", HeavyHitterEnemyHex.HpPerPercentPerPlayer),
 			[MonsterHexKind.VitalitySurge] = ("HpPerPercent", VitalitySurgeEnemyHex.HpPerPercentPerPlayer),
-			[MonsterHexKind.ProteinShake] = ("HpPerPercent", ProteinShakeEnemyHex.HpPerPercentPerPlayer),
 			// 多多益善按全队遗物数除以人数取整，每 N 件（N=人数）+1%，效果类里没有单独的常量。
 			[MonsterHexKind.MoreTheMerrier] = ("RelicsNeeded", 1),
 			[MonsterHexKind.Porcupine] = ("HitsNeeded", PorcupineEnemyHex.HitsPerTriggerPerPlayer),
 			[MonsterHexKind.HundredRefinements] = ("HitsNeeded", HundredRefinementsEnemyHex.HitsPerTriggerPerPlayer),
+			[MonsterHexKind.AncientWine] = ("SkillsNeeded", AncientWineEnemyHex.SkillsPerTriggerPerPlayer),
+			[MonsterHexKind.AnthonyBias] = ("CardsNeeded", AnthonyBiasEnemyHex.CardsPerPercentPerPlayer),
+			[MonsterHexKind.MindToMatter] = ("CardsNeeded", MindToMatterEnemyHex.CardsPerPercentPerPlayer),
 		};
 		SetEqual(expected.Keys, MonsterHexCatalog.PlayerCountScaledThresholds.Keys, "scaled threshold kinds");
 		foreach ((MonsterHexKind kind, (string Var, int Base) threshold) in MonsterHexCatalog.PlayerCountScaledThresholds)
@@ -62,7 +64,6 @@ internal static partial class Program
 	{
 		Equal(1.30m, HeavyHitterEnemyHex.ResolveMultiplier(10000m, 3), "capped multipliers stay capped for any party size");
 		Equal(1.02m, VitalitySurgeEnemyHex.ResolveMultiplier(120m, 3), "Vitality Surge threshold scales with the party");
-		Equal(1m, ProteinShakeEnemyHex.ResolveMultiplier(4m, 1), "Protein Shake below the first step");
 		Equal(16, HextechEnemyHexContext.ClampScalingPlayerCount(40), "scaling player count caps at sixteen");
 		Equal(1, HextechEnemyHexContext.ClampScalingPlayerCount(0), "scaling player count never drops below one");
 	}

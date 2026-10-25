@@ -138,19 +138,21 @@ internal static partial class Program
 	}
 
 	[HextechTest]
-	private static void GripConsumesOnlyTheFirstManualCardTrigger()
+	private static void GripLosesEnergyEveryNCardsAndCarriesAcrossSaves()
 	{
 		HextechMayhemCombatTrackingState tracking = new();
-		Expect(!IGripEnemyHex.TryConsumeFirstCard(tracking, 1, 0), "tier one should consume no trigger");
-		Expect(IGripEnemyHex.TryConsumeFirstCard(tracking, 2, 1), "tier two should consume the first card trigger");
-		Expect(!IGripEnemyHex.TryConsumeFirstCard(tracking, 2, 1), "tier two should ignore later card triggers");
-		Expect(IGripEnemyHex.TryConsumeFirstCard(tracking, 3, 2), "tier three should consume the first card trigger");
-		Expect(!IGripEnemyHex.TryConsumeFirstCard(tracking, 3, 2), "tier three should ignore later card triggers");
+		Expect(!IGripEnemyHex.TryCountCard(tracking, 1, 3), "first card should not trigger at three");
+		Expect(!IGripEnemyHex.TryCountCard(tracking, 1, 3), "second card should not trigger at three");
+		Expect(IGripEnemyHex.TryCountCard(tracking, 1, 3), "third card should trigger at three");
+		Expect(!tracking.GripPlayerCardsPlayedThisCombat.ContainsKey(1), "trigger should reset the player's count");
+		Expect(!IGripEnemyHex.TryCountCard(tracking, 2, 2), "players count separately");
+		Expect(!IGripEnemyHex.TryCountCard(tracking, 1, 3), "count restarts after a trigger");
 
 		string serialized = tracking.Serialize();
 		HextechMayhemCombatTrackingState restored = new();
 		restored.Restore(serialized);
-		SetEqual(new ulong[] { 2, 3 }, restored.GripPlayersTriggeredThisTurn, "grip guards should survive a mid-turn save/load");
+		Equal(1, restored.GripPlayerCardsPlayedThisCombat[1], "grip count should survive a save/load");
+		Expect(IGripEnemyHex.TryCountCard(restored, 2, 2), "restored partial count should trigger on the next card");
 	}
 
 	[HextechTest]

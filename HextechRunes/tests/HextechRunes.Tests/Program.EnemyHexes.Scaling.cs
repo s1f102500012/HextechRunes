@@ -164,10 +164,6 @@ internal static partial class Program
 		Equal(1m, VitalitySurgeEnemyHex.ResolveMultiplier(39m, 2), "two-player Vitality Surge below 40-HP threshold");
 		Equal(1.01m, VitalitySurgeEnemyHex.ResolveMultiplier(40m, 2), "two-player Vitality Surge first threshold");
 		Equal(1.30m, VitalitySurgeEnemyHex.ResolveMultiplier(1200m, 2), "two-player Vitality Surge cap");
-
-		Equal(1m, ProteinShakeEnemyHex.ResolveMultiplier(9m, 2), "two-player Protein Shake below 10-HP threshold");
-		Equal(1.01m, ProteinShakeEnemyHex.ResolveMultiplier(10m, 2), "two-player Protein Shake first threshold");
-		Equal(2m, ProteinShakeEnemyHex.ResolveMultiplier(1000m, 2), "two-player Protein Shake at 100 percent bonus");
 	}
 
 	[HextechTest]
@@ -184,9 +180,6 @@ internal static partial class Program
 		}
 		Equal(25, SoulEaterEnemyHex.ResolveMaxHpGain(100), "Soul Eater gains one quarter of the dead enemy's Max HP");
 		Equal(24, SoulEaterEnemyHex.ResolveMaxHpGain(99), "Soul Eater rounds the Max HP gain down");
-		Equal(5m, ProteinShakeEnemyHex.ResolveMultiplier(2000, 1), "Protein Shake exceeds the old 100-percent cap");
-		Equal(3m, ProteinShakeEnemyHex.ResolveMultiplier(2000, 2), "Protein Shake divides its threshold by player count consistently");
-		Equal(1.01m, ProteinShakeEnemyHex.ResolveMultiplier(20, 4), "four-player Protein Shake first threshold");
 		Equal(30m, VantomEnemyHex.MaxHpPerStack, "Vantom requires thirty Max HP per Slippery");
 	}
 }

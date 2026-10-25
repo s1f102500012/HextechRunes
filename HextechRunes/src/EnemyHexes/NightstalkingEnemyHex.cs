@@ -8,7 +8,7 @@ internal sealed class NightstalkingEnemyHex : DrawProgressEnemyHexBase
 
 	protected override async Task AfterLocalCardDrawn(HextechEnemyHexContext context, Player owner, HextechCombatState combatState)
 	{
-		if (HextechEnemyDrawProgress.RecordDraw(context.Tracking.NightstalkingPlayerCardsDrawnThisCombat, owner, CardsPerSlippery) == 0)
+		if (HextechEnemyDrawProgress.RecordDraw(context.Tracking.NightstalkingPlayerCardsDrawnThisCombat, CardsPerSlippery) == 0)
 		{
 			return;
 		}

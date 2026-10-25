@@ -164,5 +164,6 @@
   "HEXTECH_CHAOS_RUNE_CHANCE_DESCRIPTION": "Cada candidata tiene, de forma independiente, esta probabilidad de convertirse en runa del caos. 0% desactiva la conversión; 100% convierte todas las candidatas. Al volver a tirar se decide otra vez; las recetas ya obtenidas no cambian. Se aplica desde la próxima partida y en multijugador usa la configuración del anfitrión.",
   "HEXTECH_CHAOS_RUNE_CHANCE_VALUE_LABEL": "Probabilidad de conversión",
   "HEXTECH_TRANSMUTE_NOTICE": "{From} [color=#F0C850]se ha transformado en[/color] {To}.",
-  "HEXTECH_ENEMY_TRANSMUTE_NOTICE": "{From} del enemigo [color=#F0C850]se ha transformado en[/color] {To}."
+  "HEXTECH_ENEMY_TRANSMUTE_NOTICE": "{From} del enemigo [color=#F0C850]se ha transformado en[/color] {To}.",
+  "HEXTECH_CONFIG_POOL_FILTER_ALL": "Todos"
 }

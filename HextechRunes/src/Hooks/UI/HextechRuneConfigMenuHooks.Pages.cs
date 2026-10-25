@@ -113,7 +113,10 @@ internal static partial class HextechRuneConfigMenuHooks
 		PendingConfig pending = context.Pending;
 		VBoxContainer page = CreatePageContainer(context.CompactLayout);
 		page.AddChild(CreatePoolGroupHeader(L("HEXTECH_PLAYER_POOL_TITLE"), context.CompactLayout));
-		AddIconPoolEntries(context, page, context.PlayerEntries, pending.DisabledPlayerRuneIds, context.PlayerIconBindings);
+		List<FilterableRarityCard> playerCards = [];
+		Control filterBar = CreatePlayerPoolFilterBar(context, playerCards);
+		page.AddChild(filterBar);
+		AddIconPoolEntries(context, page, context.PlayerEntries, pending.DisabledPlayerRuneIds, context.PlayerIconBindings, playerCards);
 		page.AddChild(CreatePoolGroupHeader(L("HEXTECH_ENEMY_POOL_TITLE"), context.CompactLayout));
 		AddIconPoolEntries(context, page, context.EnemyEntries, pending.DisabledMonsterHexIds, context.EnemyIconBindings);
 		return page;
@@ -141,7 +144,8 @@ internal static partial class HextechRuneConfigMenuHooks
 		VBoxContainer page,
 		IReadOnlyList<RuneConfigEntry> entries,
 		HashSet<string> pendingDisabledIds,
-		List<RuneIconBinding> bindings)
+		List<RuneIconBinding> bindings,
+		List<FilterableRarityCard>? filterableCards = null)
 	{
 		bool compactLayout = context.CompactLayout;
 		foreach (IGrouping<int, RuneConfigEntry> rarityGroup in entries.GroupBy(static entry => entry.RarityOrder))
@@ -155,27 +159,33 @@ internal static partial class HextechRuneConfigMenuHooks
 			List<IGrouping<string, RuneConfigEntry>> sourceGroups = rarityGroup
 				.GroupBy(static entry => entry.SourceKey)
 				.ToList();
+			List<FilterableRuneGrid> grids = [];
 			foreach (IGrouping<string, RuneConfigEntry> sourceGroup in sourceGroups)
 			{
+				Label? sourceHeader = null;
 				if (sourceGroups.Count > 1)
 				{
-					card.AddChild(CreateSourceHeader(sourceGroup.First().SourceText, compactLayout));
+					sourceHeader = CreateSourceHeader(sourceGroup.First().SourceText, compactLayout);
+					card.AddChild(sourceHeader);
 				}
 
 				VBoxContainer grid = CreateRuneGrid(compactLayout);
 				card.AddChild(grid);
-				AddRuneSlots(context, grid, sourceGroup, pendingDisabledIds, bindings);
+				grids.Add(new FilterableRuneGrid(grid, sourceHeader, AddRuneSlots(context, grid, sourceGroup, pendingDisabledIds, bindings)));
 			}
+
+			filterableCards?.Add(new FilterableRarityCard(cardNode, grids));
 		}
 	}
 
-	private static void AddRuneSlots(
+	private static List<(RuneConfigEntry Entry, CenterContainer Slot)> AddRuneSlots(
 		ConfigMenuContext context,
 		VBoxContainer grid,
 		IEnumerable<RuneConfigEntry> entries,
 		HashSet<string> pendingDisabledIds,
 		List<RuneIconBinding> bindings)
 	{
+		List<(RuneConfigEntry Entry, CenterContainer Slot)> slots = [];
 		HBoxContainer? currentRow = null;
 		int column = 0;
 		foreach (RuneConfigEntry entry in entries)
@@ -188,6 +198,7 @@ internal static partial class HextechRuneConfigMenuHooks
 
 			CenterContainer slot = CreateRuneSlot();
 			currentRow?.AddChild(slot);
+			slots.Add((entry, slot));
 			context.LoadTargets.Add(new RuneConfigLoadTarget(entry, slot, pendingDisabledIds, bindings));
 
 			column++;
@@ -205,6 +216,8 @@ internal static partial class HextechRuneConfigMenuHooks
 				currentRow.AddChild(CreateRuneSlot());
 			}
 		}
+
+		return slots;
 	}
 
 	private static Control CreateRarityGroupHeaderRow(

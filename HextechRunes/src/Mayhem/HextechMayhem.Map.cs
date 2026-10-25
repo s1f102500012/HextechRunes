@@ -41,17 +41,7 @@ internal sealed partial class HextechMayhemModifier
 		ActMap modifiedMap = map;
 		foreach (HextechEnemyHexEffect effect in HextechEnemyHexEffects.GetActive(this))
 		{
-			if (effect.Kind == MonsterHexKind.HastyScribble && ActState.IsMapLengthReduced(actIndex))
-			{
-				continue;
-			}
-
-			ActMap beforeEffect = modifiedMap;
 			modifiedMap = effect.ModifyGeneratedMapLate(context, runState, modifiedMap, actIndex);
-			if (effect.Kind == MonsterHexKind.HastyScribble && !ReferenceEquals(modifiedMap, beforeEffect))
-			{
-				ActState.MarkMapLengthReduced(actIndex);
-			}
 		}
 
 		return modifiedMap;

@@ -10,6 +10,9 @@ internal static class MonsterHexCatalog
 		{
 			[MonsterHexKind.Slap] = [typeof(StrengthPower)],
 			[MonsterHexKind.SpinToWin] = [typeof(DrawCardsNextTurnPower), typeof(EnergyNextTurnPower)],
+			[MonsterHexKind.VineShambler] = [typeof(TangledPower)],
+			[MonsterHexKind.SpinyToad] = [typeof(ThornsPower)],
+			[MonsterHexKind.ScrollOfBiting] = [typeof(PaperCutsPower)],
 			[MonsterHexKind.Tormentor] = [typeof(HextechBurnPower)],
 			[MonsterHexKind.Firebrand] = [typeof(HextechBurnPower)],
 			[MonsterHexKind.Corrosion] = [typeof(FrailPower)],
@@ -87,6 +90,14 @@ internal static class MonsterHexCatalog
 
 	private static readonly Lazy<IReadOnlyDictionary<ModelId, MonsterHexKind>> MonsterHexByIconRelicId = new(BuildMonsterHexByIconRelicId);
 
+	// 只在单人局出现的敌方海克斯；联机局抽取、重掷与质变都不会给出。
+	private static readonly HashSet<MonsterHexKind> SinglePlayerOnlyMonsterHexes = [MonsterHexKind.TestSubject];
+
+	public static bool IsSinglePlayerOnly(MonsterHexKind hex)
+	{
+		return SinglePlayerOnlyMonsterHexes.Contains(hex);
+	}
+
 	public static IReadOnlyList<MonsterHexKind> GetMonsterHexesForRarity(HextechRarityTier rarity)
 	{
 		return HextechContentRegistry.MonsterHexMetadata.EnabledKindsByRarity.GetValueOrDefault(rarity, Array.Empty<MonsterHexKind>());
@@ -129,7 +140,7 @@ internal static class MonsterHexCatalog
 			[MonsterHexKind.Repulsor] = new[] { ("Stacks1", 1), ("Stacks2", 2), ("Stacks3", 3) },
 			[MonsterHexKind.ClownCollege] = new[] { ("Stacks", 1) },
 			[MonsterHexKind.CantTouchThis] = new[] { ("Stacks", 1) },
-			[MonsterHexKind.ShrinkEngine] = new[] { ("Stacks", 1) },
+			[MonsterHexKind.ShrinkEngine] = new[] { ("Stacks1", 0), ("Stacks2", 1), ("Stacks3", 2) },
 			[MonsterHexKind.ProtectiveVeil] = new[] { ("Stacks1", 1), ("Stacks2", 2), ("Stacks3", 3) },
 			[MonsterHexKind.HailToTheKing] = new[] { ("Stacks", 3) },
 			[MonsterHexKind.Inklet] = new[] { ("Stacks1", 1), ("Stacks2", 2), ("Stacks3", 3) },
@@ -141,11 +152,13 @@ internal static class MonsterHexCatalog
 			// 同 Porcupine：字面量供 TXT 同步脚本渲染，测试断言与各效果类的 HpPerPercentPerPlayer 一致。
 			[MonsterHexKind.HeavyHitter] = ("HpPerPercent", 15),
 			[MonsterHexKind.VitalitySurge] = ("HpPerPercent", 20),
-			[MonsterHexKind.ProteinShake] = ("HpPerPercent", 5),
 			[MonsterHexKind.MoreTheMerrier] = ("RelicsNeeded", 1),
 			// 写字面量:tools/sync_content_txt.py 按字面量渲染 TXT 里的"4N";测试断言它与效果类的常数一致。
 			[MonsterHexKind.Porcupine] = ("HitsNeeded", 4),
 			[MonsterHexKind.HundredRefinements] = ("HitsNeeded", 1),
+			[MonsterHexKind.AncientWine] = ("SkillsNeeded", 1),
+			[MonsterHexKind.AnthonyBias] = ("CardsNeeded", 1),
+			[MonsterHexKind.MindToMatter] = ("CardsNeeded", 1),
 		};
 
 	public static string GetEnemyHexDescriptionFormatted(MonsterHexKind hex)

@@ -144,7 +144,15 @@ internal static class HextechEnemyHexEffects
 		new BadTasteEnemyHex(),
 		new TransmuteSilverEnemyHex(),
 		new TransmuteGoldEnemyHex(),
-		new SpinToWinEnemyHex()
+		new SpinToWinEnemyHex(),
+		new BloodthirstEnemyHex(),
+		new AnthonyBiasEnemyHex(),
+		new OverflowEnemyHex(),
+		new MindToMatterEnemyHex(),
+		new ChomperEnemyHex(),
+		new VineShamblerEnemyHex(),
+		new SpinyToadEnemyHex(),
+		new ScrollOfBitingEnemyHex()
 	]);
 
 	internal static IEnumerable<HextechEnemyHexEffect> GetActive(HextechMayhemModifier modifier)
