@@ -94,7 +94,9 @@ internal static partial class HextechCombatHooks
 		}
 
 		// 升级：啃咬机：只补在不含攻击的行动上（按原版意图判断，不算本模组补的意图）。
-		if (dazed > 0 && !attacks)
+		// 逃跑行动执行完敌人已离场、失去战斗归属，附加的晕眩结算不了，不补意图，免得显示了却不加牌。
+		bool escapes = intents.Any(static intent => intent is EscapeIntent);
+		if (dazed > 0 && !attacks && !escapes)
 		{
 			intents.Add(new ChomperDazedIntent(source, dazed));
 		}

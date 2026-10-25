@@ -6,7 +6,7 @@ internal sealed class SpinyToadEnemyHex : HextechEnemyHexEffect
 
 	internal override MonsterHexKind Kind => MonsterHexKind.SpinyToad;
 
-	// 偶数回合的玩家回合开始时，所有敌人获得只持续到玩家回合结束的荆棘；实际给出的层数记在追踪状态里，结束时原数撤回。
+	// 偶数回合的玩家回合开始时，所有敌人获得只持续到玩家回合结束的荆棘；实际增加的层数记在追踪状态里，结束时原数撤回。
 	internal override async Task BeforePlayerSideTurnStart(
 		HextechEnemyHexContext context,
 		HextechCombatState combatState,
@@ -26,9 +26,15 @@ internal sealed class SpinyToadEnemyHex : HextechEnemyHexEffect
 				continue;
 			}
 
-			context.Tracking.EnemySpinyToadTemporaryThorns[combatId] =
-				context.Tracking.EnemySpinyToadTemporaryThorns.GetValueOrDefault(combatId, 0) + thorns;
+			// 按施加前后的实际增量记账：其他效果改了施加量时，撤回的也正好是实际多出来的层数。
+			int before = enemy.GetPowerAmount<ThornsPower>();
 			await PowerCmd.Apply<ThornsPower>(enemy, thorns, enemy, null);
+			int gained = enemy.GetPowerAmount<ThornsPower>() - before;
+			if (gained > 0)
+			{
+				context.Tracking.EnemySpinyToadTemporaryThorns[combatId] =
+					context.Tracking.EnemySpinyToadTemporaryThorns.GetValueOrDefault(combatId, 0) + gained;
+			}
 		}
 	}
 
