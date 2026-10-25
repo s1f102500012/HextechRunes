@@ -40,6 +40,17 @@ internal static partial class HextechRuneConfigMenuHooks
 		HashSet<string> PendingDisabledIds,
 		List<RuneIconBinding> Bindings);
 
+	/// <summary>按海克斯池筛选时重排的一块网格:来源小标题与它下面的格子(格子节点复用,不重建图标)。</summary>
+	private sealed record FilterableRuneGrid(
+		VBoxContainer Grid,
+		Label? SourceHeader,
+		IReadOnlyList<(RuneConfigEntry Entry, CenterContainer Slot)> Slots);
+
+	/// <summary>一张稀有度卡片:筛选后没有可见格子时整张隐藏。</summary>
+	private sealed record FilterableRarityCard(
+		PanelContainer Card,
+		IReadOnlyList<FilterableRuneGrid> Grids);
+
 	private sealed record RuneIconBinding(
 		string Id,
 		Control Root,

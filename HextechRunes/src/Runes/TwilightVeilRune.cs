@@ -4,7 +4,8 @@ namespace HextechRunes;
 /// 薄暮法衣(黄金,通用):敌人在战斗内获得增益效果时,你获得相同增益效果。
 /// 只镜像"战斗内"获得:开场箭闸(首个玩家回合开始才武装)挡掉出生自带/战斗开始时/敌方海克斯开局增益;
 /// BOSS 转阶段补发的开局类海克斯增益由 BeginMirrorSuppression 作用域另行压制。
-/// 怪物专属机制/形态类 buff(惊惧/硬化甲壳等)不镜像——玩家模型上没有对应动画与脚本。
+/// 只镜像白名单内、已核对可由玩家持有的增益（同祸水东引的转移白名单思路）：怪物专属机制/形态类 buff
+/// 与外部模组的 Power（如分裂、待分裂计数）会在玩家身上运行怪物侧生命周期，曾导致战斗无法结束。
 /// </summary>
 public sealed class TwilightVeilRune : HextechRelicBase
 {
@@ -53,7 +54,7 @@ public sealed class TwilightVeilRune : HextechRelicBase
 			|| enemy.CombatState == null
 			|| enemy.CombatState != Owner.Creature.CombatState
 			|| power.GetTypeForAmount(amount) != PowerType.Buff
-			|| HextechMonsterInteractionPolicy.IsMonsterMechanismBuff(power))
+			|| !IsMirrorablePower(power))
 		{
 			return;
 		}
@@ -81,6 +82,16 @@ public sealed class TwilightVeilRune : HextechRelicBase
 		{
 			_mirroring = false;
 		}
+	}
+
+	// PowerModel 没有"能否由玩家持有"的契约：只放行已核对、生命周期不依赖怪物或敌方回合的具体类型，
+	// 不放行任意 Buff 或基类派生项。
+	internal static bool IsMirrorablePower(PowerModel power)
+	{
+		return power is StrengthPower or DexterityPower or FocusPower
+			or ArtifactPower or PlatingPower or RegenPower or ThornsPower
+			or IntangiblePower or BufferPower or VigorPower or BlurPower
+			or SlipperyPower or RitualPower;
 	}
 
 	private sealed class SuppressionScope : IDisposable

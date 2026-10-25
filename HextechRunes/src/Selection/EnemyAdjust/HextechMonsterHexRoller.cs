@@ -100,10 +100,24 @@ internal static class HextechMonsterHexRoller
 		return pool.Count > 0 ? pool : rarityPool.ToArray();
 	}
 
-	/// <summary>本稀有度下本局可抽到的敌方海克斯:去掉配置禁用项。抽取、重掷与远端校验共用。</summary>
+	/// <summary>本稀有度下本局可抽到的敌方海克斯:去掉配置禁用项与联机局不出现的项。抽取、重掷、远端校验与质变共用。</summary>
 	public static IReadOnlyList<MonsterHexKind> GetConfiguredRarityPool(HextechRarityTier rarity, IReadOnlySet<string>? disabledMonsterHexIds)
 	{
-		return ApplyConfig(MonsterHexCatalog.GetMonsterHexesForRarity(rarity), disabledMonsterHexIds);
+		return GetConfiguredRarityPool(rarity, disabledMonsterHexIds, HextechPlayerContextHelper.IsNetworkMultiplayerRun());
+	}
+
+	internal static IReadOnlyList<MonsterHexKind> GetConfiguredRarityPool(
+		HextechRarityTier rarity,
+		IReadOnlySet<string>? disabledMonsterHexIds,
+		bool networkMultiplayer)
+	{
+		IReadOnlyList<MonsterHexKind> rarityPool = MonsterHexCatalog.GetMonsterHexesForRarity(rarity);
+		if (networkMultiplayer)
+		{
+			rarityPool = rarityPool.Where(static kind => !MonsterHexCatalog.IsSinglePlayerOnly(kind)).ToList();
+		}
+
+		return ApplyConfig(rarityPool, disabledMonsterHexIds);
 	}
 
 	private static HashSet<MonsterHexKind> ToSet(IEnumerable<MonsterHexKind>? hexes)

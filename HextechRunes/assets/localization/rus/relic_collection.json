@@ -164,5 +164,6 @@
   "HEXTECH_CHAOS_RUNE_CHANCE_DESCRIPTION": "Каждый кандидат независимо с этим шансом превращается в руну хаоса. 0% — превращение отключено, 100% — превращаются все кандидаты. При перебросе шанс проверяется заново; уже полученные рецепты не меняются. Действует со следующего забега, в сетевой игре используется настройка хоста.",
   "HEXTECH_CHAOS_RUNE_CHANCE_VALUE_LABEL": "Шанс превращения",
   "HEXTECH_TRANSMUTE_NOTICE": "{From} [color=#F0C850]превращается в[/color] {To}.",
-  "HEXTECH_ENEMY_TRANSMUTE_NOTICE": "Вражеская руна {From} [color=#F0C850]превращается в[/color] {To}."
+  "HEXTECH_ENEMY_TRANSMUTE_NOTICE": "Вражеская руна {From} [color=#F0C850]превращается в[/color] {To}.",
+  "HEXTECH_CONFIG_POOL_FILTER_ALL": "Все"
 }

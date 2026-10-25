@@ -27,6 +27,8 @@ internal sealed class CombatTrackingSnapshot
 	public Dictionary<uint, int> MikaelsBlessingTriggers { get; set; } = new();
 	public List<uint> GoliathApplied { get; set; } = [];
 	public List<uint> ProtectiveVeilApplied { get; set; } = [];
+	public List<uint> MindToMatterApplied { get; set; } = [];
+	public List<uint> ScrollOfBitingApplied { get; set; } = [];
 	public List<uint> ThornmailApplied { get; set; } = [];
 	public List<uint> SuperBrainApplied { get; set; } = [];
 	public List<uint> AstralBodyApplied { get; set; } = [];
@@ -55,8 +57,9 @@ internal sealed class CombatTrackingSnapshot
 	public Dictionary<ulong, int> NightstalkingPlayerCardsDrawnThisCombat { get; set; } = new();
 	public List<ulong> MindOverMatterPlayersTriggeredThisTurn { get; set; } = [];
 	public Dictionary<uint, int> EnemyPorcupineTemporaryThornsThisTurn { get; set; } = new();
+	public Dictionary<uint, int> EnemySpinyToadTemporaryThorns { get; set; } = new();
 	public Dictionary<uint, int> EnemyPorcupineUnblockedHitsThisCombat { get; set; } = new();
 	public Dictionary<uint, int> EnemyHundredRefinementsUnblockedHitsThisCombat { get; set; } = new();
 	public Dictionary<ulong, int> InspectExtraDrawsPreventedThisTurn { get; set; } = new();
-	public List<ulong> GripPlayersTriggeredThisTurn { get; set; } = [];
+	public Dictionary<ulong, int> GripPlayerCardsPlayedThisCombat { get; set; } = new();
 }

@@ -164,5 +164,6 @@
   "HEXTECH_CHAOS_RUNE_CHANCE_DESCRIPTION": "각 후보가 독립적으로 혼돈 룬으로 바뀔 확률입니다. 0%는 비활성화, 100%는 모든 후보를 변환합니다. 다시 뽑으면 재판정하며 획득한 조합은 유지됩니다. 다음 게임부터 적용되고 멀티플레이에서는 호스트 설정을 따릅니다.",
   "HEXTECH_CHAOS_RUNE_CHANCE_VALUE_LABEL": "생성 확률",
   "HEXTECH_TRANSMUTE_NOTICE": "{From}[color=#F0C850]이(가)[/color] {To}[color=#F0C850](으)로 변환되었습니다.[/color]",
-  "HEXTECH_ENEMY_TRANSMUTE_NOTICE": "적의 {From}[color=#F0C850]이(가)[/color] {To}[color=#F0C850](으)로 변환되었습니다.[/color]"
+  "HEXTECH_ENEMY_TRANSMUTE_NOTICE": "적의 {From}[color=#F0C850]이(가)[/color] {To}[color=#F0C850](으)로 변환되었습니다.[/color]",
+  "HEXTECH_CONFIG_POOL_FILTER_ALL": "전체"
 }

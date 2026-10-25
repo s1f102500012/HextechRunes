@@ -164,5 +164,6 @@
   "HEXTECH_CHAOS_RUNE_CHANCE_DESCRIPTION": "每个候选独立判定是否变成混沌符文。0% 为关闭，100% 为全部混沌。重掷会重新判定，已获得的配方保持不变。设置从下一局生效，联机使用房主设置。",
   "HEXTECH_CHAOS_RUNE_CHANCE_VALUE_LABEL": "生成概率",
   "HEXTECH_TRANSMUTE_NOTICE": "{From}[color=#F0C850]已转变为[/color]{To}。",
-  "HEXTECH_ENEMY_TRANSMUTE_NOTICE": "敌方的{From}[color=#F0C850]已转变为[/color]{To}。"
+  "HEXTECH_ENEMY_TRANSMUTE_NOTICE": "敌方的{From}[color=#F0C850]已转变为[/color]{To}。",
+  "HEXTECH_CONFIG_POOL_FILTER_ALL": "全部"
 }

@@ -15,7 +15,7 @@ internal sealed class WarmogsSpiritEnemyHex : DrawProgressEnemyHexBase
 
 	protected override async Task AfterLocalCardDrawn(HextechEnemyHexContext context, Player owner, HextechCombatState combatState)
 	{
-		if (HextechEnemyDrawProgress.RecordDraw(context.Tracking.WarmogsSpiritPlayerCardsDrawnThisCombat, owner, GetCardsPerPlating(context)) == 0)
+		if (HextechEnemyDrawProgress.RecordDraw(context.Tracking.WarmogsSpiritPlayerCardsDrawnThisCombat, GetCardsPerPlating(context)) == 0)
 		{
 			return;
 		}

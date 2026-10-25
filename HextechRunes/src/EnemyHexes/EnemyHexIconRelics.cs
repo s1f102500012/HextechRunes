@@ -196,3 +196,23 @@ public sealed class TransmuteGoldHex : EnemyHexIconRelicBase
 public sealed class SpinToWinHex : EnemyHexIconRelicBase
 {
 }
+
+/// <summary>升级：啃咬机</summary>
+public sealed class ChomperHex : EnemyHexIconRelicBase
+{
+}
+
+/// <summary>升级：藤蔓蹒跚者</summary>
+public sealed class VineShamblerHex : EnemyHexIconRelicBase
+{
+}
+
+/// <summary>升级：棘刺蟾蜍</summary>
+public sealed class SpinyToadHex : EnemyHexIconRelicBase
+{
+}
+
+/// <summary>升级：咬人卷轴</summary>
+public sealed class ScrollOfBitingHex : EnemyHexIconRelicBase
+{
+}

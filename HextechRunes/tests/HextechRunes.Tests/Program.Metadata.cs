@@ -47,14 +47,14 @@ internal static partial class Program
 		tracking.EnemyPorcupineUnblockedHitsThisCombat[8] = 2;
 		tracking.EnemyHundredRefinementsUnblockedHitsThisCombat[8] = 1;
 		tracking.InspectExtraDrawsPreventedThisTurn[11] = 2;
-		tracking.GripPlayersTriggeredThisTurn.Add(12);
+		tracking.GripPlayerCardsPlayedThisCombat[12] = 1;
 
 		tracking.PreparePlayerSideTurnEnd();
 
 		Equal(1, tracking.ClownCollegeProcsThisTurn.Count, "player side end should keep clown college round proc count");
 		Equal(1, tracking.EnemyPorcupineUnblockedHitsThisCombat.Count, "player side end should keep porcupine hit count");
 		Equal(1, tracking.InspectExtraDrawsPreventedThisTurn.Count, "player side end should keep inspect draw count");
-		Equal(1, tracking.GripPlayersTriggeredThisTurn.Count, "player side end should keep grip proc count");
+		Equal(1, tracking.GripPlayerCardsPlayedThisCombat.Count, "player side end should keep grip card count");
 
 		tracking.PrepareEnemySideTurnStart();
 
@@ -68,7 +68,7 @@ internal static partial class Program
 		Equal(1, tracking.FinalFormTriggeredThisTurn.Count, "enemy side start should keep final form round proc count");
 		Equal(1, tracking.EnemyPorcupineUnblockedHitsThisCombat.Count, "enemy side start should keep porcupine hit count");
 		Equal(1, tracking.InspectExtraDrawsPreventedThisTurn.Count, "enemy side start should keep inspect draw count");
-		Equal(1, tracking.GripPlayersTriggeredThisTurn.Count, "enemy side start should keep grip proc count");
+		Equal(1, tracking.GripPlayerCardsPlayedThisCombat.Count, "enemy side start should keep grip card count");
 
 		tracking.PreparePlayerSideTurnStart();
 		Equal(2, tracking.PlayerRuneProcsThisTurn.Count, "player rune per-turn counts are not cleared for everyone at once");
@@ -88,7 +88,7 @@ internal static partial class Program
 		Equal(1, tracking.EnemyPorcupineUnblockedHitsThisCombat.Count, "porcupine hit count carries across turns");
 		Equal(1, tracking.EnemyHundredRefinementsUnblockedHitsThisCombat.Count, "hundred refinements hit count carries across turns");
 		Equal(0, tracking.InspectExtraDrawsPreventedThisTurn.Count, "player side start should reset inspect draw count");
-		Equal(0, tracking.GripPlayersTriggeredThisTurn.Count, "player side start should reset grip proc count");
+		Equal(1, tracking.GripPlayerCardsPlayedThisCombat.Count, "grip card count carries across turns");
 	}
 
 	[HextechTest]

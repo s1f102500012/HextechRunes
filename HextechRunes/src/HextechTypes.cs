@@ -157,5 +157,13 @@ internal enum MonsterHexKind
 	BadTaste = 147,           // 恶趣味（白银）
 	TransmuteSilver = 148,    // 质变：白银阶（黄金）
 	TransmuteGold = 149,      // 质变：黄金阶（棱彩）
-	SpinToWin = 150           // 转出胜利（棱彩，SpinToWinHex）；我方同名符文是黄金 SpinToWinRune
+	SpinToWin = 150,          // 转出胜利（棱彩，SpinToWinHex）；我方同名符文是黄金 SpinToWinRune
+	Bloodthirst = 151,        // 渴血（白银）
+	AnthonyBias = 152,        // 安东尼的偏见（黄金）
+	Overflow = 153,           // 溢流（黄金）
+	MindToMatter = 154,       // 由心及物（白银）
+	Chomper = 155,            // 升级：啃咬机（黄金）
+	VineShambler = 156,       // 升级：藤蔓蹒跚者（黄金）
+	SpinyToad = 157,          // 升级：棘刺蟾蜍（棱彩）
+	ScrollOfBiting = 158      // 升级：咬人卷轴（棱彩）
 }

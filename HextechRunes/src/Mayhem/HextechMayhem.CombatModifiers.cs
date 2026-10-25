@@ -45,6 +45,19 @@ internal sealed partial class HextechMayhemModifier
 			(effect, context, current) => effect.ModifyHpLostAfterOsty(context, target, current, props, dealer, cardSource));
 	}
 
+	public override decimal ModifyMaxEnergy(Player player, decimal amount)
+	{
+		if (player.RunState != RunState)
+		{
+			return amount;
+		}
+
+		return HextechEnemyHexDispatcher.Transform(
+			this,
+			amount,
+			(effect, context, current) => effect.ModifyMaxEnergy(context, player, current));
+	}
+
 	public override decimal ModifyHandDraw(Player player, decimal count)
 	{
 		return HextechEnemyHexDispatcher.Transform(

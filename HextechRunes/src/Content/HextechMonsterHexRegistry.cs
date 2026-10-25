@@ -150,7 +150,15 @@ internal static class HextechMonsterHexRegistry
 		Monster<BadTasteRune>(MonsterHexKind.BadTaste, HextechRarityTier.Silver),
 		Monster<TransmuteSilverHex>(MonsterHexKind.TransmuteSilver, HextechRarityTier.Gold),
 		Monster<TransmuteGoldHex>(MonsterHexKind.TransmuteGold, HextechRarityTier.Prismatic),
-		Monster<SpinToWinHex>(MonsterHexKind.SpinToWin, HextechRarityTier.Prismatic)
+		Monster<SpinToWinHex>(MonsterHexKind.SpinToWin, HextechRarityTier.Prismatic),
+		Monster<BloodthirstRune>(MonsterHexKind.Bloodthirst, HextechRarityTier.Silver),
+		Monster<AnthonyBiasRune>(MonsterHexKind.AnthonyBias, HextechRarityTier.Gold),
+		Monster<OverflowRune>(MonsterHexKind.Overflow, HextechRarityTier.Gold),
+		Monster<MindToMatterRune>(MonsterHexKind.MindToMatter, HextechRarityTier.Silver),
+		Monster<ChomperHex>(MonsterHexKind.Chomper, HextechRarityTier.Gold),
+		Monster<VineShamblerHex>(MonsterHexKind.VineShambler, HextechRarityTier.Gold),
+		Monster<SpinyToadHex>(MonsterHexKind.SpinyToad, HextechRarityTier.Prismatic),
+		Monster<ScrollOfBitingHex>(MonsterHexKind.ScrollOfBiting, HextechRarityTier.Prismatic)
 	];
 
 	private static MonsterHexRegistration Monster<TRelic>(

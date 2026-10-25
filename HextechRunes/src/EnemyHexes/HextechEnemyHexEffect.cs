@@ -61,6 +61,11 @@ internal abstract class HextechEnemyHexEffect
 		return Task.FromResult(false);
 	}
 
+	internal virtual decimal ModifyMaxEnergy(HextechEnemyHexContext context, Player player, decimal amount)
+	{
+		return amount;
+	}
+
 	internal virtual decimal ModifyEnergyGain(HextechEnemyHexContext context, Player player, decimal amount)
 	{
 		return amount;

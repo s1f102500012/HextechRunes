@@ -164,5 +164,6 @@
   "HEXTECH_CHAOS_RUNE_CHANCE_DESCRIPTION": "ตัวเลือกแต่ละใบมีโอกาสนี้แยกกันที่จะกลายเป็นรูนอลวน 0% คือปิด 100% คือเปลี่ยนทั้งหมด การสุ่มใหม่จะสุ่มโอกาสอีกครั้ง ส่วนสูตรที่ได้รับแล้วจะไม่เปลี่ยน มีผลตั้งแต่การเดินทางครั้งถัดไป และในโหมดหลายคนจะใช้การตั้งค่าของเจ้าของห้อง",
   "HEXTECH_CHAOS_RUNE_CHANCE_VALUE_LABEL": "โอกาสเปลี่ยน",
   "HEXTECH_TRANSMUTE_NOTICE": "{From} [color=#F0C850]ได้แปรเปลี่ยนเป็น[/color] {To}",
-  "HEXTECH_ENEMY_TRANSMUTE_NOTICE": "{From} ของศัตรู [color=#F0C850]ได้แปรเปลี่ยนเป็น[/color] {To}"
+  "HEXTECH_ENEMY_TRANSMUTE_NOTICE": "{From} ของศัตรู [color=#F0C850]ได้แปรเปลี่ยนเป็น[/color] {To}",
+  "HEXTECH_CONFIG_POOL_FILTER_ALL": "ทั้งหมด"
 }

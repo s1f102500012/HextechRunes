@@ -164,5 +164,6 @@
   "HEXTECH_CHAOS_RUNE_CHANCE_DESCRIPTION": "各候補を個別に判定して混沌ルーンに変換します。0%で無効、100%ですべて変換。リロール時に再判定し、取得済みの効果は変わりません。次のランから適用され、マルチプレイではホストの設定を使用します。",
   "HEXTECH_CHAOS_RUNE_CHANCE_VALUE_LABEL": "生成確率",
   "HEXTECH_TRANSMUTE_NOTICE": "{From}[color=#F0C850]は[/color]{To}[color=#F0C850]に変化した。[/color]",
-  "HEXTECH_ENEMY_TRANSMUTE_NOTICE": "敵の{From}[color=#F0C850]は[/color]{To}[color=#F0C850]に変化した。[/color]"
+  "HEXTECH_ENEMY_TRANSMUTE_NOTICE": "敵の{From}[color=#F0C850]は[/color]{To}[color=#F0C850]に変化した。[/color]",
+  "HEXTECH_CONFIG_POOL_FILTER_ALL": "すべて"
 }

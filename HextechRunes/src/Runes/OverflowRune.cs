@@ -4,7 +4,7 @@ public sealed class OverflowRune : HextechRelicBase, IHextechHealingMultiplierPr
 {
 	// 治疗、格挡、伤害共用的倍率与手牌加费；文案写的是字面值（翻倍、+1），改数值要同步九语言。
 	private const decimal StatMultiplier = 2m;
-	private const decimal HandCostIncrease = 1m;
+	private const int HandCostIncrease = 1;
 
 	protected override IEnumerable<DynamicVar> CanonicalVars =>
 	[
@@ -24,8 +24,11 @@ public sealed class OverflowRune : HextechRelicBase, IHextechHealingMultiplierPr
 			return false;
 		}
 
-		modifiedCost = originalCost + HandCostIncrease;
-		return true;
+		// 视同加在基础费用上：本回合 0 费、直到打出前 0 费等"免费"会吃掉这 1 费；
+		// 规则型免费（地狱三头犬、润滑油、原版免费攻击等）在 Late 阶段定为 0，同样晚于这里。
+		int increase = HextechCardCostHelper.GetIncreaseSurvivingLocalModifiers(card.EnergyCost, HandCostIncrease);
+		modifiedCost = originalCost + increase;
+		return increase != 0;
 	}
 
 	public override decimal ModifyBlockMultiplicative(Creature target, decimal block, ValueProp props, CardModel? cardSource, CardPlay? cardPlay)

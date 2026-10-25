@@ -79,6 +79,7 @@ internal sealed class HextechMayhemActState
 		}
 	}
 
+	// 旧版潦草急就(敌方)缩短地图的已处理幕；效果已改为手牌上限，只为旧存档的读写保留。
 	public int[] SavedMapLengthReducedActs
 	{
 		get => _mapLengthReducedActs.OrderBy(static actIndex => actIndex).ToArray();
@@ -126,19 +127,6 @@ internal sealed class HextechMayhemActState
 		_resolvedActs[slot] = 1;
 		MarkChanged();
 		return true;
-	}
-
-	public bool IsMapLengthReduced(int actIndex)
-	{
-		return actIndex >= 0 && _mapLengthReducedActs.Contains(actIndex);
-	}
-
-	public void MarkMapLengthReduced(int actIndex)
-	{
-		if (actIndex >= 0 && _mapLengthReducedActs.Add(actIndex))
-		{
-			MarkChanged();
-		}
 	}
 
 	public HextechRarityTier? GetRarity(int actIndex)

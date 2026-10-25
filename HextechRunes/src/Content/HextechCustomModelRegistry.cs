@@ -82,7 +82,11 @@ internal static class HextechCustomModelRegistry
 		typeof(EntomancerHex),
 		typeof(TransmuteSilverHex),
 		typeof(TransmuteGoldHex),
-		typeof(SpinToWinHex)
+		typeof(SpinToWinHex),
+		typeof(ChomperHex),
+		typeof(VineShamblerHex),
+		typeof(SpinyToadHex),
+		typeof(ScrollOfBitingHex)
 	];
 
 	internal static IReadOnlyList<Type> CustomCardTypes { get; } =
