@@ -74,3 +74,4 @@ HextechRunes.ModEntry._harmony : Harmony
 HextechRunes.ModEntry._initialized : Boolean
 HextechRunes.SlowCookAuraVisual._flowShader : Shader
 HextechRunes.StokeRestSiteOption._icon : Texture2D
+HextechRunes.CompensationEnemyHex._lastQuerySplit : PendingCompensation

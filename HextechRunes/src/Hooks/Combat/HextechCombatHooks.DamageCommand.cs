@@ -24,8 +24,6 @@ internal static partial class HextechCombatHooks
 		}
 		finally
 		{
-			CompensationRune.ClearPendingCompensations(commandId);
-			CompensationEnemyHex.ClearPendingCompensations(commandId);
 			PiercingThreadRune.ClearPendingDamage(commandId);
 			try
 			{
@@ -105,7 +103,7 @@ internal static partial class HextechCombatHooks
 
 	// 原版在伤害命令内部扣血、改能力层数时会发"战斗状态变化"通知，它启动的延迟任务捕获当前执行上下文，
 	// 下一帧带着本命令的 ID 调用 CombatStateChanged 的订阅者。随机数预测在这个订阅里用真实生物模拟回合结束，
-	// 代偿、滑溜等只在真实伤害命令里记账的查询钩子会把模拟当成本次结算，只在本机多记一笔（#22 同类问题）。
+	// 滑溜、穿针引线等只在真实伤害命令里记账的查询钩子会把模拟当成本次结算，只在本机多记一笔（#22 同类问题）。
 	// 启动延迟任务前清空作用域、同步返回前恢复：通知本身是同步方法，Prefix 与 Postfix 在同一个上下文里执行。
 	[HarmonyPatch(typeof(CombatStateTracker), "NotifyCombatStateChanged")]
 	[HextechPatch("combat.damage-command-state-notify", "伤害命令作用域不带进战斗状态通知")]
