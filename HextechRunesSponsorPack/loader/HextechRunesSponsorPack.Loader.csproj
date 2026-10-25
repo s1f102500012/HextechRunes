@@ -3,7 +3,7 @@
     <TargetFramework>net9.0</TargetFramework>
     <AssemblyName>HextechRunesSponsorPack.Loader</AssemblyName>
     <RootNamespace>HextechRunesSponsorPack.Loader</RootNamespace>
-    <Version>0.9.2</Version>
+    <Version>0.9.8</Version>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <!-- 共享源码按此符号切换到拓展包自己的命名空间。 -->

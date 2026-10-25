@@ -137,7 +137,8 @@ public sealed class RegretRune : HextechRelicBase
 		return Task.CompletedTask;
 	}
 
-	public override bool TryModifyEnergyCostInCombat(CardModel card, decimal originalCost, out decimal modifiedCost)
+	// 免费在 Late 阶段定为 0（同原版免费攻击与本体的免费海克斯），晚于溢流等常规阶段的加费。
+	public override bool TryModifyEnergyCostInCombatLate(CardModel card, decimal originalCost, out decimal modifiedCost)
 	{
 		return TryMakeFree(card, originalCost, out modifiedCost);
 	}

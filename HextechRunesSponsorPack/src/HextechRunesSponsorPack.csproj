@@ -3,7 +3,7 @@
     <TargetFramework>net9.0</TargetFramework>
     <AssemblyName>HextechRunesSponsorPack</AssemblyName>
     <RootNamespace>HextechRunesSponsorPack</RootNamespace>
-    <Version>0.9.2</Version>
+    <Version>0.9.8</Version>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <HextechSts2Target Condition="'$(HextechSts2Target)' == ''">0.107.1</HextechSts2Target>
