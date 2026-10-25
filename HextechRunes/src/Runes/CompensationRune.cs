@@ -4,7 +4,9 @@ namespace HextechRunes;
 
 public sealed class CompensationRune : HextechRelicBase
 {
-	private static readonly HashSet<CompensationRune> RunesWithPendingCompensation = new();
+	// 与敌方代偿相同：查询钩子只记下最近一次查询，原版只在真实伤害里紧接着调的 AfterModifyingHpLostAfterOsty 确认，
+	// AfterDamageReceived 取走施加。不依赖伤害命令的 AsyncLocal 作用域。
+	private PendingCompensation? _lastQuerySplit;
 
 	private readonly List<PendingCompensation> _pendingCompensations = [];
 
@@ -38,17 +40,12 @@ public sealed class CompensationRune : HextechRelicBase
 
 	public override decimal ModifyHpLostAfterOsty(Creature target, decimal amount, ValueProp props, Creature? dealer, CardModel? cardSource)
 	{
+		_lastQuerySplit = null;
 		if (target != Owner.Creature
 			|| Owner.Creature.IsDead
 			|| amount <= 0m
 			|| !IsNecrobinderPlayer(Owner)
 			|| !IsInActiveCombat(Owner))
-		{
-			return amount;
-		}
-
-		long commandId = HextechCombatHooks.CurrentActualDamageCommandId;
-		if (commandId == 0L)
 		{
 			return amount;
 		}
@@ -59,8 +56,19 @@ public sealed class CompensationRune : HextechRelicBase
 			return amount;
 		}
 
-		EnqueuePendingCompensation(commandId, target, doom, dealer, cardSource);
+		_lastQuerySplit = new PendingCompensation(target, doom, dealer, cardSource);
 		return 0m;
+	}
+
+	public override Task AfterModifyingHpLostAfterOsty()
+	{
+		if (_lastQuerySplit is { } split)
+		{
+			_lastQuerySplit = null;
+			ConfirmPendingCompensation(split);
+		}
+
+		return Task.CompletedTask;
 	}
 
 	public override async Task AfterDamageReceived(PlayerChoiceContext choiceContext, Creature target, DamageResult result, ValueProp props, Creature? dealer, CardModel? cardSource)
@@ -70,8 +78,7 @@ public sealed class CompensationRune : HextechRelicBase
 			return;
 		}
 
-		long commandId = HextechCombatHooks.CurrentActualDamageCommandId;
-		if (commandId == 0L || !TryTakePendingCompensation(commandId, target, out PendingCompensation? compensation))
+		if (!TryTakePendingCompensation(target, out PendingCompensation? compensation))
 		{
 			return;
 		}
@@ -79,20 +86,6 @@ public sealed class CompensationRune : HextechRelicBase
 		Flash();
 		await HextechCombatHooks.RunWithCompensationReplacementGuard(
 			() => PowerCmd.Apply<DoomPower>(Owner.Creature, compensation.Amount, compensation.Dealer ?? Owner.Creature, compensation.CardSource));
-	}
-
-	internal static void ClearPendingCompensations(long commandId)
-	{
-		if (RunesWithPendingCompensation.Count == 0)
-		{
-			return;
-		}
-
-		CompensationRune[] runes = RunesWithPendingCompensation.ToArray();
-		foreach (CompensationRune rune in runes)
-		{
-			rune.ClearPendingCompensationsForCommand(commandId);
-		}
 	}
 
 	// 只在本局正在进行的战斗里替换伤害：事件等战斗外伤害，以及残留的其他局战斗状态都不算。
@@ -103,40 +96,37 @@ public sealed class CompensationRune : HextechRelicBase
 			&& ReferenceEquals(owner.Creature.CombatState?.RunState, owner.RunState);
 	}
 
-	private void EnqueuePendingCompensation(long commandId, Creature target, decimal amount, Creature? dealer, CardModel? cardSource)
+	private void ConfirmPendingCompensation(PendingCompensation split)
 	{
 		for (int i = _pendingCompensations.Count - 1; i >= 0; i--)
 		{
 			PendingCompensation pending = _pendingCompensations[i];
-			if (pending.CommandId == commandId && pending.Target == target)
+			if (pending.Target == split.Target)
 			{
 				_pendingCompensations[i] = pending with
 				{
-					Amount = pending.Amount + amount,
-					Dealer = dealer ?? pending.Dealer,
-					CardSource = cardSource ?? pending.CardSource
+					Amount = pending.Amount + split.Amount,
+					Dealer = split.Dealer ?? pending.Dealer,
+					CardSource = split.CardSource ?? pending.CardSource
 				};
-				RunesWithPendingCompensation.Add(this);
 				return;
 			}
 		}
 
-		_pendingCompensations.Add(new PendingCompensation(commandId, target, amount, dealer, cardSource));
-		RunesWithPendingCompensation.Add(this);
+		_pendingCompensations.Add(split);
 	}
 
-	private bool TryTakePendingCompensation(long commandId, Creature target, [NotNullWhen(true)] out PendingCompensation? pending)
+	private bool TryTakePendingCompensation(Creature target, [NotNullWhen(true)] out PendingCompensation? pending)
 	{
 		for (int i = 0; i < _pendingCompensations.Count; i++)
 		{
 			pending = _pendingCompensations[i];
-			if (pending.CommandId != commandId || pending.Target != target)
+			if (pending.Target != target)
 			{
 				continue;
 			}
 
 			_pendingCompensations.RemoveAt(i);
-			RemoveFromPendingRegistryIfEmpty();
 			return true;
 		}
 
@@ -144,25 +134,11 @@ public sealed class CompensationRune : HextechRelicBase
 		return false;
 	}
 
-	private void ClearPendingCompensationsForCommand(long commandId)
-	{
-		_pendingCompensations.RemoveAll(pending => pending.CommandId == commandId);
-		RemoveFromPendingRegistryIfEmpty();
-	}
-
 	private void ClearPendingCompensationsForRune()
 	{
+		_lastQuerySplit = null;
 		_pendingCompensations.Clear();
-		RunesWithPendingCompensation.Remove(this);
 	}
 
-	private void RemoveFromPendingRegistryIfEmpty()
-	{
-		if (_pendingCompensations.Count == 0)
-		{
-			RunesWithPendingCompensation.Remove(this);
-		}
-	}
-
-	private sealed record PendingCompensation(long CommandId, Creature Target, decimal Amount, Creature? Dealer, CardModel? CardSource);
+	private sealed record PendingCompensation(Creature Target, decimal Amount, Creature? Dealer, CardModel? CardSource);
 }

@@ -4,47 +4,46 @@ namespace HextechRunes;
 
 internal sealed class CompensationEnemyHex : HextechEnemyHexEffect
 {
-	// 效果是单例（HextechEnemyHexEffects），待结算项放静态列表：伤害命令结束时 HextechCombatHooks 按命令号清理。
+	// 效果是单例（HextechEnemyHexEffects），状态放静态字段。
+	// ModifyHpLostAfterOsty 是查询钩子，只记下"最近一次查询拆出了什么"；原版只在真实伤害里、紧接着这次查询调
+	// AfterModifyingHpLostAfterOsty，由它把记录确认成待结算项，AfterEnemyDamageReceivedAny 再按目标取走施加。
+	// 不依赖伤害命令的 AsyncLocal 作用域：作用域在某一端丢失时，只有那一端不拆分，联机分歧（主机全额、客户端拆分）。
+	private static PendingCompensation? _lastQuerySplit;
 	private static readonly List<PendingCompensation> PendingCompensations = [];
 
 	internal override MonsterHexKind Kind => MonsterHexKind.Compensation;
 
 	internal override void ResetRunScopedState()
 	{
-		PendingCompensations.Clear();
+		ClearAll();
 	}
 
 	internal override Task ApplyCombatStartToEnemy(HextechEnemyHexContext context, Creature enemy, CombatRoom room)
 	{
-		PendingCompensations.Clear();
+		ClearAll();
 		return Task.CompletedTask;
 	}
 
 	internal override Task BeforeSideTurnStart(HextechEnemyHexContext context, PlayerChoiceContext choiceContext, CombatSide side, HextechCombatState combatState)
 	{
-		PendingCompensations.Clear();
+		ClearAll();
 		return Task.CompletedTask;
 	}
 
 	internal override Task AfterCombatVictory(HextechEnemyHexContext context, CombatRoom room)
 	{
-		PendingCompensations.Clear();
+		ClearAll();
 		return Task.CompletedTask;
 	}
 
 	internal override decimal ModifyHpLostAfterOsty(HextechEnemyHexContext context, Creature target, decimal amount, ValueProp props, Creature? dealer, CardModel? cardSource)
 	{
-		// 分发层已限定 target 在本局战斗中。
+		// 分发层已限定 target 在本局战斗中。每次查询都覆盖记录：没拆分的查询不能让上一次的记录被确认。
+		_lastQuerySplit = null;
 		if (target.Side != CombatSide.Enemy
 			|| target.IsDead
 			|| ShouldSkipDamageReplacement()
 			|| amount <= 0m)
-		{
-			return amount;
-		}
-
-		long commandId = HextechCombatHooks.CurrentActualDamageCommandId;
-		if (commandId == 0L)
 		{
 			return amount;
 		}
@@ -55,14 +54,24 @@ internal sealed class CompensationEnemyHex : HextechEnemyHexEffect
 			return amount;
 		}
 
-		EnqueuePendingCompensation(commandId, target, nextTurnDamage, dealer, cardSource);
+		_lastQuerySplit = new PendingCompensation(target, nextTurnDamage, dealer, cardSource);
 		return immediateDamage;
+	}
+
+	internal override void AfterModifyingHpLostAfterOsty(HextechEnemyHexContext context)
+	{
+		if (_lastQuerySplit is not { } split)
+		{
+			return;
+		}
+
+		_lastQuerySplit = null;
+		ConfirmPendingCompensation(split);
 	}
 
 	internal override async Task AfterEnemyDamageReceivedAny(HextechEnemyHexContext context, Creature target, DamageResult result, Creature? dealer, CardModel? cardSource)
 	{
-		long commandId = HextechCombatHooks.CurrentActualDamageCommandId;
-		if (commandId == 0L || !TryTakePendingCompensation(commandId, target, out PendingCompensation? compensation))
+		if (!TryTakePendingCompensation(target, out PendingCompensation? compensation))
 		{
 			return;
 		}
@@ -77,9 +86,10 @@ internal sealed class CompensationEnemyHex : HextechEnemyHexEffect
 			() => PowerCmd.Apply<HextechNextTurnDamagePower>(target, compensation.Amount, applier, compensation.CardSource));
 	}
 
-	internal static void ClearPendingCompensations(long commandId)
+	private static void ClearAll()
 	{
-		PendingCompensations.RemoveAll(pending => pending.CommandId == commandId);
+		_lastQuerySplit = null;
+		PendingCompensations.Clear();
 	}
 
 	internal static (decimal ImmediateDamage, int NextTurnDamage) SplitDamage(decimal damage)
@@ -104,32 +114,33 @@ internal sealed class CompensationEnemyHex : HextechEnemyHexEffect
 			|| HextechNextTurnDamagePower.IsResolvingDamage;
 	}
 
-	private static void EnqueuePendingCompensation(long commandId, Creature target, decimal amount, Creature? dealer, CardModel? cardSource)
+	// 同一目标在受伤回调取走之前又确认一次时累加，与旧实现按目标合并一致。
+	private static void ConfirmPendingCompensation(PendingCompensation split)
 	{
 		for (int i = PendingCompensations.Count - 1; i >= 0; i--)
 		{
 			PendingCompensation pending = PendingCompensations[i];
-			if (pending.CommandId == commandId && pending.Target == target)
+			if (pending.Target == split.Target)
 			{
 				PendingCompensations[i] = pending with
 				{
-					Amount = pending.Amount + amount,
-					Dealer = dealer ?? pending.Dealer,
-					CardSource = cardSource ?? pending.CardSource
+					Amount = pending.Amount + split.Amount,
+					Dealer = split.Dealer ?? pending.Dealer,
+					CardSource = split.CardSource ?? pending.CardSource
 				};
 				return;
 			}
 		}
 
-		PendingCompensations.Add(new PendingCompensation(commandId, target, amount, dealer, cardSource));
+		PendingCompensations.Add(split);
 	}
 
-	private static bool TryTakePendingCompensation(long commandId, Creature target, [NotNullWhen(true)] out PendingCompensation? pending)
+	private static bool TryTakePendingCompensation(Creature target, [NotNullWhen(true)] out PendingCompensation? pending)
 	{
 		for (int i = 0; i < PendingCompensations.Count; i++)
 		{
 			pending = PendingCompensations[i];
-			if (pending.CommandId != commandId || pending.Target != target)
+			if (pending.Target != target)
 			{
 				continue;
 			}
@@ -149,5 +160,5 @@ internal sealed class CompensationEnemyHex : HextechEnemyHexEffect
 			&& target.CombatState?.RunState == context.RunState;
 	}
 
-	private sealed record PendingCompensation(long CommandId, Creature Target, decimal Amount, Creature? Dealer, CardModel? CardSource);
+	private sealed record PendingCompensation(Creature Target, decimal Amount, Creature? Dealer, CardModel? CardSource);
 }

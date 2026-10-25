@@ -42,6 +42,44 @@ internal static partial class Program
 		Equal((500m, 499), CompensationEnemyHex.SplitDamage(999m), "large odd damage split");
 	}
 
+	// 代偿拆分不看伤害命令的 AsyncLocal 作用域：作用域在一端丢失时只有那一端不拆分，主机全额、客户端拆分，联机分歧。
+	// 查询本身只记下最近一次拆分，原版真实伤害紧接着调的 AfterModifyingHpLostAfterOsty 才确认成待结算项。
+	[HextechTest]
+	private static void EnemyCompensationSplitsWithoutDamageCommandScopeAndConfirmsOnlyAfterRealDamage()
+	{
+		(HextechEnemyHexContext context, Player first, _) = CreatePrismaticEnemyFixture();
+		Creature enemy = CreatePrismaticTestCreature(CombatSide.Enemy, (CombatState)first.Creature.CombatState!);
+		CompensationEnemyHex effect = new();
+		var pending = (System.Collections.IList)AccessTools.Field(typeof(CompensationEnemyHex), "PendingCompensations").GetValue(null)!;
+		effect.ResetRunScopedState();
+		try
+		{
+			Equal(0L, HextechCombatHooks.CurrentActualDamageCommandId, "no damage command scope");
+			Equal(3m, effect.ModifyHpLostAfterOsty(context, enemy, 6m, ValueProp.Move, first.Creature, null), "splits without a damage command scope");
+			Equal(3m, effect.ModifyHpLostAfterOsty(context, enemy, 6m, ValueProp.Move, first.Creature, null), "repeated queries return the same split");
+			Equal(0, pending.Count, "querying alone records nothing");
+
+			effect.AfterModifyingHpLostAfterOsty(context);
+			Equal(1, pending.Count, "the real damage confirms the last split");
+			effect.AfterModifyingHpLostAfterOsty(context);
+			Equal(1, pending.Count, "a confirmation is consumed once");
+
+			effect.ResetRunScopedState();
+			Equal(3m, effect.ModifyHpLostAfterOsty(context, enemy, 6m, ValueProp.Move, first.Creature, null), "split query");
+			Equal(1m, effect.ModifyHpLostAfterOsty(context, enemy, 1m, ValueProp.Move, first.Creature, null), "one damage stays immediate");
+			effect.AfterModifyingHpLostAfterOsty(context);
+			Equal(0, pending.Count, "a later non-splitting query clears the earlier record");
+
+			Equal(2m, effect.ModifyHpLostAfterOsty(context, first.Creature, 2m, ValueProp.Move, enemy, null), "players are not compensated");
+			effect.AfterModifyingHpLostAfterOsty(context);
+			Equal(0, pending.Count, "player damage confirms nothing");
+		}
+		finally
+		{
+			effect.ResetRunScopedState();
+		}
+	}
+
 	[HextechTest]
 	private static void NextTurnDamageUsesTurnStartSnapshot()
 	{

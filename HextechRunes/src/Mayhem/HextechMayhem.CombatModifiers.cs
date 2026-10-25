@@ -45,6 +45,19 @@ internal sealed partial class HextechMayhemModifier
 			(effect, context, current) => effect.ModifyHpLostAfterOsty(context, target, current, props, dealer, cardSource));
 	}
 
+	// 原版 CreatureCmd.Damage 在 ModifyHpLost 改动了数值后才调这里，模拟/预览只问查询钩子不会走到这里。
+	// 同步处理：原版在这之后才扣血，确认必须赶在本次伤害的受伤回调之前。
+	public override Task AfterModifyingHpLostAfterOsty()
+	{
+		HextechEnemyHexContext context = new(this);
+		foreach (HextechEnemyHexEffect effect in HextechEnemyHexEffects.GetActive(this))
+		{
+			effect.AfterModifyingHpLostAfterOsty(context);
+		}
+
+		return Task.CompletedTask;
+	}
+
 	public override decimal ModifyHandDraw(Player player, decimal count)
 	{
 		return HextechEnemyHexDispatcher.Transform(

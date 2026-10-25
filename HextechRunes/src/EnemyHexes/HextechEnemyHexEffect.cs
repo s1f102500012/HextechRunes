@@ -44,6 +44,11 @@ internal abstract class HextechEnemyHexEffect
 		return amount;
 	}
 
+	// 只在原版真实伤害里、紧接着 Mayhem 改动了 ModifyHpLostAfterOsty 的那次查询之后调用（见 HextechMayhemModifier.AfterModifyingHpLostAfterOsty）。
+	internal virtual void AfterModifyingHpLostAfterOsty(HextechEnemyHexContext context)
+	{
+	}
+
 	internal virtual decimal ModifyHandDraw(HextechEnemyHexContext context, Player player, decimal count)
 	{
 		return count;
