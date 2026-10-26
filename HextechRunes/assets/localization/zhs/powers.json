@@ -47,6 +47,6 @@
   "HEXTECH_HEX_POWER.description": "你的所有卡牌都拥有[gold]虚无[/gold]。",
   "HEXTECH_HEX_POWER.smartDescription": "你的所有卡牌都拥有[gold]虚无[/gold]。",
   "HEXTECH_SOAR_POWER.title": "翱翔",
-  "HEXTECH_SOAR_POWER.description": "受到的伤害减少[blue]50%[/blue]。每回合结束时减少[blue]1[/blue]层。",
-  "HEXTECH_SOAR_POWER.smartDescription": "受到的伤害减少[blue]50%[/blue]，还剩[blue]{Amount}[/blue]回合。"
+  "HEXTECH_SOAR_POWER.description": "受到的攻击伤害减少[blue]50%[/blue]。每回合结束时减少[blue]1[/blue]层。",
+  "HEXTECH_SOAR_POWER.smartDescription": "受到的攻击伤害减少[blue]50%[/blue]，还剩[blue]{Amount}[/blue]回合。"
 }

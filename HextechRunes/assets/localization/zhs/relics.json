@@ -1577,8 +1577,8 @@
   "SPECTRAL_KNIGHT_HEX.flavor": "它的诅咒不随它消散。",
   "spectralKnightHex.enemyDescription": "战斗开始时，所有玩家获得[gold]恶咒[/gold]。",
   "OWL_MAGISTRATE_HEX.title": "升级：猫头鹰法官",
-  "OWL_MAGISTRATE_HEX.description": "前[blue]1[/blue]/[blue]2[/blue]/[blue]3[/blue]回合，敌人受到的伤害减少[blue]50%[/blue]。",
+  "OWL_MAGISTRATE_HEX.description": "前[blue]1[/blue]/[blue]2[/blue]/[blue]3[/blue]回合，敌人受到的攻击伤害减少[blue]50%[/blue]。",
   "OWL_MAGISTRATE_HEX.flavor": "在它落地之前，判决不会下达。",
-  "owlMagistrateHex.enemyDescription": "前[blue]1[/blue]/[blue]2[/blue]/[blue]3[/blue]回合，敌人受到的伤害减少[blue]50%[/blue]。",
+  "owlMagistrateHex.enemyDescription": "前[blue]1[/blue]/[blue]2[/blue]/[blue]3[/blue]回合，敌人受到的攻击伤害减少[blue]50%[/blue]。",
   "badTasteRune.enemyDescription": "每当敌人受到负面效果时，回复[blue]1%[/blue]的最大生命值。"
 }

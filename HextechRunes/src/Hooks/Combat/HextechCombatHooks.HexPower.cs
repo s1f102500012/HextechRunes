@@ -22,4 +22,19 @@ internal static partial class HextechCombatHooks
 			return false;
 		}
 	}
+
+	// 原版恶咒移除时（幽灵骑士死亡）会清掉持有者所有牌上的邪咒；玩家侧恶咒还在时立即补回外观，虚无本身不受影响。
+	[HarmonyPatch(typeof(HexPower), nameof(HexPower.AfterRemoved), typeof(Creature))]
+	[HextechPatch("combat.hex-power-removed-restore", "升级：幽灵骑士")]
+	private static class HexPowerRemovedRestorePatch
+	{
+		[HarmonyPostfix]
+		private static void Postfix(Creature oldOwner, ref Task __result)
+		{
+			if (oldOwner.GetPower<HextechHexPower>() is { } power)
+			{
+				__result = power.RestoreHexedAfter(__result);
+			}
+		}
+	}
 }

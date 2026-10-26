@@ -14,13 +14,13 @@ internal static partial class HextechCombatHooks
 		{
 			if (CombatManager.Instance.IsOverOrEnding
 				|| HextechEnemyNearDeath.IsDyingButAlive(creature)
-				|| !TryGetLivingEnemyHexModifier(creature, MonsterHexKind.ProteinShake, out _)
+				|| !TryGetLivingEnemyHexModifier(creature, MonsterHexKind.ProteinShake, out HextechMayhemModifier? modifier)
 				|| !ProteinShakeEnemyHex.ShouldConvert(creature))
 			{
 				return true;
 			}
 
-			__result = ProteinShakeEnemyHex.HealThenBlock(creature, amount, props, cardPlay, fast);
+			__result = ProteinShakeEnemyHex.HealThenBlock(modifier, creature, amount, props, cardPlay, fast);
 			return false;
 		}
 	}
