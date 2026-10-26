@@ -161,7 +161,7 @@
   "NIGHTSTALKING_RUNE.description": "ทุกครั้งที่คุณจั่วการ์ดครบ [blue]{CardsNeeded}[/blue] ใบ ได้รับ [blue]{IntangiblePower}[/blue] [gold]ไร้ตัวตน[/gold]",
   "NIGHTSTALKING_RUNE.flavor": "ราตรีไม่ได้ช่วยคนดี แต่ช่วยคนที่ยังไม่ลงมือ",
   "MASTER_OF_DUALITY_RUNE.title": "ผู้เชี่ยวชาญทวิภาวะ",
-  "MASTER_OF_DUALITY_RUNE.description": "การเล่นการ์ดทักษะให้ [blue]1[/blue] ความแข็งแรงชั่วคราว การเล่นการ์ดโจมตีให้ [blue]1[/blue] ความชำนาญชั่วคราว",
+  "MASTER_OF_DUALITY_RUNE.description": "[gold]ความแข็งแรง[/gold]และ[gold]ความชำนาญ[/gold]ของคุณมีผลทั้งกับความเสียหายและบล็อก เมื่อเริ่มการต่อสู้ ได้รับ[gold]ความแข็งแรง[/gold] [blue]1[/blue] และ[gold]ความชำนาญ[/gold] [blue]1[/blue]",
   "MASTER_OF_DUALITY_RUNE.flavor": "ดาบกับเวทไม่ต้องปรองดองกัน เพียงผลัดกันทำงานก็พอ",
   "BIG_STRENGTH_RUNE.title": "แรงทื่อ",
   "BIG_STRENGTH_RUNE.description": "สร้างความเสียหายเพิ่มขึ้น [blue]{DamageBonusPercent}%[/blue]",

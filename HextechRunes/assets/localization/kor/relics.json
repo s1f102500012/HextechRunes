@@ -161,7 +161,7 @@
   "NIGHTSTALKING_RUNE.description": "카드를 [blue]{CardsNeeded}[/blue]장 뽑을 때마다 [gold]영체화[/gold]를 [blue]{IntangiblePower}[/blue] 얻습니다.",
   "NIGHTSTALKING_RUNE.flavor": "밤은 선한 자를 돕지 않습니다. 아직 공격하지 않은 자를 도울 뿐입니다.",
   "MASTER_OF_DUALITY_RUNE.title": "이중성의 대가",
-  "MASTER_OF_DUALITY_RUNE.description": "스킬 카드를 사용하면 일시적 [gold]힘[/gold]을 [blue]1[/blue] 얻습니다. 공격 카드를 사용하면 일시적 [gold]민첩[/gold]을 [blue]1[/blue] 얻습니다.",
+  "MASTER_OF_DUALITY_RUNE.description": "[gold]힘[/gold]과 [gold]민첩[/gold]이 피해와 방어도 모두에 적용됩니다. 전투 시작 시 [gold]힘[/gold]을 [blue]1[/blue], [gold]민첩[/gold]을 [blue]1[/blue] 얻습니다.",
   "MASTER_OF_DUALITY_RUNE.flavor": "칼날과 주문이 화해할 필요는 없습니다. 그저 번갈아 가며 일하기만 하면 됩니다.",
   "BIG_STRENGTH_RUNE.title": "무식한 힘",
   "BIG_STRENGTH_RUNE.description": "주는 피해가 [blue]{DamageBonusPercent}%[/blue] 증가합니다.",

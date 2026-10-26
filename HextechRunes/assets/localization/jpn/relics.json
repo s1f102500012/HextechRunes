@@ -161,7 +161,7 @@
   "NIGHTSTALKING_RUNE.description": "[blue]{CardsNeeded}[/blue]カードを引くたびに、[blue]{IntangiblePower}[/blue][gold]霊体[/gold]を獲得します。",
   "NIGHTSTALKING_RUNE.flavor": "夜は善を助けません。まだ打ってない人には助かります。",
   "MASTER_OF_DUALITY_RUNE.title": "文武両道",
-  "MASTER_OF_DUALITY_RUNE.description": "スキルプレイするたび、このターン[blue]1[/blue]筋力を得られます。アタックプレイするたび、このターン[blue]1[/blue]敏捷を得られます。",
+  "MASTER_OF_DUALITY_RUNE.description": "あなたの[gold]筋力[/gold]と[gold]敏捷[/gold]は、ダメージとブロックの両方に適用される。戦闘開始時、[gold]筋力[/gold]を[blue]1[/blue]と[gold]敏捷[/gold]を[blue]1[/blue]得る。",
   "MASTER_OF_DUALITY_RUNE.flavor": "ブレードとスペルは調和する必要はありません。彼らは交代で働くだけで済みます。",
   "BIG_STRENGTH_RUNE.title": "無骨なる力",
   "BIG_STRENGTH_RUNE.description": "ダメージ増加[blue]{DamageBonusPercent}%[/blue]獲得します。",

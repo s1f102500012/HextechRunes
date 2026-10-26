@@ -52,7 +52,9 @@ internal static partial class HextechRuneConfiguration
 		// 我方吸血习性（原死亡收割，v23 默认禁用）转为默认启用。
 		new(43, [ typeof(DeathHarvestRune) ], []),
 		// 0.9.9：俯冲轰炸、量子计算与升级势不可当/火焰屏障/狱火/抉择，抉择（只我方）转为默认禁用。
-		new(44, [], [ typeof(DiveBomberRune), typeof(QuantumComputingRune), typeof(JuggernautUpgradeRune), typeof(FlameBarrierUpgradeRune), typeof(InfernoUpgradeRune), typeof(DecisionsDecisionsUpgradeRune) ])
+		new(44, [], [ typeof(DiveBomberRune), typeof(QuantumComputingRune), typeof(JuggernautUpgradeRune), typeof(FlameBarrierUpgradeRune), typeof(InfernoUpgradeRune), typeof(DecisionsDecisionsUpgradeRune) ]),
+		// 物法皆修（只我方）重做为“力量与敏捷同时作用于伤害和格挡，开局各 +1”，转为默认启用。
+		new(45, [ typeof(MasterOfDualityRune) ], [])
 	];
 
 	/// <summary>敌方海克斯默认禁用迁移:只迁移一次,之后尊重玩家手动开启。</summary>
