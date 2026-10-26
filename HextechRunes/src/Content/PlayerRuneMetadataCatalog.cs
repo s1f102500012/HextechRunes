@@ -56,13 +56,13 @@ internal sealed class PlayerRuneMetadataCatalog
 	public bool IsVisible(Type runeType)
 	{
 		return _registrationByType.ContainsKey(runeType)
-			&& !HasFlag(runeType, PlayerRuneFlags.Disabled);
+			&& !HasFlag(runeType, PlayerRuneFlags.Disabled | PlayerRuneFlags.Hidden);
 	}
 
 	public bool IsConfigurable(Type runeType)
 	{
 		return _registrationByType.ContainsKey(runeType)
-			&& !HasFlag(runeType, PlayerRuneFlags.SelectionExcluded);
+			&& !HasFlag(runeType, PlayerRuneFlags.SelectionExcluded | PlayerRuneFlags.Hidden);
 	}
 
 	public bool HasFlag(Type runeType, PlayerRuneFlags flag)

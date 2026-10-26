@@ -1,6 +1,7 @@
 ﻿# 由 HEXTECH_WRITE_PATCH_MANIFEST=1 生成;每行 = 类型.字段 : 字段类型(可变静态字段)。
 HextechRunes.CompensationEnemyHex._lastQuerySplit : PendingCompensation
 HextechRunes.DeathHarvestRune._isOwnHeal : Boolean
+HextechRunes.HextechArchitectGodslayerHooks._pendingFinale : WeakReference`1
 HextechRunes.HextechBurnVisual._particleTexture : Texture2D
 HextechRunes.HextechCatalog._configurablePlayerRuneIds : IReadOnlySet`1
 HextechRunes.HextechCatalog._configurablePlayerRuneIdsFinal : Boolean
@@ -43,6 +44,7 @@ HextechRunes.HextechExternalContentRegistry._version : Int32
 HextechRunes.HextechFeaturedConfigs._cached : IReadOnlyList`1
 HextechRunes.HextechFeaturedConfigs._cachedAtUtc : DateTime
 HextechRunes.HextechGlassCannonHealthBarVisual._hatchTexture : Texture2D
+HextechRunes.HextechGodslayerFinale._playing : Boolean
 HextechRunes.HextechGoldenRerollDebug._currentScreen : WeakReference`1
 HextechRunes.HextechGoldenRerollDebug._forceNextEligible : Boolean
 HextechRunes.HextechGoldrendSync._trackedRunState : RunState
@@ -61,9 +63,14 @@ HextechRunes.HextechRuneGeneration._chaosTransform : CandidateTransform
 HextechRunes.HextechRuneSelectionCoordinator._actSelectionRun : RunState
 HextechRunes.HextechRuneSelectionScreen.RerollSfxPlayer : AudioStreamPlayer
 HextechRunes.HextechRuneSelectionScreen.SelectSfxPlayer : AudioStreamPlayer
+HextechRunes.HextechRuneSelectionScreen._noiseFragmentFont : Font
 HextechRunes.HextechSavedPropertyNetIdHooks._canonicalized : Boolean
 HextechRunes.HextechSavedPropertyNetIdHooks._registrationFrozen : Boolean
 HextechRunes.HextechSelectionProgress.Changed : Action
+HextechRunes.HextechSignalNoise._currentScreen : WeakReference`1
+HextechRunes.HextechSignalNoise._debugCursor : Int32
+HextechRunes.HextechSignalNoise._pendingDebug : Nullable`1
+HextechRunes.HextechSignalNoise._slain : Nullable`1
 HextechRunes.HextechStarterUpgradeHooks._stepDownDepth : Int32
 HextechRunes.HextechTextures._missingTexture : Texture2D
 HextechRunes.HextechTransmuteNotice._layer : CanvasLayer

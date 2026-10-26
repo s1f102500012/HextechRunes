@@ -50,6 +50,11 @@ internal sealed partial class HextechRuneSelectionScreen
 
 	private Button CreateCardButton(RelicModel relic, int slotIndex)
 	{
+		if (_signalNoise is { } noise && noise.Slot == slotIndex)
+		{
+			return CreateNoiseCardButton(relic, slotIndex, noise);
+		}
+
 		bool usePendingSelection = UsesPlayerRuneConfirmation;
 		string rarityKey = DetermineCardRarityKey(relic, _metadataMode);
 		Color accent = GetAccentColor(rarityKey);
@@ -157,7 +162,8 @@ internal sealed partial class HextechRuneSelectionScreen
 
 	private Button CreateRerollButton(int slotIndex)
 	{
-		bool rerollLimitReached = IsPlayerRuneRerollLimitReached(slotIndex);
+		// 噪声格的刷新只还原外观、不计次数，次数用完也保持可点。
+		bool rerollLimitReached = IsPlayerRuneRerollLimitReached(slotIndex) && !IsNoiseSlot(slotIndex);
 		Button button = CreateRerollIconButton(
 			$"RerollButton_{slotIndex}",
 			PlayerRerollButtonSize,

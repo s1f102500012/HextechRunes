@@ -91,7 +91,7 @@ internal sealed partial class HextechRuneSelectionScreen
 			int count = Math.Min(_relics.Count, _cardsRow.GetChildCount());
 			for (int i = 0; i < count; i++)
 			{
-				if (_cardsRow.GetChild(i) is Control slot)
+				if (_cardsRow.GetChild(i) is Control slot && !IsNoiseSlot(i))
 				{
 					AttachCardVfx(slot, i, TierVfx(_relics[i], "FlashInVFX"), FlashInVfxLayer);
 					StartCardIdleVfx(slot, i, _relics[i]);
@@ -198,6 +198,7 @@ internal sealed partial class HextechRuneSelectionScreen
 		HextechPresentation.TryRun("Mayhem", "SelectionScreen.StartCardHoverVfx failed", () =>
 		{
 			if (_choiceLocked
+				|| IsNoiseSlot(slotIndex)
 				|| _cardsRow == null
 				|| slotIndex < 0
 				|| slotIndex >= _relics.Count

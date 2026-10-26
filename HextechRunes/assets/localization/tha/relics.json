@@ -1580,5 +1580,9 @@
   "OWL_MAGISTRATE_HEX.description": "ใน [blue]1[/blue]/[blue]2[/blue]/[blue]3[/blue] เทิร์นแรก ศัตรูได้รับความเสียหายจากการโจมตีลดลง [blue]50%[/blue]",
   "OWL_MAGISTRATE_HEX.flavor": "ก่อนที่มันจะลงพื้น จะไม่มีคำตัดสินใด",
   "owlMagistrateHex.enemyDescription": "ใน [blue]1[/blue]/[blue]2[/blue]/[blue]3[/blue] เทิร์นแรก ศัตรูได้รับความเสียหายจากการโจมตีลดลง [blue]50%[/blue]",
-  "badTasteRune.enemyDescription": "เมื่อศัตรูได้รับดีบัฟ จะฟื้นฟู [blue]1%[/blue] ของ HP สูงสุด"
+  "badTasteRune.enemyDescription": "เมื่อศัตรูได้รับดีบัฟ จะฟื้นฟู [blue]1%[/blue] ของ HP สูงสุด",
+  "GODSLAYER_RUNE.title": "สังหารเทพ",
+  "GODSLAYER_RUNE.description": "ชิ้นนี้ไม่อยู่ในพิมพ์เขียวใดเลย",
+  "GODSLAYER_RUNE.flavor": "มีเพียงมือเปล่าเท่านั้นที่จะกุมมันไว้ได้",
+  "GODSLAYER_RUNE.rememberedDescription": "คุณจำได้ว่ามันมาจากที่ใด"
 }

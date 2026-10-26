@@ -258,6 +258,8 @@ class Truth:
                 "source": "main",
             }
             for reg in extract_rune_registrations(registry)
+            # Hidden 不进随机池、配置和图鉴，也不列进公开清单与计数。
+            if "Hidden" not in reg["flags"]
         ]
         for match in re.finditer(
             r"\(\s*typeof\((\w+)\),\s*HextechRarityTier\.(\w+),\s*\"(\w+)\"\s*\)",

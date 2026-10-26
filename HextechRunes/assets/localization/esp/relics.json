@@ -1580,5 +1580,9 @@
   "OWL_MAGISTRATE_HEX.description": "Durante los primeros [blue]1[/blue]/[blue]2[/blue]/[blue]3[/blue] turnos, los enemigos reciben un [blue]50 %[/blue] menos de daño de ataque.",
   "OWL_MAGISTRATE_HEX.flavor": "No hay veredicto antes de que aterrice.",
   "owlMagistrateHex.enemyDescription": "Durante los primeros [blue]1[/blue]/[blue]2[/blue]/[blue]3[/blue] turnos, los enemigos reciben un [blue]50 %[/blue] menos de daño de ataque.",
-  "badTasteRune.enemyDescription": "Cada vez que un enemigo recibe un efecto negativo, recupera [blue]1%[/blue] de sus PV máximos."
+  "badTasteRune.enemyDescription": "Cada vez que un enemigo recibe un efecto negativo, recupera [blue]1%[/blue] de sus PV máximos.",
+  "GODSLAYER_RUNE.title": "Matadioses",
+  "GODSLAYER_RUNE.description": "Esta no aparece en ningún plano.",
+  "GODSLAYER_RUNE.flavor": "Solo unas manos vacías pueden sostenerla.",
+  "GODSLAYER_RUNE.rememberedDescription": "Recuerdas de dónde vino."
 }

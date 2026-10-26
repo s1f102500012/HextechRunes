@@ -1580,5 +1580,9 @@
   "OWL_MAGISTRATE_HEX.description": "For the first [blue]1[/blue]/[blue]2[/blue]/[blue]3[/blue] turns, enemies receive [blue]50%[/blue] less attack damage.",
   "OWL_MAGISTRATE_HEX.flavor": "No verdict is passed before it lands.",
   "owlMagistrateHex.enemyDescription": "For the first [blue]1[/blue]/[blue]2[/blue]/[blue]3[/blue] turns, enemies receive [blue]50%[/blue] less attack damage.",
-  "badTasteRune.enemyDescription": "Whenever an enemy receives a debuff, it heals [blue]1%[/blue] of its Max HP."
+  "badTasteRune.enemyDescription": "Whenever an enemy receives a debuff, it heals [blue]1%[/blue] of its Max HP.",
+  "GODSLAYER_RUNE.title": "Godslayer",
+  "GODSLAYER_RUNE.description": "This one appears on no blueprint.",
+  "GODSLAYER_RUNE.flavor": "Only empty hands may hold it.",
+  "GODSLAYER_RUNE.rememberedDescription": "You remember where it came from."
 }

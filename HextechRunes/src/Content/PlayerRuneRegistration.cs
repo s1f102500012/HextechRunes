@@ -10,7 +10,9 @@ public enum PlayerRuneFlags
 	ThirdActExcluded = 8,
 	SelectionExcluded = 16,
 	// 每幕首次三选一保底出现一个（见 HextechRunePoolBuilder.ApplyGuaranteedFirstPick）。
-	GuaranteedFirstPick = 32
+	GuaranteedFirstPick = 32,
+	// 只能由特定流程发放：不进抽选池、设置界面列表与图鉴。仅供本体内部使用，不对外部注册开放。
+	Hidden = 64
 }
 
 public enum PlayerRuneCharacterPool

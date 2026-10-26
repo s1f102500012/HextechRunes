@@ -1580,5 +1580,9 @@
   "OWL_MAGISTRATE_HEX.description": "最初の[blue]1[/blue]/[blue]2[/blue]/[blue]3[/blue]ターン、敵がアタックから受けるダメージが[blue]50%[/blue]減少する。",
   "OWL_MAGISTRATE_HEX.flavor": "着地するまで、判決は下されない。",
   "owlMagistrateHex.enemyDescription": "最初の[blue]1[/blue]/[blue]2[/blue]/[blue]3[/blue]ターン、敵がアタックから受けるダメージが[blue]50%[/blue]減少する。",
-  "badTasteRune.enemyDescription": "敵がデバフを受けるたび、最大HPの[blue]1%[/blue]を回復する。"
+  "badTasteRune.enemyDescription": "敵がデバフを受けるたび、最大HPの[blue]1%[/blue]を回復する。",
+  "GODSLAYER_RUNE.title": "神殺し",
+  "GODSLAYER_RUNE.description": "この一枚は、どの設計図にも載っていない。",
+  "GODSLAYER_RUNE.flavor": "空の手だけが、これを握ることができる。",
+  "GODSLAYER_RUNE.rememberedDescription": "それがどこから来たのか、あなたは覚えている。"
 }

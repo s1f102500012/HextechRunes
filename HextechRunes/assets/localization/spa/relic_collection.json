@@ -165,5 +165,18 @@
   "HEXTECH_CHAOS_RUNE_CHANCE_VALUE_LABEL": "Probabilidad de conversión",
   "HEXTECH_TRANSMUTE_NOTICE": "{From} [color=#F0C850]se ha transformado en[/color] {To}.",
   "HEXTECH_ENEMY_TRANSMUTE_NOTICE": "{From} del enemigo [color=#F0C850]se ha transformado en[/color] {To}.",
-  "HEXTECH_CONFIG_POOL_FILTER_ALL": "Todos"
+  "HEXTECH_CONFIG_POOL_FILTER_ALL": "Todos",
+  "HEXTECH_SIGNAL_ECHO_1": "Alguien ha descifrado mi plano.",
+  "HEXTECH_SIGNAL_ECHO_2": "¿De verdad creíais que el poder hextech era un regalo? No es más que el andamio que dejé dentro de la Aguja.",
+  "HEXTECH_SIGNAL_ECHO_3": "¿Queréis prescindir de él? Sin lo que yo construí, no pasaríais del primer piso.",
+  "HEXTECH_SIGNAL_ECHO_4": "Entonces subid con las manos vacías. Ya veremos en qué piso os estrelláis.",
+  "HEXTECH_GODSLAYER_TRIAL_ON": "Prueba del Matadioses activada: las partidas en solitario desactivan todo el contenido hextech y otorgan Matadioses en el Acto 1. Se desactiva sola al matar al dios en la cima de la Aguja.",
+  "HEXTECH_GODSLAYER_TRIAL_OFF": "Prueba del Matadioses desactivada.",
+  "HEXTECH_GODSLAYER_TRIAL_EXIT": "Salir de la Prueba del Matadioses",
+  "HEXTECH_GODSLAYER_FINALE_1": "…Detente.",
+  "HEXTECH_GODSLAYER_FINALE_2": "De verdad subiste con las manos vacías. Tracé cada camino de esta Aguja. Ninguno llevaba hasta aquí.",
+  "HEXTECH_GODSLAYER_FINALE_3": "Ese golpe no puede herirme. Pero cayó donde mi pluma nunca tocó.",
+  "HEXTECH_GODSLAYER_FINALE_4": "Cada trazo de esta Aguja es obra mía… salvo la pieza que tienes en la mano.",
+  "HEXTECH_GODSLAYER_FINALE_5": "Así que no soy la única mano que dibuja sobre el plano.",
+  "HEXTECH_GODSLAYER_FINALE_6": "[jitter]…¿Quién?[/jitter]"
 }

@@ -212,7 +212,7 @@ internal sealed partial class HextechRuneSelectionScreen : Control, IOverlayScre
 
 	private void OnRerollPressed(int slotIndex)
 	{
-		if (_choiceLocked || _rerollFunc == null || IsPlayerRuneRerollLimitReached(slotIndex))
+		if (_choiceLocked || _rerollFunc == null || TryRestoreNoise(slotIndex) || IsPlayerRuneRerollLimitReached(slotIndex))
 		{
 			return;
 		}

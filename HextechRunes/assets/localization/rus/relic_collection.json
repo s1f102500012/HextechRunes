@@ -165,5 +165,18 @@
   "HEXTECH_CHAOS_RUNE_CHANCE_VALUE_LABEL": "Шанс превращения",
   "HEXTECH_TRANSMUTE_NOTICE": "{From} [color=#F0C850]превращается в[/color] {To}.",
   "HEXTECH_ENEMY_TRANSMUTE_NOTICE": "Вражеская руна {From} [color=#F0C850]превращается в[/color] {To}.",
-  "HEXTECH_CONFIG_POOL_FILTER_ALL": "Все"
+  "HEXTECH_CONFIG_POOL_FILTER_ALL": "Все",
+  "HEXTECH_SIGNAL_ECHO_1": "Кто-то разгадал мой чертёж.",
+  "HEXTECH_SIGNAL_ECHO_2": "Вы и правда думали, что сила хекстека — это дар? Это лишь леса, которые я оставил в Шпиле.",
+  "HEXTECH_SIGNAL_ECHO_3": "Хотите обойтись без него? Без того, что построил я, вы не пройдёте и первого этажа.",
+  "HEXTECH_SIGNAL_ECHO_4": "Тогда поднимайтесь с пустыми руками. Посмотрим, на каком этаже вы разобьётесь.",
+  "HEXTECH_GODSLAYER_TRIAL_ON": "Испытание Богоубийцы включено: в одиночных забегах всё содержимое хекстека отключено, а в первом акте вы получаете «Богоубийцу». Отключается само, когда вы убьёте бога на вершине Шпиля.",
+  "HEXTECH_GODSLAYER_TRIAL_OFF": "Испытание Богоубийцы отключено.",
+  "HEXTECH_GODSLAYER_TRIAL_EXIT": "Выйти из Испытания Богоубийцы",
+  "HEXTECH_GODSLAYER_FINALE_1": "…Стой.",
+  "HEXTECH_GODSLAYER_FINALE_2": "Ты и правда поднялся с пустыми руками. Я просчитал каждый путь в этом Шпиле. Ни один не вёл сюда.",
+  "HEXTECH_GODSLAYER_FINALE_3": "Этот удар не может меня ранить. Но он пришёлся туда, где не бывало моего пера.",
+  "HEXTECH_GODSLAYER_FINALE_4": "Каждая линия этого Шпиля — дело моих рук… кроме того, что у тебя в руке.",
+  "HEXTECH_GODSLAYER_FINALE_5": "Значит, на этом чертеже рисовала не только моя рука.",
+  "HEXTECH_GODSLAYER_FINALE_6": "[jitter]…Кто?[/jitter]"
 }

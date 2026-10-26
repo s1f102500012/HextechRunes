@@ -377,7 +377,8 @@ internal static class HextechPlayerRuneRegistry
 		Rune<VakuuMockeryRune>(HextechRarityTier.Gold, tagKey: "RANDOM"),
 		Rune<DiveBomberRune>(HextechRarityTier.Silver, flags: PlayerRuneFlags.Disabled, tagKey: "MULTIPLAYER"),
 		Rune<AllForYouRune>(HextechRarityTier.Gold, tagKey: "MULTIPLAYER"),
-		Rune<BlossomBladeRune>(HextechRarityTier.Prismatic, tagKey: "MULTIPLAYER")
+		Rune<BlossomBladeRune>(HextechRarityTier.Prismatic, tagKey: "MULTIPLAYER"),
+		Rune<GodslayerRune>(HextechRarityTier.Prismatic, flags: PlayerRuneFlags.Hidden)
 	];
 
 	private static PlayerRuneRegistration Rune<TRune>(

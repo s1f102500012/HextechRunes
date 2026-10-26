@@ -36,6 +36,7 @@ internal sealed partial class HextechRuneSelectionScreen : Control, IOverlayScre
 		root.AddChild(row);
 		_cardsRow = row;
 		row.Visible = !_enemyOnly && !SelfPickMode;
+		RollSignalNoise();
 
 		if (SelfPickMode)
 		{

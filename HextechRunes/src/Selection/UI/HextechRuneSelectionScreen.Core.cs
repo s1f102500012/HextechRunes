@@ -203,6 +203,7 @@ internal sealed partial class HextechRuneSelectionScreen : Control, IOverlayScre
 	public override void _ExitTree()
 	{
 		HextechGoldenRerollDebug.UnregisterScreen(this);
+		HextechSignalNoise.UnregisterScreen(this);
 		EndMapPreview(restoreOverlay: false);
 		RestoreMapButtonState();
 		_mapPreviewHint?.QueueFree();

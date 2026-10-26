@@ -1,3 +1,5 @@
+using System.Text.Json.Serialization;
+
 namespace HextechRunes;
 
 internal sealed record HextechRunConfigurationSnapshot(
@@ -16,7 +18,10 @@ internal sealed record HextechRunConfigurationSnapshot(
 	bool RandomForgeDirectGrant,
 	bool ModEnabled,
 	// 默认值同时是旧存档 JSON(无此字段)反序列化时的回退值。
-	int ChaosRuneChancePercent = HextechRuneConfiguration.DefaultChaosRuneChancePercent)
+	int ChaosRuneChancePercent = HextechRuneConfiguration.DefaultChaosRuneChancePercent,
+	// 弑神试炼局(只在单人开局时由本机开关写入，见 HextechGodslayerTrial)；不进分享码与联机同步，为 false 时不写进存档。
+	[property: JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)]
+	bool GodslayerTrial = false)
 {
 	public HextechRunConfigurationSnapshot Copy()
 	{

@@ -165,5 +165,18 @@
   "HEXTECH_CHAOS_RUNE_CHANCE_VALUE_LABEL": "Conversion chance",
   "HEXTECH_TRANSMUTE_NOTICE": "{From} [color=#F0C850]has transformed into[/color] {To}.",
   "HEXTECH_ENEMY_TRANSMUTE_NOTICE": "Enemy {From} [color=#F0C850]has transformed into[/color] {To}.",
-  "HEXTECH_CONFIG_POOL_FILTER_ALL": "All"
+  "HEXTECH_CONFIG_POOL_FILTER_ALL": "All",
+  "HEXTECH_SIGNAL_ECHO_1": "Someone has seen through my blueprint.",
+  "HEXTECH_SIGNAL_ECHO_2": "Did you truly think Hextech was a gift? It is merely the scaffolding I left inside the Spire.",
+  "HEXTECH_SIGNAL_ECHO_3": "You would cast it aside? Without my work, you would not make it past the first floor.",
+  "HEXTECH_SIGNAL_ECHO_4": "Then climb with empty hands. I shall watch to see how far you get before you fall.",
+  "HEXTECH_GODSLAYER_TRIAL_ON": "Godslayer Trial enabled: single-player runs turn off all Hextech content and grant Godslayer in Act 1. It turns off automatically once you slay the god at the top of the Spire.",
+  "HEXTECH_GODSLAYER_TRIAL_OFF": "Godslayer Trial disabled.",
+  "HEXTECH_GODSLAYER_TRIAL_EXIT": "Exit Godslayer Trial",
+  "HEXTECH_GODSLAYER_FINALE_1": "...Halt.",
+  "HEXTECH_GODSLAYER_FINALE_2": "You truly climbed with empty hands. I charted every path within this Spire. Not one of them led here.",
+  "HEXTECH_GODSLAYER_FINALE_3": "That blow cannot harm me. Yet it struck a place my pen never touched.",
+  "HEXTECH_GODSLAYER_FINALE_4": "Every line of this Spire is of my making—save for the piece in your hand.",
+  "HEXTECH_GODSLAYER_FINALE_5": "So mine is not the only hand drawing upon the blueprint.",
+  "HEXTECH_GODSLAYER_FINALE_6": "[jitter]...Who?[/jitter]"
 }

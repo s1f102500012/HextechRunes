@@ -1580,5 +1580,9 @@
   "OWL_MAGISTRATE_HEX.description": "Nos primeiros [blue]1[/blue]/[blue]2[/blue]/[blue]3[/blue] turnos, os inimigos sofrem [blue]50%[/blue] menos dano de ataques.",
   "OWL_MAGISTRATE_HEX.flavor": "Nenhum veredito é dado antes de ela pousar.",
   "owlMagistrateHex.enemyDescription": "Nos primeiros [blue]1[/blue]/[blue]2[/blue]/[blue]3[/blue] turnos, os inimigos sofrem [blue]50%[/blue] menos dano de ataques.",
-  "badTasteRune.enemyDescription": "Sempre que um inimigo recebe um efeito negativo, recupera [blue]1%[/blue] de seus PV máximos."
+  "badTasteRune.enemyDescription": "Sempre que um inimigo recebe um efeito negativo, recupera [blue]1%[/blue] de seus PV máximos.",
+  "GODSLAYER_RUNE.title": "Matador de Deuses",
+  "GODSLAYER_RUNE.description": "Esta não aparece em planta nenhuma.",
+  "GODSLAYER_RUNE.flavor": "Só mãos vazias podem segurá-la.",
+  "GODSLAYER_RUNE.rememberedDescription": "Você se lembra de onde ela veio."
 }
