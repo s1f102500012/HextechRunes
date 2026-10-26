@@ -32,12 +32,12 @@ internal sealed partial class HextechMayhemCombatTrackingState
 	public readonly HashSet<uint> DevilsDanceTriggeredThisTurn = new();
 	[CombatTrackingClear(CombatTrackingClearPhase.PlayerTurnStart)]
 	public readonly HashSet<uint> FinalFormTriggeredThisTurn = new();
-	public readonly HashSet<uint> FeelTheBurnTriggered = new();
 	public readonly Dictionary<uint, uint> FeyMagicPendingNoDrawPlayers = new();
 	public readonly Dictionary<uint, int> MikaelsBlessingTriggers = new();
 	public readonly HashSet<uint> GoliathApplied = new();
 	public readonly HashSet<uint> ProtectiveVeilApplied = new();
 	public readonly HashSet<uint> MindToMatterApplied = new();
+	public readonly HashSet<uint> MoreTheMerrierApplied = new();
 	public readonly HashSet<uint> ScrollOfBitingApplied = new();
 	public readonly HashSet<uint> OwlMagistrateApplied = new();
 	public readonly HashSet<uint> ThornmailApplied = new();
@@ -56,7 +56,6 @@ internal sealed partial class HextechMayhemCombatTrackingState
 	public readonly Dictionary<uint, int> TankEngineStacks = new();
 	public readonly Dictionary<uint, int> TankEngineLastAppliedRound = new();
 	public readonly Dictionary<uint, int> ShrinkEngineStacks = new();
-	public readonly HashSet<uint> FeelTheBurnPending = new();
 	public readonly HashSet<uint> MountainSoulHasPreviousTurn = new();
 	public readonly HashSet<uint> MountainSoulDamagedSinceLastTurn = new();
 	[CombatTrackingClear(CombatTrackingClearPhase.EveryTurnBoundary)]

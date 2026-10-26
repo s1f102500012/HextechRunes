@@ -106,6 +106,25 @@ class SecondCard : CardModel
         self.assertIn("白银：示例：保留手写说明", kept)
         self.assertIn("白银：示例：解析后的新说明", accepted)
 
+    def test_content_summary_layout_groups_rarities_and_keeps_manual_lines(self):
+        sections = {name: [] for name in (*content.TAG_SECTION_ORDER, "怪物", "属性锻造器", "卡牌", "事件遗物")}
+        sections["怪物"] = [
+            {"rarity": "白银", "title": "甲", "disabled": False, "desc": "新甲", "suffix": ""},
+            {"rarity": "棱彩", "title": "乙", "disabled": True, "desc": "新乙", "suffix": ""},
+            {"rarity": "白银", "title": "丙", "disabled": False, "desc": "新丙", "suffix": ""},
+        ]
+        original = (
+            "怪物：\n说明行\n#棱彩：乙：手写乙\n\n\n白银：丙：手写丙\n白银：甲：手写甲\n"
+            "特定规则：\n\n规则一\n\n\n规则二\n"
+        )
+        with patch.object(content, "summary_truth", return_value=sections):
+            text = content.sync_summary(None, original, [], False, set())
+        self.assertEqual(
+            "[敌方海克斯]\n说明行\n\n白银：甲：手写甲\n白银：丙：手写丙\n\n#棱彩：乙：手写乙\n\n"
+            "[特定规则]\n规则一\n\n规则二\n",
+            text,
+        )
+
     def test_localization_copy_preserves_unrelated_values_and_formatting(self):
         with tempfile.TemporaryDirectory() as folder:
             root = Path(folder)

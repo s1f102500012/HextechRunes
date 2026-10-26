@@ -22,12 +22,12 @@ internal sealed class CombatTrackingSnapshot
 	public Dictionary<uint, int> DelayedEnemyHealingBlock { get; set; } = new();
 	public List<uint> DevilsDanceTriggeredThisTurn { get; set; } = [];
 	public List<uint> FinalFormTriggeredThisTurn { get; set; } = [];
-	public List<uint> FeelTheBurnTriggered { get; set; } = [];
 	public Dictionary<uint, uint> FeyMagicPendingNoDrawPlayers { get; set; } = new();
 	public Dictionary<uint, int> MikaelsBlessingTriggers { get; set; } = new();
 	public List<uint> GoliathApplied { get; set; } = [];
 	public List<uint> ProtectiveVeilApplied { get; set; } = [];
 	public List<uint> MindToMatterApplied { get; set; } = [];
+	public List<uint> MoreTheMerrierApplied { get; set; } = [];
 	public List<uint> ScrollOfBitingApplied { get; set; } = [];
 	public List<uint> OwlMagistrateApplied { get; set; } = [];
 	public List<uint> ThornmailApplied { get; set; } = [];
@@ -46,7 +46,6 @@ internal sealed class CombatTrackingSnapshot
 	public Dictionary<uint, int> TankEngineStacks { get; set; } = new();
 	public Dictionary<uint, int> TankEngineLastAppliedRound { get; set; } = new();
 	public Dictionary<uint, int> ShrinkEngineStacks { get; set; } = new();
-	public List<uint> FeelTheBurnPending { get; set; } = [];
 	public List<uint> MountainSoulHasPreviousTurn { get; set; } = [];
 	public List<uint> MountainSoulDamagedSinceLastTurn { get; set; } = [];
 	public Dictionary<ulong, int> PlayerAttackCardsPlayedThisTurn { get; set; } = new();

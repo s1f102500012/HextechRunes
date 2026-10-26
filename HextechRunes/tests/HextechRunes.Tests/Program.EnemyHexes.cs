@@ -341,6 +341,7 @@ internal static partial class Program
 		Equal(1.10m, effect.ModifyDamageMultiplicative(context, null, 10m, ValueProp.Move, null, null), "21 relics across two players grant ten percent");
 		Equal(1.10m, effect.ModifyBlockMultiplicative(context, first.Creature, 10m, ValueProp.Move, null, null), "same block coefficient");
 		Equal(1.10m, effect.ModifyEnemyHealMultiplicative(context, first.Creature, 10m), "same healing coefficient");
+		Equal(0.10m, effect.GetMaxHpBonusFraction(context, first.Creature), "same max HP bonus");
 		secondRelics.Add(CreateMutableTestModel<MoreTheMerrierRune>());
 		Equal(1.11m, effect.ModifyEnemyHealMultiplicative(context, first.Creature, 10m), "pool before rounding; changes update immediately");
 		firstRelics.Clear();

@@ -9,7 +9,7 @@ public enum HextechRarityTier
 
 internal enum MonsterHexKind
 {
-	// 已移除的数值 18/33/47/64/65/71/72/82/92/96 保持空洞，勿复用。
+	// 已移除的数值 18/24/26/33/47/64/65/71/72/82/92/96/98 保持空洞，勿复用。
 	Slap = 0,
 	EscapePlan = 1,
 	HeavyHitter = 2,
@@ -33,9 +33,7 @@ internal enum MonsterHexKind
 	MasterOfDuality = 21,
 	Goldrend = 22,
 	TankEngine = 23,
-	GetExcited = 24,
 	ShrinkEngine = 25,
-	FeelTheBurn = 26,
 	LightEmUp = 27,
 	MountainSoul = 28,
 	TwiceThrice = 29,
@@ -98,7 +96,6 @@ internal enum MonsterHexKind
 	BloodIdol = 94,
 	OmniDragonSoul = 95,
 	Corrosion = 97,
-	Brutality = 98,
 	Judicator = 99,
 	SoulEater = 100,
 	DeathHarvest = 101,
