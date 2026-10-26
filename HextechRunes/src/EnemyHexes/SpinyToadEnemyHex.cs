@@ -6,7 +6,7 @@ internal sealed class SpinyToadEnemyHex : HextechEnemyHexEffect
 
 	internal override MonsterHexKind Kind => MonsterHexKind.SpinyToad;
 
-	// 偶数回合的玩家回合开始时，所有敌人获得只持续到玩家回合结束的荆棘；实际增加的层数记在追踪状态里，结束时原数撤回。
+	// 偶数回合开始时（玩家回合开始），所有敌人获得只持续到玩家回合结束的荆棘；实际增加的层数记在追踪状态里，结束时原数撤回。
 	internal override async Task BeforePlayerSideTurnStart(
 		HextechEnemyHexContext context,
 		HextechCombatState combatState,

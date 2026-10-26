@@ -13,6 +13,8 @@ internal static class MonsterHexCatalog
 			[MonsterHexKind.VineShambler] = [typeof(TangledPower)],
 			[MonsterHexKind.SpinyToad] = [typeof(ThornsPower)],
 			[MonsterHexKind.ScrollOfBiting] = [typeof(PaperCutsPower)],
+			[MonsterHexKind.SpectralKnight] = [typeof(HextechHexPower)],
+			[MonsterHexKind.OwlMagistrate] = [typeof(HextechSoarPower)],
 			[MonsterHexKind.Tormentor] = [typeof(HextechBurnPower)],
 			[MonsterHexKind.Firebrand] = [typeof(HextechBurnPower)],
 			[MonsterHexKind.Corrosion] = [typeof(FrailPower)],

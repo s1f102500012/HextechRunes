@@ -3,7 +3,7 @@ namespace HextechRunes;
 internal static partial class HextechRuneConfiguration
 {
 	private const string ConfigFileName = "rune_config.json";
-	private const int CurrentConfigVersion = 43;
+	private const int CurrentConfigVersion = 44;
 	// v15(0.8.4):一次性强制重置——旧版本配置载入时整体丢弃回默认(含禁用池/数量/权重/重随/价格/总开关)。
 	private const int ForceResetBelowConfigVersion = 15;
 	private const int HexActCount = 3;

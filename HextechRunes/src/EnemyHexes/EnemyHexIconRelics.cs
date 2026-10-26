@@ -216,3 +216,13 @@ public sealed class SpinyToadHex : EnemyHexIconRelicBase
 public sealed class ScrollOfBitingHex : EnemyHexIconRelicBase
 {
 }
+
+/// <summary>升级：幽灵骑士</summary>
+public sealed class SpectralKnightHex : EnemyHexIconRelicBase
+{
+}
+
+/// <summary>升级：猫头鹰法官</summary>
+public sealed class OwlMagistrateHex : EnemyHexIconRelicBase
+{
+}

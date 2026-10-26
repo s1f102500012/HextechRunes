@@ -23,8 +23,8 @@ internal static partial class HextechRuneConfiguration
 		new(19, [], [ typeof(KakaRune) ]),
 		// 小猪存钱罐(鼓励挨打赚钱与防御方向相悖)转为默认禁用。
 		new(20, [], [ typeof(PiggyBankRune) ]),
-		// 升级打击/防御(围绕不该保留的牌做增强,遥测垫底)与验牌(每回合选牌拖慢节奏)转为默认禁用。
-		new(21, [], [ typeof(StrikeUpgradeRune), typeof(DefendUpgradeRune), typeof(CardInspectionRune) ]),
+		// 升级打击/防御(围绕不该保留的牌做增强,遥测垫底)与验牌(每回合选牌拖慢节奏,0.9.9 已移除)转为默认禁用。
+		new(21, [], [ typeof(StrikeUpgradeRune), typeof(DefendUpgradeRune) ]),
 		// 罪恶快感(开局+击杀双重资源滚雪球)转为默认禁用。
 		new(22, [], [ typeof(GetExcitedRune) ]),
 		// 0.8.5 遥测(69.8万局)选取率垫底批次转为默认禁用:豪猪7.7%/巨像的勇气10.6%/瓦库11.4%/
@@ -50,7 +50,9 @@ internal static partial class HextechRuneConfiguration
 		// 启动流程敌我双方转为默认禁用。
 		new(42, [], [ typeof(StartupRoutineRune) ]),
 		// 我方吸血习性（原死亡收割，v23 默认禁用）转为默认启用。
-		new(43, [ typeof(DeathHarvestRune) ], [])
+		new(43, [ typeof(DeathHarvestRune) ], []),
+		// 0.9.9：俯冲轰炸、量子计算与升级势不可当/火焰屏障/狱火/抉择，抉择（只我方）转为默认禁用。
+		new(44, [], [ typeof(DiveBomberRune), typeof(QuantumComputingRune), typeof(JuggernautUpgradeRune), typeof(FlameBarrierUpgradeRune), typeof(InfernoUpgradeRune), typeof(DecisionsDecisionsUpgradeRune) ])
 	];
 
 	/// <summary>敌方海克斯默认禁用迁移:只迁移一次,之后尊重玩家手动开启。</summary>

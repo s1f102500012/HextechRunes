@@ -2,16 +2,19 @@ namespace HextechRunes;
 
 public sealed class ParticleWallUpgradeRune : CardUpgradeRuneBase<ParticleWall>
 {
+	protected override IEnumerable<DynamicVar> CanonicalVars =>
+	[
+		new StarsVar(1)
+	];
+
 	protected override bool IsAvailableForCharacter(Player player) => IsRegentPlayer(player);
 
-	public override Task AfterCardPlayed(PlayerChoiceContext context, CardPlay cardPlay)
+	public override async Task AfterCardPlayed(PlayerChoiceContext context, CardPlay cardPlay)
 	{
 		if (cardPlay.Card.Owner == Owner && cardPlay.Card is ParticleWall)
 		{
-			// 只改战斗卡实例，不回写 DeckVersion；本次结算后成长，下一次打出开始受益。
-			cardPlay.Card.DynamicVars.Block.BaseValue += 1m;
 			Flash();
+			await PlayerCmd.GainStars(DynamicVars.Stars.BaseValue, Owner);
 		}
-		return Task.CompletedTask;
 	}
 }

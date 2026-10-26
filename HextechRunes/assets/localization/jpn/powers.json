@@ -42,5 +42,11 @@
   "HEXTECH_HANG_POWER.smartDescription": "受けるすべてのダメージが[blue]{Amount}[/blue]倍になる。",
   "HEXTECH_NEUROSURGE_POWER.title": "ニューロサージ",
   "HEXTECH_NEUROSURGE_POWER.description": "自分のターン開始時、敵全体にスタック数と同じ量の[gold]破滅[/gold]を付与する。",
-  "HEXTECH_NEUROSURGE_POWER.smartDescription": "自分のターン開始時、敵全体に[blue]{Amount}[/blue]の[gold]破滅[/gold]を付与する。"
+  "HEXTECH_NEUROSURGE_POWER.smartDescription": "自分のターン開始時、敵全体に[blue]{Amount}[/blue]の[gold]破滅[/gold]を付与する。",
+  "HEXTECH_HEX_POWER.title": "呪術",
+  "HEXTECH_HEX_POWER.description": "あなたのすべてのカードは[gold]エセリアル[/gold]を得る。",
+  "HEXTECH_HEX_POWER.smartDescription": "あなたのすべてのカードは[gold]エセリアル[/gold]を得る。",
+  "HEXTECH_SOAR_POWER.title": "飛翔",
+  "HEXTECH_SOAR_POWER.description": "アタックから受けるダメージが[blue]50%[/blue]減少する。ラウンド終了時に[blue]1[/blue]減少する。",
+  "HEXTECH_SOAR_POWER.smartDescription": "アタックから受けるダメージが[blue]50%[/blue]減少する（残り[blue]{Amount}[/blue]ラウンド）。"
 }

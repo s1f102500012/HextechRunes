@@ -42,5 +42,11 @@
   "HEXTECH_HANG_POWER.smartDescription": "Todo el daño recibido se multiplica por [blue]{Amount}[/blue].",
   "HEXTECH_NEUROSURGE_POWER.title": "Sobrecarga neuronal",
   "HEXTECH_NEUROSURGE_POWER.description": "Al comienzo de tu turno, aplica [gold]Condena[/gold] igual a la cantidad de este poder a TODOS los enemigos.",
-  "HEXTECH_NEUROSURGE_POWER.smartDescription": "Al comienzo de tu turno, aplica [blue]{Amount}[/blue] de [gold]Condena[/gold] a TODOS los enemigos."
+  "HEXTECH_NEUROSURGE_POWER.smartDescription": "Al comienzo de tu turno, aplica [blue]{Amount}[/blue] de [gold]Condena[/gold] a TODOS los enemigos.",
+  "HEXTECH_HEX_POWER.title": "Maleficio",
+  "HEXTECH_HEX_POWER.description": "TODAS tus cartas son [gold]Etéreas[/gold].",
+  "HEXTECH_HEX_POWER.smartDescription": "TODAS tus cartas son [gold]Etéreas[/gold].",
+  "HEXTECH_SOAR_POWER.title": "Planear",
+  "HEXTECH_SOAR_POWER.description": "Recibe un [blue]50 %[/blue] menos de daño de ataque. Pierde [blue]1[/blue] carga al final de cada ronda.",
+  "HEXTECH_SOAR_POWER.smartDescription": "Recibe un [blue]50 %[/blue] menos de daño de ataque. Rondas restantes: [blue]{Amount}[/blue]."
 }

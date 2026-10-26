@@ -29,6 +29,7 @@ internal sealed class CombatTrackingSnapshot
 	public List<uint> ProtectiveVeilApplied { get; set; } = [];
 	public List<uint> MindToMatterApplied { get; set; } = [];
 	public List<uint> ScrollOfBitingApplied { get; set; } = [];
+	public List<uint> OwlMagistrateApplied { get; set; } = [];
 	public List<uint> ThornmailApplied { get; set; } = [];
 	public List<uint> SuperBrainApplied { get; set; } = [];
 	public List<uint> AstralBodyApplied { get; set; } = [];

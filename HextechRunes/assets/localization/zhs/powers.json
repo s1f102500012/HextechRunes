@@ -42,5 +42,11 @@
   "HEXTECH_HANG_POWER.smartDescription": "受到的所有伤害乘以[blue]{Amount}[/blue]。",
   "HEXTECH_NEUROSURGE_POWER.title": "精神过载",
   "HEXTECH_NEUROSURGE_POWER.description": "在你的回合开始时，对所有敌人施加等同于层数的[gold]灾厄[/gold]。",
-  "HEXTECH_NEUROSURGE_POWER.smartDescription": "在你的回合开始时，对所有敌人施加[blue]{Amount}[/blue]层[gold]灾厄[/gold]。"
+  "HEXTECH_NEUROSURGE_POWER.smartDescription": "在你的回合开始时，对所有敌人施加[blue]{Amount}[/blue]层[gold]灾厄[/gold]。",
+  "HEXTECH_HEX_POWER.title": "恶咒",
+  "HEXTECH_HEX_POWER.description": "你的所有卡牌都拥有[gold]虚无[/gold]。",
+  "HEXTECH_HEX_POWER.smartDescription": "你的所有卡牌都拥有[gold]虚无[/gold]。",
+  "HEXTECH_SOAR_POWER.title": "翱翔",
+  "HEXTECH_SOAR_POWER.description": "受到的伤害减少[blue]50%[/blue]。每回合结束时减少[blue]1[/blue]层。",
+  "HEXTECH_SOAR_POWER.smartDescription": "受到的伤害减少[blue]50%[/blue]，还剩[blue]{Amount}[/blue]回合。"
 }
