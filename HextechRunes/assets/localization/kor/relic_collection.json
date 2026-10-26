@@ -170,7 +170,7 @@
   "HEXTECH_SIGNAL_ECHO_2": "정말로 헥스텍의 힘이 선물이라 믿었나? 그것은 내가 탑 안에 남겨 둔 비계에 불과하다.",
   "HEXTECH_SIGNAL_ECHO_3": "그것을 버리겠다고? 내가 세운 것 없이는, 너희는 첫 층조차 벗어나지 못한다.",
   "HEXTECH_SIGNAL_ECHO_4": "그렇다면 빈손으로 올라와라. 어느 층에서 떨어져 죽는지 지켜봐 주지.",
-  "HEXTECH_GODSLAYER_TRIAL_ON": "신살해 시련이 시작되었습니다: 싱글 플레이에서는 모든 헥스텍 콘텐츠가 꺼지고 1막에서 '신살해'를 얻습니다. 탑 꼭대기에서 신을 죽이면 자동으로 종료됩니다.",
+  "HEXTECH_GODSLAYER_TRIAL_ON": "신살해 시련이 시작되었습니다: 싱글 플레이에서 당신은 헥스텍을 전혀 얻지 못하며, 적은 기본 설정대로 헥스텍을 얻습니다. 1막에서 '신살해'를 얻습니다. 탑 꼭대기에서 신을 죽이면 자동으로 종료됩니다.",
   "HEXTECH_GODSLAYER_TRIAL_OFF": "신살해 시련을 종료했습니다.",
   "HEXTECH_GODSLAYER_TRIAL_EXIT": "신살해 시련 종료",
   "HEXTECH_GODSLAYER_FINALE_1": "……멈춰라.",

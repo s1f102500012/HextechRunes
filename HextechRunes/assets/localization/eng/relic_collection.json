@@ -170,7 +170,7 @@
   "HEXTECH_SIGNAL_ECHO_2": "Did you truly think Hextech was a gift? It is merely the scaffolding I left inside the Spire.",
   "HEXTECH_SIGNAL_ECHO_3": "You would cast it aside? Without my work, you would not make it past the first floor.",
   "HEXTECH_SIGNAL_ECHO_4": "Then climb with empty hands. I shall watch to see how far you get before you fall.",
-  "HEXTECH_GODSLAYER_TRIAL_ON": "Godslayer Trial enabled: single-player runs turn off all Hextech content and grant Godslayer in Act 1. It turns off automatically once you slay the god at the top of the Spire.",
+  "HEXTECH_GODSLAYER_TRIAL_ON": "Godslayer Trial enabled: in single-player runs you get no Hextech at all, while enemies still gain Hextech at default settings. You receive Godslayer in Act 1. It turns off automatically once you slay the god at the top of the Spire.",
   "HEXTECH_GODSLAYER_TRIAL_OFF": "Godslayer Trial disabled.",
   "HEXTECH_GODSLAYER_TRIAL_EXIT": "Exit Godslayer Trial",
   "HEXTECH_GODSLAYER_FINALE_1": "...Halt.",

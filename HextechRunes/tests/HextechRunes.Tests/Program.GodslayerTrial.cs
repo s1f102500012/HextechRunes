@@ -25,10 +25,24 @@ internal static partial class Program
 		Expect(!defaults.GodslayerTrial, "off by default");
 		Expect(!JsonSerializer.Serialize(defaults).Contains(nameof(HextechRunConfigurationSnapshot.GodslayerTrial)), "ordinary save JSON omits the trial");
 
-		HextechRunConfigurationSnapshot trial = defaults with { ModEnabled = false, GodslayerTrial = true };
+		HextechRunConfigurationSnapshot trial = HextechGodslayerTrial.CreateTrialSnapshot();
 		Expect(HextechRuneConfiguration.NormalizeSnapshot(trial).GodslayerTrial, "normalization keeps the trial");
 		Expect(JsonSerializer.Deserialize<HextechRunConfigurationSnapshot>(JsonSerializer.Serialize(trial))!.GodslayerTrial, "trial save JSON round-trips");
 		Expect(!HextechConfigShareCodec.TryParse(HextechConfigShareCodec.Export(trial))!.Snapshot.GodslayerTrial, "share codes never carry the trial");
+	}
+
+	// 试炼局：敌方按默认配置照常获得海克斯，我方每幕 0 个；不读玩家自己的设置。
+	[HextechTest]
+	private static void GodslayerTrialSnapshotKeepsDefaultEnemyHexesAndNoPlayerHexes()
+	{
+		HextechRunConfigurationSnapshot defaults = HextechRuneConfiguration.GetDefaultSnapshot();
+		HextechRunConfigurationSnapshot trial = HextechGodslayerTrial.CreateTrialSnapshot();
+		Expect(trial.ModEnabled && trial.GodslayerTrial, "trial runs keep the mod active");
+		Expect(trial.PlayerHexCountsByAct.Length == defaults.PlayerHexCountsByAct.Length && trial.PlayerHexCountsByAct.All(static count => count == 0), "no player hexes in any act");
+		SequenceEqual(defaults.EnemyHexCountsByAct, trial.EnemyHexCountsByAct, "enemy hex counts use the defaults");
+		Expect(defaults.DisabledMonsterHexIds.SetEquals(trial.DisabledMonsterHexIds), "enemy hex pool uses the defaults");
+		Equal(defaults.MonsterHexRerollLimit, trial.MonsterHexRerollLimit, "enemy reroll limit uses the default");
+		Expect(HextechRuneConfiguration.NormalizeSnapshot(trial).PlayerHexCountsByAct.All(static count => count == 0), "normalization keeps zero player hexes");
 	}
 
 	// 每套台词从 0 连续编号，每行只有一个说话人，最后一行带按钮文字；各语言键集与简中一致。

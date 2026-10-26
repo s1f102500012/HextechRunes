@@ -170,7 +170,7 @@
   "HEXTECH_SIGNAL_ECHO_2": "你们当真以为海克斯之力是馈赠？那不过是我留在塔里的脚手架。",
   "HEXTECH_SIGNAL_ECHO_3": "想撇开它？离了我搭的东西，你们连第一层都走不出去。",
   "HEXTECH_SIGNAL_ECHO_4": "那就空着手爬上来。我倒要看看，你会摔死在哪一层。",
-  "HEXTECH_GODSLAYER_TRIAL_ON": "已开启弑神试炼：单人对局将关闭全部海克斯内容，并在第一幕获得「弑神」。在塔顶弑神后自动关闭。",
+  "HEXTECH_GODSLAYER_TRIAL_ON": "已开启弑神试炼：单人对局中你将没有任何海克斯，敌人仍会按默认配置获得海克斯；第一幕获得「弑神」。在塔顶弑神后自动关闭。",
   "HEXTECH_GODSLAYER_TRIAL_OFF": "已退出弑神试炼。",
   "HEXTECH_GODSLAYER_TRIAL_EXIT": "退出弑神试炼",
   "HEXTECH_GODSLAYER_FINALE_1": "……停下。",

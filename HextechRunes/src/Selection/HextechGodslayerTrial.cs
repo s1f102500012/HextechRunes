@@ -3,14 +3,14 @@ using MegaCrit.Sts2.Core.Context;
 namespace HextechRunes;
 
 /// <summary>
-/// 弑神试炼：口令开启的本机开关。只在单人开局生效，本局按原版对局进行（模组内容关闭），
-/// 唯一例外是第一幕的海克斯选择只给“弑神”一个选项；在建筑师面前弑神后自动关闭。联机局忽略开关。
+/// 弑神试炼：口令开启的本机开关。只在单人开局生效：敌方照常获得海克斯（强度固定用默认配置，不读玩家设置），
+/// 我方没有海克斯与锻造器，第一幕在敌方海克斯之后只拿到“弑神”一枚；在建筑师面前弑神后自动关闭。联机局忽略开关。
 /// </summary>
 internal static class HextechGodslayerTrial
 {
 	private const string LogTag = "GodslayerTrial";
 
-	/// <summary>开局：开关开着且是单人局时，把本局快照改成关闭模组的试炼局。</summary>
+	/// <summary>开局：开关开着且是单人局时，本局改用试炼快照。</summary>
 	internal static HextechRunConfigurationSnapshot ApplyToNewRun(HextechRunConfigurationSnapshot snapshot)
 	{
 		if (!HextechRuneConfiguration.IsGodslayerTrialEnabled() || HextechPlayerContextHelper.IsNetworkMultiplayerRun())
@@ -19,9 +19,17 @@ internal static class HextechGodslayerTrial
 		}
 
 		HextechLog.Info(LogTag, "New run starts as a trial run.");
-		return snapshot with
+		return CreateTrialSnapshot();
+	}
+
+	/// <summary>默认配置，去掉我方每幕的海克斯；敌方海克斯数量、禁用列表等都是默认值。</summary>
+	internal static HextechRunConfigurationSnapshot CreateTrialSnapshot()
+	{
+		HextechRunConfigurationSnapshot defaults = HextechRuneConfiguration.GetDefaultSnapshot();
+		return defaults with
 		{
-			ModEnabled = false,
+			PlayerHexCountsByAct = new int[defaults.PlayerHexCountsByAct.Length],
+			ModEnabled = true,
 			GodslayerTrial = true
 		};
 	}
@@ -30,6 +38,11 @@ internal static class HextechGodslayerTrial
 	{
 		return modifier.GetEffectiveRunConfigurationSnapshot().GodslayerTrial
 			&& !HextechPlayerContextHelper.IsNetworkMultiplayerRun();
+	}
+
+	internal static bool IsTrialRun(IRunState? runState)
+	{
+		return HextechMayhemModifier.FindIn(runState) is { } modifier && IsTrialRun(modifier);
 	}
 
 	/// <summary>试炼局第一幕：本机玩家还没有弑神时，弹出只有它一个选项的选择界面并发放。</summary>
