@@ -165,5 +165,18 @@
   "HEXTECH_CHAOS_RUNE_CHANCE_VALUE_LABEL": "生成確率",
   "HEXTECH_TRANSMUTE_NOTICE": "{From}[color=#F0C850]は[/color]{To}[color=#F0C850]に変化した。[/color]",
   "HEXTECH_ENEMY_TRANSMUTE_NOTICE": "敵の{From}[color=#F0C850]は[/color]{To}[color=#F0C850]に変化した。[/color]",
-  "HEXTECH_CONFIG_POOL_FILTER_ALL": "すべて"
+  "HEXTECH_CONFIG_POOL_FILTER_ALL": "すべて",
+  "HEXTECH_SIGNAL_ECHO_1": "何者かが、私の設計図を見抜いた。",
+  "HEXTECH_SIGNAL_ECHO_2": "ヘクステックの力を贈り物だと、本気で思っていたのか？あれは私が塔に残した足場にすぎない。",
+  "HEXTECH_SIGNAL_ECHO_3": "それを捨てるつもりか？私が築いたものなしでは、一階すら抜けられまい。",
+  "HEXTECH_SIGNAL_ECHO_4": "ならば手ぶらで登ってこい。どの階で墜ちるか、見物させてもらう。",
+  "HEXTECH_GODSLAYER_TRIAL_ON": "神殺しの試練を開始しました：ソロプレイではヘクステックの内容がすべて無効になり、第1幕で「神殺し」を獲得します。塔の頂で神を殺すと自動的に終了します。",
+  "HEXTECH_GODSLAYER_TRIAL_OFF": "神殺しの試練を終了しました。",
+  "HEXTECH_GODSLAYER_TRIAL_EXIT": "神殺しの試練をやめる",
+  "HEXTECH_GODSLAYER_FINALE_1": "……止まれ。",
+  "HEXTECH_GODSLAYER_FINALE_2": "本当に手ぶらで登ってきたのか。塔のあらゆる道を推し量った。だが、ここへ通じる道はひとつもなかった。",
+  "HEXTECH_GODSLAYER_FINALE_3": "その一撃では、私に傷ひとつ付けられん。だがそれは……私が一度も筆を入れなかった場所に落ちた。",
+  "HEXTECH_GODSLAYER_FINALE_4": "この塔の一線一画は、すべて私の手によるもの——お前の掌にある、その一枚を除いて。",
+  "HEXTECH_GODSLAYER_FINALE_5": "設計図に筆を入れていたのは、私だけではなかったのか。",
+  "HEXTECH_GODSLAYER_FINALE_6": "[jitter]……誰だ？[/jitter]"
 }

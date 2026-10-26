@@ -1580,5 +1580,9 @@
   "OWL_MAGISTRATE_HEX.description": "처음 [blue]1[/blue]/[blue]2[/blue]/[blue]3[/blue]턴 동안, 적이 공격으로 받는 피해량이 [blue]50%[/blue] 감소합니다.",
   "OWL_MAGISTRATE_HEX.flavor": "착지하기 전까지 판결은 내려지지 않습니다.",
   "owlMagistrateHex.enemyDescription": "처음 [blue]1[/blue]/[blue]2[/blue]/[blue]3[/blue]턴 동안, 적이 공격으로 받는 피해량이 [blue]50%[/blue] 감소합니다.",
-  "badTasteRune.enemyDescription": "적이 디버프를 받을 때마다 최대 체력의 [blue]1%[/blue]를 회복합니다."
+  "badTasteRune.enemyDescription": "적이 디버프를 받을 때마다 최대 체력의 [blue]1%[/blue]를 회복합니다.",
+  "GODSLAYER_RUNE.title": "신살해",
+  "GODSLAYER_RUNE.description": "이것은 어떤 설계도에도 없다.",
+  "GODSLAYER_RUNE.flavor": "빈손만이 이것을 쥘 수 있다.",
+  "GODSLAYER_RUNE.rememberedDescription": "당신은 이것이 어디에서 왔는지 기억한다."
 }

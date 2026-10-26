@@ -39,6 +39,12 @@ internal static partial class HextechCatalog
 			return false;
 		}
 
+		// 弑神不进任何池子；本机完成弑神后作为纪念出现在图鉴里。
+		if (runeType == typeof(GodslayerRune))
+		{
+			return HextechSignalNoise.HasSlain();
+		}
+
 		if (IsPlayerRuneTypeConfigurable(runeType))
 		{
 			return HextechRuneConfiguration.IsPlayerRuneEnabled(ModelDb.GetId(runeType).Entry);

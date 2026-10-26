@@ -84,7 +84,7 @@ internal sealed partial class HextechMayhemModifier
 	{
 		return HextechPlayerContextHelper.IsClientRun(fallbackWhenUnavailable: true)
 			? HextechRuneConfiguration.GetDefaultSnapshot()
-			: HextechRuneConfiguration.GetSnapshot();
+			: HextechGodslayerTrial.ApplyToNewRun(HextechRuneConfiguration.GetSnapshot());
 	}
 
 	private string SerializeRunConfigurationSnapshot()

@@ -351,7 +351,9 @@ internal static class HextechRunePoolBuilder
 
 		Type runeType = (relics[0].CanonicalInstance ?? relics[0]).GetType();
 		PlayerRuneMetadataCatalog metadata = HextechContentRegistry.PlayerRuneMetadata;
-		return metadata.IsConfigurable(runeType) && metadata.TryGetRarity(runeType, out HextechRarityTier rarity)
+		// Hidden 不可配置，但只会单独出现在专属选择里，界面按它自己的品级显示。
+		return (metadata.IsConfigurable(runeType) || metadata.HasFlag(runeType, PlayerRuneFlags.Hidden))
+			&& metadata.TryGetRarity(runeType, out HextechRarityTier rarity)
 			? rarity
 			: HextechRarityTier.Gold;
 	}

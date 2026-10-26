@@ -165,5 +165,18 @@
   "HEXTECH_CHAOS_RUNE_CHANCE_VALUE_LABEL": "生成概率",
   "HEXTECH_TRANSMUTE_NOTICE": "{From}[color=#F0C850]已转变为[/color]{To}。",
   "HEXTECH_ENEMY_TRANSMUTE_NOTICE": "敌方的{From}[color=#F0C850]已转变为[/color]{To}。",
-  "HEXTECH_CONFIG_POOL_FILTER_ALL": "全部"
+  "HEXTECH_CONFIG_POOL_FILTER_ALL": "全部",
+  "HEXTECH_SIGNAL_ECHO_1": "有人看穿了我的蓝图。",
+  "HEXTECH_SIGNAL_ECHO_2": "你们当真以为海克斯之力是馈赠？那不过是我留在塔里的脚手架。",
+  "HEXTECH_SIGNAL_ECHO_3": "想撇开它？离了我搭的东西，你们连第一层都走不出去。",
+  "HEXTECH_SIGNAL_ECHO_4": "那就空着手爬上来。我倒要看看，你会摔死在哪一层。",
+  "HEXTECH_GODSLAYER_TRIAL_ON": "已开启弑神试炼：单人对局将关闭全部海克斯内容，并在第一幕获得「弑神」。在塔顶弑神后自动关闭。",
+  "HEXTECH_GODSLAYER_TRIAL_OFF": "已退出弑神试炼。",
+  "HEXTECH_GODSLAYER_TRIAL_EXIT": "退出弑神试炼",
+  "HEXTECH_GODSLAYER_FINALE_1": "……停下。",
+  "HEXTECH_GODSLAYER_FINALE_2": "你真是空着手走上来的。我推演过塔里的每一条路，没有一条，能通向这里。",
+  "HEXTECH_GODSLAYER_FINALE_3": "这一击伤不了我分毫。可它落下的地方……我从未落过笔。",
+  "HEXTECH_GODSLAYER_FINALE_4": "塔中的一砖一瓦皆出自我手——唯独你掌心这一枚。",
+  "HEXTECH_GODSLAYER_FINALE_5": "原来在蓝图上落笔的，不止我一人。",
+  "HEXTECH_GODSLAYER_FINALE_6": "[jitter]……是谁？[/jitter]"
 }

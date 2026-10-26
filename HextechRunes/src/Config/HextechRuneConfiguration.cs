@@ -184,6 +184,30 @@ internal static partial class HextechRuneConfiguration
 		}
 	}
 
+	public static bool IsGodslayerTrialEnabled()
+	{
+		EnsureLoaded();
+		lock (SyncRoot)
+		{
+			return _config.GodslayerTrial;
+		}
+	}
+
+	public static void SetGodslayerTrialEnabled(bool enabled)
+	{
+		EnsureLoaded();
+		lock (SyncRoot)
+		{
+			if (_config.GodslayerTrial == enabled)
+			{
+				return;
+			}
+
+			_config.GodslayerTrial = enabled;
+			SaveConfig(_config);
+		}
+	}
+
 	internal static HashSet<string> NormalizeStringIds(IEnumerable<string>? ids, IReadOnlySet<string> validIds)
 	{
 		return NormalizeConfigStringIds(ids).Where(validIds.Contains).ToHashSet(StringComparer.Ordinal);

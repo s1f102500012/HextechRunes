@@ -98,6 +98,8 @@ internal static partial class HextechRuneSelectionCoordinator
 			// 多个敌方海克斯再丢弃，否则仍会推进原版 Niche 随机流。
 			if (modifier.FreezeModActiveForRunAndCheckDisabled())
 			{
+				// 弑神试炼局同样关闭模组内容，只在第一幕补发弑神；中途关掉界面时本幕保持未决，下次进入再弹。
+				await HextechGodslayerTrial.GrantForFirstActAsync(runState, modifier, actIndex);
 				modifier.SetMonsterHexesForAct(actIndex, []);
 				modifier.SetStageResolved(actIndex, true);
 				HextechEnemyUi.Refresh(modifier);

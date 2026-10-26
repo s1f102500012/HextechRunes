@@ -1580,5 +1580,9 @@
   "OWL_MAGISTRATE_HEX.description": "前[blue]1[/blue]/[blue]2[/blue]/[blue]3[/blue]回合，敌人受到的攻击伤害减少[blue]50%[/blue]。",
   "OWL_MAGISTRATE_HEX.flavor": "在它落地之前，判决不会下达。",
   "owlMagistrateHex.enemyDescription": "前[blue]1[/blue]/[blue]2[/blue]/[blue]3[/blue]回合，敌人受到的攻击伤害减少[blue]50%[/blue]。",
-  "badTasteRune.enemyDescription": "每当敌人受到负面效果时，回复[blue]1%[/blue]的最大生命值。"
+  "badTasteRune.enemyDescription": "每当敌人受到负面效果时，回复[blue]1%[/blue]的最大生命值。",
+  "GODSLAYER_RUNE.title": "弑神",
+  "GODSLAYER_RUNE.description": "这一枚，不在任何一张蓝图之上。",
+  "GODSLAYER_RUNE.flavor": "唯有两手空空之人，方能将它握紧。",
+  "GODSLAYER_RUNE.rememberedDescription": "你记得它从哪里来。"
 }

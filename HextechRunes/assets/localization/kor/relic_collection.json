@@ -165,5 +165,18 @@
   "HEXTECH_CHAOS_RUNE_CHANCE_VALUE_LABEL": "생성 확률",
   "HEXTECH_TRANSMUTE_NOTICE": "{From}[color=#F0C850]이(가)[/color] {To}[color=#F0C850](으)로 변환되었습니다.[/color]",
   "HEXTECH_ENEMY_TRANSMUTE_NOTICE": "적의 {From}[color=#F0C850]이(가)[/color] {To}[color=#F0C850](으)로 변환되었습니다.[/color]",
-  "HEXTECH_CONFIG_POOL_FILTER_ALL": "전체"
+  "HEXTECH_CONFIG_POOL_FILTER_ALL": "전체",
+  "HEXTECH_SIGNAL_ECHO_1": "누군가 내 설계도를 꿰뚫어 보았다.",
+  "HEXTECH_SIGNAL_ECHO_2": "정말로 헥스텍의 힘이 선물이라 믿었나? 그것은 내가 탑 안에 남겨 둔 비계에 불과하다.",
+  "HEXTECH_SIGNAL_ECHO_3": "그것을 버리겠다고? 내가 세운 것 없이는, 너희는 첫 층조차 벗어나지 못한다.",
+  "HEXTECH_SIGNAL_ECHO_4": "그렇다면 빈손으로 올라와라. 어느 층에서 떨어져 죽는지 지켜봐 주지.",
+  "HEXTECH_GODSLAYER_TRIAL_ON": "신살해 시련이 시작되었습니다: 싱글 플레이에서는 모든 헥스텍 콘텐츠가 꺼지고 1막에서 '신살해'를 얻습니다. 탑 꼭대기에서 신을 죽이면 자동으로 종료됩니다.",
+  "HEXTECH_GODSLAYER_TRIAL_OFF": "신살해 시련을 종료했습니다.",
+  "HEXTECH_GODSLAYER_TRIAL_EXIT": "신살해 시련 종료",
+  "HEXTECH_GODSLAYER_FINALE_1": "……멈춰라.",
+  "HEXTECH_GODSLAYER_FINALE_2": "정말 빈손으로 올라왔군. 나는 이 탑의 모든 길을 헤아렸다. 여기로 이어지는 길은 하나도 없었다.",
+  "HEXTECH_GODSLAYER_FINALE_3": "그 일격으로는 나를 조금도 다치게 할 수 없다. 하지만 그것이 떨어진 곳은…… 내가 한 번도 붓을 대지 않은 곳이다.",
+  "HEXTECH_GODSLAYER_FINALE_4": "이 탑의 선 하나, 획 하나까지 모두 내 손에서 나왔다—네 손에 든 그것만 빼고.",
+  "HEXTECH_GODSLAYER_FINALE_5": "설계도에 붓을 댄 것이, 나 혼자가 아니었던가.",
+  "HEXTECH_GODSLAYER_FINALE_6": "[jitter]……누구냐?[/jitter]"
 }

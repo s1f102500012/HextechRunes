@@ -331,6 +331,7 @@ internal static partial class HextechRuneConfigMenuHooks
 		buttons.AddChild(CreateActionButton(L("HEXTECH_CONFIG_EXPORT_CODE"), () => ExportShareCodeToClipboard(context), compactLayout));
 		buttons.AddChild(CreateActionButton(L("HEXTECH_CONFIG_IMPORT_CODE"), () => ImportShareCodeFromClipboard(context), compactLayout));
 		buttons.AddChild(CreateActionButton(L("HEXTECH_CONFIG_FEATURED"), () => OpenCommunityConfigsPanel(context), compactLayout));
+		buttons.AddChild(CreateGodslayerTrialExitButton(context));
 		section.AddChild(buttons);
 
 		return card;

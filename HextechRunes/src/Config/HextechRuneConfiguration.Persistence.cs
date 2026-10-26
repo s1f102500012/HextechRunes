@@ -163,6 +163,11 @@ internal static partial class HextechRuneConfiguration
 
 		[JsonPropertyName("mod_enabled")]
 		public bool ModEnabled { get; set; } = DefaultModEnabled;
+
+		// 弑神试炼开关：不进配置快照与分享码，只由口令开启、弑神后自动关闭；为 false 时不写进文件。
+		[JsonPropertyName("godslayer_trial")]
+		[JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)]
+		public bool GodslayerTrial { get; set; }
 	}
 
 	private sealed class RarityWeightConfig

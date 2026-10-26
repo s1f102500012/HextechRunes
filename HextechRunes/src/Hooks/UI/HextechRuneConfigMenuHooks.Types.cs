@@ -124,6 +124,8 @@ internal static partial class HextechRuneConfigMenuHooks
 
 		internal ConfigPage SelectedPage { get; set; } = ConfigPage.Counts;
 
+		internal Button? GodslayerTrialExitButton { get; set; }
+
 		/// <summary>刷新页脚摘要与各稀有度分组的启用角标。</summary>
 		internal void UpdateSummary()
 		{

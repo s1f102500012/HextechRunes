@@ -1580,5 +1580,9 @@
   "OWL_MAGISTRATE_HEX.description": "Первые [blue]1[/blue]/[blue]2[/blue]/[blue]3[/blue] хода враги получают на [blue]50%[/blue] меньше урона от Атак.",
   "OWL_MAGISTRATE_HEX.flavor": "Пока она не приземлится, приговор не будет вынесен.",
   "owlMagistrateHex.enemyDescription": "Первые [blue]1[/blue]/[blue]2[/blue]/[blue]3[/blue] хода враги получают на [blue]50%[/blue] меньше урона от Атак.",
-  "badTasteRune.enemyDescription": "Когда враг получает отрицательный эффект, он восстанавливает [blue]1%[/blue] от макс. ОЗ."
+  "badTasteRune.enemyDescription": "Когда враг получает отрицательный эффект, он восстанавливает [blue]1%[/blue] от макс. ОЗ.",
+  "GODSLAYER_RUNE.title": "Богоубийца",
+  "GODSLAYER_RUNE.description": "Этого нет ни на одном чертеже.",
+  "GODSLAYER_RUNE.flavor": "Удержать это могут лишь пустые руки.",
+  "GODSLAYER_RUNE.rememberedDescription": "Вы помните, откуда это взялось."
 }

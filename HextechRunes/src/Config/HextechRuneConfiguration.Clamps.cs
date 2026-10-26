@@ -147,7 +147,8 @@ internal static partial class HextechRuneConfiguration
 			ClampRandomForgeShopPrice(snapshot.RandomForgeShopPrice),
 			snapshot.RandomForgeDirectGrant,
 			snapshot.ModEnabled,
-			ClampChaosRuneChancePercent(snapshot.ChaosRuneChancePercent));
+			ClampChaosRuneChancePercent(snapshot.ChaosRuneChancePercent),
+			snapshot.GodslayerTrial);
 	}
 
 	internal static HextechRarityWeights NormalizeRarityWeights(HextechRarityWeights weights, HextechRarityWeights fallback)

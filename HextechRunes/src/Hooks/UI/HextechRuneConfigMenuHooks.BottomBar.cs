@@ -179,7 +179,15 @@ internal static partial class HextechRuneConfigMenuHooks
 
 	private static void ImportShareCodeFromClipboard(ConfigMenuContext context)
 	{
-		HextechConfigShareCodec.ImportPreview? preview = HextechConfigShareCodec.TryParse(DisplayServer.ClipboardGet());
+		string clipboard = DisplayServer.ClipboardGet();
+		// 口令不改动编辑中的配置，只打开弑神试炼；其余内容照常按分享码解析。
+		if (HextechSignalNoise.TryEcho(clipboard))
+		{
+			EnterGodslayerTrial(context);
+			return;
+		}
+
+		HextechConfigShareCodec.ImportPreview? preview = HextechConfigShareCodec.TryParse(clipboard);
 		if (preview == null)
 		{
 			context.ShowSummaryNotice(L("HEXTECH_CONFIG_IMPORT_INVALID"));
