@@ -25,9 +25,12 @@ internal interface IHextechPercentHpForge : IHextechMaxHpBaseHolder
 /// </summary>
 internal static class HextechMaxHpScaling
 {
+	// 优先取已经存下基础值的持有者：新加入的参与者（或旧存档里新增字段为 0 的参与者）排在前面时，
+	// 不能抢走主持有者，否则会把已放大的当前最大生命误当基础值再放大一次。
 	public static IHextechMaxHpBaseHolder? GetPrimary(Player? player)
 	{
-		return player?.Relics.OfType<IHextechMaxHpBaseHolder>().FirstOrDefault();
+		IHextechMaxHpBaseHolder[] holders = player?.Relics.OfType<IHextechMaxHpBaseHolder>().ToArray() ?? [];
+		return holders.FirstOrDefault(static holder => holder.BaseMaxHp > 0) ?? holders.FirstOrDefault();
 	}
 
 	public static decimal GetScale(Player player)
@@ -90,7 +93,8 @@ internal static class HextechMaxHpScaling
 	/// 系数参与者获得/叠层后重算实际最大生命并补上差值的当前生命。
 	/// 基础值未初始化 ⟺ 此前没有任何参与者生效过,此时当前最大生命就是未缩放的基础值。
 	/// </summary>
-	public static async Task ReapplyScale(Player owner)
+	/// <param name="healBaselineMaxHp">按这个最大生命计算要补的当前生命；不给时取调用时的最大生命（多步遗物变更按事务前的值算净增量）。</param>
+	public static async Task ReapplyScale(Player owner, int? healBaselineMaxHp = null)
 	{
 		if (GetPrimary(owner) is not IHextechMaxHpBaseHolder primary)
 		{
@@ -98,7 +102,7 @@ internal static class HextechMaxHpScaling
 		}
 
 		EnsureBaseInitialized(owner, primary, assumeAlreadyScaled: false);
-		int oldMax = owner.Creature.MaxHp;
+		int oldMax = healBaselineMaxHp ?? owner.Creature.MaxHp;
 		await CreatureCmd.SetMaxHp(owner.Creature, primary.BaseMaxHp);
 		int delta = owner.Creature.MaxHp - oldMax;
 		if (delta > 0)

@@ -42,5 +42,11 @@
   "HEXTECH_HANG_POWER.smartDescription": "받는 모든 피해가 [blue]{Amount}[/blue]배가 됩니다.",
   "HEXTECH_NEUROSURGE_POWER.title": "정신 폭주",
   "HEXTECH_NEUROSURGE_POWER.description": "당신의 턴 시작 시, 모든 적에게 중첩 수만큼의 [gold]종말[/gold]을 부여합니다.",
-  "HEXTECH_NEUROSURGE_POWER.smartDescription": "당신의 턴 시작 시, 모든 적에게 [gold]종말[/gold]을 [blue]{Amount}[/blue]만큼 부여합니다."
+  "HEXTECH_NEUROSURGE_POWER.smartDescription": "당신의 턴 시작 시, 모든 적에게 [gold]종말[/gold]을 [blue]{Amount}[/blue]만큼 부여합니다.",
+  "HEXTECH_HEX_POWER.title": "주술",
+  "HEXTECH_HEX_POWER.description": "모든 카드에 [gold]휘발성[/gold]이 추가됩니다.",
+  "HEXTECH_HEX_POWER.smartDescription": "모든 카드에 [gold]휘발성[/gold]이 추가됩니다.",
+  "HEXTECH_SOAR_POWER.title": "날아오르기",
+  "HEXTECH_SOAR_POWER.description": "공격으로 받는 피해량이 [blue]50%[/blue] 감소합니다. 라운드 종료 시 [blue]1[/blue] 감소합니다.",
+  "HEXTECH_SOAR_POWER.smartDescription": "공격으로 받는 피해량이 [blue]50%[/blue] 감소합니다. (남은 라운드: [blue]{Amount}[/blue])"
 }

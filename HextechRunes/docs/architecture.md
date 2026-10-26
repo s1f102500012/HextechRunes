@@ -44,7 +44,6 @@ Platform/Hooks/Config/Localization/Telemetry
 
 以下补丁点在 2026-09 重构中逐条评估过，结论是**保留**，理由已核实，不要再翻案；要改先拿出新的原版证据。
 
-- `CardPileCmd.Draw` 前缀：卡牌检视是"用选牌界面替换抽牌返回值"，`ShouldDraw` / `ModifyHandDraw` / `BeforeHandDraw` 都表达不了，且改走 Hook 会把 PlayerChoice 挪到不同的同步点。
 - `RunManager.OnEnded` 前缀 + 后缀：前缀必须在 `ToSave` 之前补战斗历史（原版败北存档缺房间记录），`OnMetricsUpload` 只在 `ShouldSave` 且首次上报时触发，替不了。
 - `NGame.StartRun` / `LoadRun`：需要包住原版 UI 任务链再做延续，`RunManager.RunStarted` 只在模型层触发。
 - 剩余的资源图标补丁组：理论上可整组删除，但纹理加载多轮返工过，headless 验证不了视觉，必须真机看过遗物栏/图鉴/检视/悬浮四处再删。

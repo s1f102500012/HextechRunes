@@ -4,13 +4,11 @@ public sealed class ReanimateUpgradeRune : CardUpgradeRuneBase<Reanimate>
 {
 	private const decimal BaseCostReduction = 1m;
 
-	private int _deathsThisCombat;
-
 	[SavedProperty(SerializationCondition.SaveIfNotTypeDefault)]
 	public int SavedDeathsThisCombat
 	{
-		get => _deathsThisCombat;
-		set => _deathsThisCombat = Math.Max(0, value);
+		get => 0;
+		set { } // 旧存档仍可能包含该字段；新版不再按死亡数额外减费。
 	}
 
 	protected override bool IsAvailableForCharacter(Player player)
@@ -18,29 +16,20 @@ public sealed class ReanimateUpgradeRune : CardUpgradeRuneBase<Reanimate>
 		return IsNecrobinderPlayer(player);
 	}
 
-	public override Task BeforeCombatStart()
+	public override async Task AfterDeath(PlayerChoiceContext choiceContext, Creature target, bool wasRemovalPrevented, float deathAnimLength)
 	{
-		_deathsThisCombat = 0;
-		return Task.CompletedTask;
-	}
-
-	public override Task AfterCombatEnd(CombatRoom room)
-	{
-		_deathsThisCombat = 0;
-		return Task.CompletedTask;
-	}
-
-	public override Task AfterDeath(PlayerChoiceContext choiceContext, Creature target, bool wasRemovalPrevented, float deathAnimLength)
-	{
-		// 原版忧郁只排除被阻止的死亡；爪牙和小手回调时可能已经脱离 CombatState。
-		if (!wasRemovalPrevented)
+		// 与原版忧郁一样只排除被阻止的死亡；爪牙和小手回调时可能已经脱离 CombatState，所以取持有者的战斗。
+		if (wasRemovalPrevented
+			|| Owner.Creature.IsDead
+			|| Owner.Creature.CombatState is not { } combatState
+			|| CombatManager.Instance.IsOverOrEnding)
 		{
-			_deathsThisCombat++;
-			Flash();
-			RefreshReanimateCostsInHand();
+			return;
 		}
 
-		return Task.CompletedTask;
+		Flash();
+		CardModel card = combatState.CreateCard<Reanimate>(Owner);
+		await HextechCardGeneration.AddGeneratedCardToCombat(card, PileType.Hand, addedByPlayer: true);
 	}
 
 	public override bool TryModifyEnergyCostInCombat(CardModel card, decimal originalCost, out decimal modifiedCost)
@@ -53,7 +42,7 @@ public sealed class ReanimateUpgradeRune : CardUpgradeRuneBase<Reanimate>
 			return false;
 		}
 
-		decimal reducedCost = Math.Max(0m, originalCost - BaseCostReduction - _deathsThisCombat);
+		decimal reducedCost = Math.Max(0m, originalCost - BaseCostReduction);
 		if (reducedCost == originalCost)
 		{
 			return false;
@@ -61,23 +50,5 @@ public sealed class ReanimateUpgradeRune : CardUpgradeRuneBase<Reanimate>
 
 		modifiedCost = reducedCost;
 		return true;
-	}
-
-	private void RefreshReanimateCostsInHand()
-	{
-		foreach (CardModel card in PileType.Hand.GetPile(Owner).Cards)
-		{
-			if (card is Reanimate)
-			{
-				try
-				{
-					card.InvokeEnergyCostChanged();
-				}
-				catch (Exception ex)
-				{
-					HextechLog.Warn("ReanimateUpgrade", $"Cost visual refresh failed: {ex.Message}");
-				}
-			}
-		}
 	}
 }

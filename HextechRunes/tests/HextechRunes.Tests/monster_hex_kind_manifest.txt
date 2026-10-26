@@ -159,3 +159,5 @@ Chomper=155
 VineShambler=156
 SpinyToad=157
 ScrollOfBiting=158
+SpectralKnight=159
+OwlMagistrate=160

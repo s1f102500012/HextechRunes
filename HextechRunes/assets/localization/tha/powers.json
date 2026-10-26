@@ -42,5 +42,11 @@
   "HEXTECH_HANG_POWER.smartDescription": "ความเสียหายทั้งหมดที่ได้รับจะคูณด้วย [blue]{Amount}[/blue]",
   "HEXTECH_NEUROSURGE_POWER.title": "Neurosurge",
   "HEXTECH_NEUROSURGE_POWER.description": "เมื่อเริ่มเทิร์นของคุณ มอบ [gold]อายุขัย[/gold] เท่ากับจำนวนสแต็กให้ศัตรูทั้งหมด",
-  "HEXTECH_NEUROSURGE_POWER.smartDescription": "เมื่อเริ่มเทิร์นของคุณ มอบ [gold]อายุขัย[/gold] [blue]{Amount}[/blue] ให้ศัตรูทั้งหมด"
+  "HEXTECH_NEUROSURGE_POWER.smartDescription": "เมื่อเริ่มเทิร์นของคุณ มอบ [gold]อายุขัย[/gold] [blue]{Amount}[/blue] ให้ศัตรูทั้งหมด",
+  "HEXTECH_HEX_POWER.title": "คำสาป",
+  "HEXTECH_HEX_POWER.description": "การ์ดทั้งหมดของคุณมี[gold]กึ่งสลาย[/gold]",
+  "HEXTECH_HEX_POWER.smartDescription": "การ์ดทั้งหมดของคุณมี[gold]กึ่งสลาย[/gold]",
+  "HEXTECH_SOAR_POWER.title": "ร่อนเหิน",
+  "HEXTECH_SOAR_POWER.description": "ได้รับความเสียหายจากการโจมตีลดลง [blue]50%[/blue] ลดลง [blue]1[/blue] ทุกท้ายรอบ",
+  "HEXTECH_SOAR_POWER.smartDescription": "ได้รับความเสียหายจากการโจมตีลดลง [blue]50%[/blue] (เหลืออีก [blue]{Amount}[/blue] รอบ)"
 }

@@ -110,7 +110,6 @@ internal static partial class Program
 		typeof(CuttingEdgeAlchemistRune),
 		typeof(DawnbringersResolveRune),
 		typeof(EarthAwakensRune),
-		typeof(EndlessRecoveryRune),
 		typeof(EscapePlanRune),
 		typeof(FeelTheBurnRune),
 		typeof(HappyAccidentRune),

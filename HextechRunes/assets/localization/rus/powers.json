@@ -42,5 +42,11 @@
   "HEXTECH_HANG_POWER.smartDescription": "Весь получаемый урон умножается на [blue]{Amount}[/blue].",
   "HEXTECH_NEUROSURGE_POWER.title": "Мозговой штурм",
   "HEXTECH_NEUROSURGE_POWER.description": "В начале вашего хода накладывает [gold]Злой рок[/gold], равный количеству зарядов, на ВСЕХ врагов.",
-  "HEXTECH_NEUROSURGE_POWER.smartDescription": "В начале вашего хода накладывает [blue]{Amount}[/blue] [gold]Злой рок[/gold] на ВСЕХ врагов."
+  "HEXTECH_NEUROSURGE_POWER.smartDescription": "В начале вашего хода накладывает [blue]{Amount}[/blue] [gold]Злой рок[/gold] на ВСЕХ врагов.",
+  "HEXTECH_HEX_POWER.title": "Сглаз",
+  "HEXTECH_HEX_POWER.description": "ВСЕ ваши карты [gold]эфирные[/gold].",
+  "HEXTECH_HEX_POWER.smartDescription": "ВСЕ ваши карты [gold]эфирные[/gold].",
+  "HEXTECH_SOAR_POWER.title": "Крылья",
+  "HEXTECH_SOAR_POWER.description": "Получает на [blue]50%[/blue] меньше урона от Атак. В конце каждого раунда теряет [blue]1[/blue] заряд.",
+  "HEXTECH_SOAR_POWER.smartDescription": "Получает на [blue]50%[/blue] меньше урона от Атак. Осталось раундов: [blue]{Amount}[/blue]."
 }

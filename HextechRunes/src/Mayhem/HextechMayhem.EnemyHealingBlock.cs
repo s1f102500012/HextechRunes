@@ -32,7 +32,8 @@ internal sealed partial class HextechMayhemModifier
 				continue;
 			}
 
-			await CreatureCmd.GainBlock(creature, block, ValueProp.Unpowered, null);
+			// 这笔格挡由回血换来，蛋白粉奶昔不再把它转回回血。
+			await ProteinShakeEnemyHex.RunWithoutConversion(() => CreatureCmd.GainBlock(creature, block, ValueProp.Unpowered, null));
 		}
 	}
 }

@@ -42,5 +42,11 @@
   "HEXTECH_HANG_POWER.smartDescription": "Todo dano recebido é multiplicado por [blue]{Amount}[/blue].",
   "HEXTECH_NEUROSURGE_POWER.title": "Sobrecarga Neural",
   "HEXTECH_NEUROSURGE_POWER.description": "No início do seu turno, aplica [gold]Ruína[/gold] igual à quantidade deste poder a TODOS os inimigos.",
-  "HEXTECH_NEUROSURGE_POWER.smartDescription": "No início do seu turno, aplica [blue]{Amount}[/blue] de [gold]Ruína[/gold] a TODOS os inimigos."
+  "HEXTECH_NEUROSURGE_POWER.smartDescription": "No início do seu turno, aplica [blue]{Amount}[/blue] de [gold]Ruína[/gold] a TODOS os inimigos.",
+  "HEXTECH_HEX_POWER.title": "Feitiço",
+  "HEXTECH_HEX_POWER.description": "TODAS as suas cartas são [gold]Etéreas[/gold].",
+  "HEXTECH_HEX_POWER.smartDescription": "TODAS as suas cartas são [gold]Etéreas[/gold].",
+  "HEXTECH_SOAR_POWER.title": "Planar",
+  "HEXTECH_SOAR_POWER.description": "Sofre [blue]50%[/blue] menos dano de ataques. Perde [blue]1[/blue] acúmulo no fim de cada rodada.",
+  "HEXTECH_SOAR_POWER.smartDescription": "Sofre [blue]50%[/blue] menos dano de ataques. Rodadas restantes: [blue]{Amount}[/blue]."
 }

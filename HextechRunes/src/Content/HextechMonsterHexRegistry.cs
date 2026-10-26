@@ -158,7 +158,9 @@ internal static class HextechMonsterHexRegistry
 		Monster<ChomperHex>(MonsterHexKind.Chomper, HextechRarityTier.Gold),
 		Monster<VineShamblerHex>(MonsterHexKind.VineShambler, HextechRarityTier.Gold),
 		Monster<SpinyToadHex>(MonsterHexKind.SpinyToad, HextechRarityTier.Prismatic),
-		Monster<ScrollOfBitingHex>(MonsterHexKind.ScrollOfBiting, HextechRarityTier.Prismatic)
+		Monster<ScrollOfBitingHex>(MonsterHexKind.ScrollOfBiting, HextechRarityTier.Prismatic),
+		Monster<SpectralKnightHex>(MonsterHexKind.SpectralKnight, HextechRarityTier.Prismatic),
+		Monster<OwlMagistrateHex>(MonsterHexKind.OwlMagistrate, HextechRarityTier.Gold)
 	];
 
 	private static MonsterHexRegistration Monster<TRelic>(

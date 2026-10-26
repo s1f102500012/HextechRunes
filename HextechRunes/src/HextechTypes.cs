@@ -165,5 +165,7 @@ internal enum MonsterHexKind
 	Chomper = 155,            // 升级：啃咬机（黄金）
 	VineShambler = 156,       // 升级：藤蔓蹒跚者（黄金）
 	SpinyToad = 157,          // 升级：棘刺蟾蜍（棱彩）
-	ScrollOfBiting = 158      // 升级：咬人卷轴（棱彩）
+	ScrollOfBiting = 158,     // 升级：咬人卷轴（棱彩）
+	SpectralKnight = 159,     // 升级：幽灵骑士（棱彩）
+	OwlMagistrate = 160       // 升级：猫头鹰法官（黄金）
 }

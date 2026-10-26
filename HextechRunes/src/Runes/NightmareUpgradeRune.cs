@@ -4,41 +4,51 @@ public sealed class NightmareUpgradeRune : CardUpgradeRuneBase<Nightmare>
 {
 	protected override bool IsAvailableForCharacter(Player player) => IsSilentPlayer(player);
 
-	internal static async Task ResolveNewNightmares(Task original, Nightmare card,
-		PlayerChoiceContext context, NightmarePower[] previous)
+	// 原版夜魇在下回合抽牌前由 NightmarePower 克隆选中的牌加入手牌（手牌满时进弃牌堆）；
+	// 这次调用前后新出现在战斗里的牌就是这批复制品，设为本场战斗免费。
+	internal static async Task MakeNewCopiesFree(Task original, Player owner, HashSet<CardModel> before)
 	{
 		await original;
-		if (card.CombatState is not { } combatState)
+		if (owner.PlayerCombatState is not { } combatState)
 		{
 			return;
 		}
 
-		// 原版先选牌、清除复制模板的污染，再填入独立 NightmarePower。
-		// 直接提前执行其原生复制/移除回调，保留复制语义；不提前结算之前已有的夜魇。
-		foreach (NightmarePower power in card.Owner.Creature.Powers.OfType<NightmarePower>().Except(previous).ToArray())
+		bool any = false;
+		foreach (CardModel card in combatState.AllCards.Where(card => !before.Contains(card)).ToList())
 		{
-			await power.BeforeHandDraw(card.Owner, context, combatState);
+			card.SetToFreeThisCombat();
+			any = true;
+		}
+
+		if (any)
+		{
+			owner.GetRelic<NightmareUpgradeRune>()?.Flash();
 		}
 	}
 
-	[HarmonyPatch(typeof(Nightmare), "OnPlay", typeof(PlayerChoiceContext), typeof(CardPlay))]
-	[HextechPatch("rune.nightmare.immediate", "升级夜魇", Rune = typeof(NightmareUpgradeRune))]
-	private static class ImmediateNightmarePatch
+	[HarmonyPatch(typeof(NightmarePower), nameof(NightmarePower.BeforeHandDraw), typeof(Player), typeof(PlayerChoiceContext), typeof(HextechCombatState))]
+	[HextechPatch("rune.nightmare.free-copies", "升级夜魇", Rune = typeof(NightmareUpgradeRune))]
+	private static class FreeNightmareCopiesPatch
 	{
 		[HarmonyPrefix]
-		private static void Prefix(Nightmare __instance, out NightmarePower[]? __state)
+		private static void Prefix(NightmarePower __instance, Player player, out HashSet<CardModel>? __state)
 		{
-			__state = __instance.Owner?.GetRelic<NightmareUpgradeRune>() != null
-				? __instance.Owner.Creature.Powers.OfType<NightmarePower>().ToArray() : null;
+			Player? owner = __instance.Owner.Player;
+			__state = owner != null
+				&& owner == player
+				&& owner.GetRelic<NightmareUpgradeRune>() != null
+				&& owner.PlayerCombatState is { } combatState
+					? combatState.AllCards.ToHashSet()
+					: null;
 		}
 
 		[HarmonyPostfix]
-		private static void Postfix(Nightmare __instance, PlayerChoiceContext choiceContext,
-			NightmarePower[]? __state, ref Task __result)
+		private static void Postfix(NightmarePower __instance, HashSet<CardModel>? __state, ref Task __result)
 		{
-			if (__state != null)
+			if (__state != null && __instance.Owner.Player is { } owner)
 			{
-				__result = ResolveNewNightmares(__result, __instance, choiceContext, __state);
+				__result = MakeNewCopiesFree(__result, owner, __state);
 			}
 		}
 	}

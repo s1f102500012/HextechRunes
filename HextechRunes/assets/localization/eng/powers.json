@@ -42,5 +42,11 @@
   "HEXTECH_HANG_POWER.smartDescription": "All damage taken is multiplied by [blue]{Amount}[/blue].",
   "HEXTECH_NEUROSURGE_POWER.title": "Neurosurge",
   "HEXTECH_NEUROSURGE_POWER.description": "At the start of your turn, apply [gold]Doom[/gold] equal to this power's amount to ALL enemies.",
-  "HEXTECH_NEUROSURGE_POWER.smartDescription": "At the start of your turn, apply [blue]{Amount}[/blue] [gold]Doom[/gold] to ALL enemies."
+  "HEXTECH_NEUROSURGE_POWER.smartDescription": "At the start of your turn, apply [blue]{Amount}[/blue] [gold]Doom[/gold] to ALL enemies.",
+  "HEXTECH_HEX_POWER.title": "Hex",
+  "HEXTECH_HEX_POWER.description": "ALL your cards are [gold]Ethereal[/gold].",
+  "HEXTECH_HEX_POWER.smartDescription": "ALL your cards are [gold]Ethereal[/gold].",
+  "HEXTECH_SOAR_POWER.title": "Soar",
+  "HEXTECH_SOAR_POWER.description": "Receives [blue]50%[/blue] less attack damage. Loses [blue]1[/blue] stack at the end of each round.",
+  "HEXTECH_SOAR_POWER.smartDescription": "Receives [blue]50%[/blue] less attack damage. Rounds remaining: [blue]{Amount}[/blue]."
 }

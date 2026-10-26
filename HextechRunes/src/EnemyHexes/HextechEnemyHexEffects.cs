@@ -152,7 +152,9 @@ internal static class HextechEnemyHexEffects
 		new ChomperEnemyHex(),
 		new VineShamblerEnemyHex(),
 		new SpinyToadEnemyHex(),
-		new ScrollOfBitingEnemyHex()
+		new ScrollOfBitingEnemyHex(),
+		new SpectralKnightEnemyHex(),
+		new OwlMagistrateEnemyHex()
 	]);
 
 	internal static IEnumerable<HextechEnemyHexEffect> GetActive(HextechMayhemModifier modifier)
