@@ -161,7 +161,7 @@
   "NIGHTSTALKING_RUNE.description": "Every time you draw [blue]{CardsNeeded}[/blue] cards, gain [blue]{IntangiblePower}[/blue] [gold]Intangible[/gold].",
   "NIGHTSTALKING_RUNE.flavor": "The night does not help the good. It helps the ones who have not struck yet.",
   "MASTER_OF_DUALITY_RUNE.title": "Master of Duality",
-  "MASTER_OF_DUALITY_RUNE.description": "Playing a Skill grants [blue]1[/blue] Temporary Strength. Playing an Attack grants [blue]1[/blue] Temporary Dexterity.",
+  "MASTER_OF_DUALITY_RUNE.description": "Your [gold]Strength[/gold] and [gold]Dexterity[/gold] both apply to damage and Block. At the start of combat, gain [blue]1[/blue] [gold]Strength[/gold] and [blue]1[/blue] [gold]Dexterity[/gold].",
   "MASTER_OF_DUALITY_RUNE.flavor": "Blade and spell need not reconcile. They only need to take turns working.",
   "BIG_STRENGTH_RUNE.title": "Blunt Force",
   "BIG_STRENGTH_RUNE.description": "Deal [blue]{DamageBonusPercent}%[/blue] more damage.",

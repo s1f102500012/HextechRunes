@@ -161,7 +161,7 @@
   "NIGHTSTALKING_RUNE.description": "Cada vez que robas [blue]{CardsNeeded}[/blue] cartas, ganas [blue]{IntangiblePower}[/blue] [gold]Intangible[/gold].",
   "NIGHTSTALKING_RUNE.flavor": "La noche no ayuda al bien. Ayuda a los que aún no han atacado.",
   "MASTER_OF_DUALITY_RUNE.title": "Maestro de la dualidad",
-  "MASTER_OF_DUALITY_RUNE.description": "Jugar una habilidad otorga [blue]1[/blue] Fuerza temporal. Jugar un ataque otorga [blue]1[/blue] Destreza temporal.",
+  "MASTER_OF_DUALITY_RUNE.description": "Tu [gold]Fuerza[/gold] y tu [gold]Destreza[/gold] se aplican tanto al daño como al Bloqueo. Al comienzo del combate, gana [blue]1[/blue] de [gold]Fuerza[/gold] y [blue]1[/blue] de [gold]Destreza[/gold].",
   "MASTER_OF_DUALITY_RUNE.flavor": "La espada y el hechizo no necesitan reconciliarse. Sólo necesitan turnarse para trabajar.",
   "BIG_STRENGTH_RUNE.title": "Fuerza contundente",
   "BIG_STRENGTH_RUNE.description": "Causa [blue]{DamageBonusPercent}%[/blue] más daño.",

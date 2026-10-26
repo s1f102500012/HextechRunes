@@ -161,7 +161,7 @@
   "NIGHTSTALKING_RUNE.description": "Каждый раз, когда вы берёте [blue]{CardsNeeded}[/blue] карт, получите [blue]{IntangiblePower}[/blue] [gold]Неосязаемость[/gold].",
   "NIGHTSTALKING_RUNE.flavor": "Ночь помогает не добрым. Она помогает тем, кто ещё не нанёс удар.",
   "MASTER_OF_DUALITY_RUNE.title": "Мастер двойственности",
-  "MASTER_OF_DUALITY_RUNE.description": "Разыгрывая Навык вы получаете [blue]1[/blue] временную силу. Разыгрывая Атаку вы получаете [blue]1[/blue] временную ловкость.",
+  "MASTER_OF_DUALITY_RUNE.description": "Ваши [gold]Сила[/gold] и [gold]Ловкость[/gold] действуют и на урон, и на защиту. В начале боя получите [blue]1[/blue] [gold]Силу[/gold] и [blue]1[/blue] [gold]Ловкость[/gold].",
   "MASTER_OF_DUALITY_RUNE.flavor": "Клинку и заклинанию не нужно мириться. Им нужно лишь работать по очереди.",
   "BIG_STRENGTH_RUNE.title": "Великая сила",
   "BIG_STRENGTH_RUNE.description": "Наносите на [blue]{DamageBonusPercent}%[/blue] больше урона.",

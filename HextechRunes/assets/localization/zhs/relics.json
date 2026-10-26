@@ -161,7 +161,7 @@
   "NIGHTSTALKING_RUNE.description": "每抽[blue]{CardsNeeded}[/blue]张牌，获得[blue]{IntangiblePower}[/blue]层[gold]无实体[/gold]。",
   "NIGHTSTALKING_RUNE.flavor": "夜色不帮善人，只帮还没出手的人。",
   "MASTER_OF_DUALITY_RUNE.title": "物法皆修",
-  "MASTER_OF_DUALITY_RUNE.description": "打出技能牌时，获得[blue]1[/blue]点临时力量。打出攻击牌时，获得[blue]1[/blue]点临时敏捷。",
+  "MASTER_OF_DUALITY_RUNE.description": "你的[gold]力量[/gold]与[gold]敏捷[/gold]同时作用于伤害和格挡。战斗开始时，获得[blue]1[/blue]点[gold]力量[/gold]和[blue]1[/blue]点[gold]敏捷[/gold]。",
   "MASTER_OF_DUALITY_RUNE.flavor": "刀锋不向咒文道歉，轮到谁就谁奏效。",
   "BIG_STRENGTH_RUNE.title": "大力",
   "BIG_STRENGTH_RUNE.description": "获得[blue]{DamageBonusPercent}%[/blue]伤害加成。",

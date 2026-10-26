@@ -161,7 +161,7 @@
   "NIGHTSTALKING_RUNE.description": "Cada vez que você comprar [blue]{CardsNeeded}[/blue] cartas, ganhe [blue]{IntangiblePower}[/blue] de [gold]Intangível[/gold].",
   "NIGHTSTALKING_RUNE.flavor": "A noite não ajuda os bons. Ela ajuda aqueles que ainda não atacaram.",
   "MASTER_OF_DUALITY_RUNE.title": "Mestre da Dualidade",
-  "MASTER_OF_DUALITY_RUNE.description": "Jogar uma Habilidade concede [blue]1[/blue] de Força Temporária. Jogar um Ataque concede [blue]1[/blue] de Destreza Temporária.",
+  "MASTER_OF_DUALITY_RUNE.description": "Sua [gold]Força[/gold] e sua [gold]Destreza[/gold] se aplicam tanto ao dano quanto ao Bloqueio. No início do combate, ganhe [blue]1[/blue] de [gold]Força[/gold] e [blue]1[/blue] de [gold]Destreza[/gold].",
   "MASTER_OF_DUALITY_RUNE.flavor": "Lâmina e feitiço não precisam se reconciliar. Eles só precisam se revezar no trabalho.",
   "BIG_STRENGTH_RUNE.title": "Força Bruta",
   "BIG_STRENGTH_RUNE.description": "Causa [blue]{DamageBonusPercent}%[/blue] a mais de dano.",

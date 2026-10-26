@@ -166,6 +166,6 @@ internal enum MonsterHexKind
 	VineShambler = 156,       // 升级：藤蔓蹒跚者（黄金）
 	SpinyToad = 157,          // 升级：棘刺蟾蜍（棱彩）
 	ScrollOfBiting = 158,     // 升级：咬人卷轴（棱彩）
-	SpectralKnight = 159,     // 升级：幽灵骑士（棱彩）
+	SpectralKnight = 159,     // 升级：幽灵骑士（黄金）
 	OwlMagistrate = 160       // 升级：猫头鹰法官（黄金）
 }

@@ -274,7 +274,7 @@ internal static class HextechPlayerRuneRegistry
 		Rune<InfernalConduitRune>(HextechRarityTier.Prismatic, tagKey: "OUTPUT"),
 		Rune<DualWieldRune>(HextechRarityTier.Prismatic, tagKey: "OUTPUT"),
 		Rune<GoliathRune>(HextechRarityTier.Prismatic),
-		Rune<MasterOfDualityRune>(HextechRarityTier.Prismatic, flags: PlayerRuneFlags.Disabled),
+		Rune<MasterOfDualityRune>(HextechRarityTier.Prismatic),
 		Rune<HandOfBaronRune>(HextechRarityTier.Prismatic, tagKey: "SURVIVAL"),
 		Rune<CantTouchThisRune>(HextechRarityTier.Prismatic, tagKey: "SURVIVAL"),
 		Rune<QueenRune>(HextechRarityTier.Prismatic),
