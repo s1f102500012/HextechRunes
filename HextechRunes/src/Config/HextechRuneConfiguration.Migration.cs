@@ -60,8 +60,6 @@ internal static partial class HextechRuneConfiguration
 	/// <summary>敌方海克斯默认禁用迁移:只迁移一次,之后尊重玩家手动开启。</summary>
 	private static readonly (int BelowVersion, MonsterHexKind Kind)[] MonsterHexDefaultDisableMigrations =
 	[
-		// 我方已在 v22 默认禁用。
-		(36, MonsterHexKind.GetExcited),
 		// 我方同在 v42 默认禁用。
 		(42, MonsterHexKind.StartupRoutine)
 	];

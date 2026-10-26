@@ -14,6 +14,8 @@
 - hextech_relic_flavors.txt    纯生成物,全量重生成,flavor 一律取 zhs JSON。
 - hextech_relics_summary.txt   混合物,只做增量:补缺失条目、修 #禁用前缀/品级前缀;
                                描述永不覆盖(单条采纳用 --accept-json);删除需 --prune。
+                               排版每次统一(见 normalize_summary_layout):方括号标题,带品级的节
+                               按白银/黄金/棱彩分块、块内按注册表顺序、禁用条目排在块末。
 
 模式:
 - 默认只读预览: 报告差异;存在需落盘的差异时 exit 1。
@@ -720,19 +722,33 @@ def summary_truth(truth: Truth) -> dict[str, list[dict]]:
     return sections
 
 
-SUMMARY_PLAIN_SECTIONS = ("卡牌：", "怪物：", "属性锻造器：", "事件遗物：", "特定规则：")
+# 段名 -> 标题行。段名同时是 --accept-json 锚的前缀,不随标题改。
+SUMMARY_SECTION_HEADERS = {
+    **{name: name for name in TAG_SECTION_ORDER},
+    "卡牌": "[卡牌]",
+    "怪物": "[敌方海克斯]",
+    "属性锻造器": "[属性锻造器]",
+    "事件遗物": "[事件遗物]",
+    "特定规则": "[特定规则]",
+}
+SUMMARY_SECTION_ORDER = list(SUMMARY_SECTION_HEADERS)
+SUMMARY_RARITY_SECTIONS = {*TAG_SECTION_ORDER, "怪物", "属性锻造器"}
+# 标题行 -> 段名;兼容旧版“卡牌：”这类写法,同步时统一改成方括号标题。
+SUMMARY_HEADER_NAMES = {
+    **{header: name for name, header in SUMMARY_SECTION_HEADERS.items()},
+    **{f"{name}：": name for name in SUMMARY_SECTION_HEADERS if not name.startswith("[")},
+}
 SUMMARY_RARITY_ENTRY = re.compile(r"^(#?)(白银|黄金|棱彩)：(.+)$")
+SUMMARY_RARITY_ORDER = ("白银", "黄金", "棱彩")
 
 
 def summary_section_bounds(lines: list[str]) -> dict[str, tuple[int, int]]:
     """段名 -> (起始行号, 结束行号开区间)。"""
     marks: list[tuple[int, str]] = []
     for i, line in enumerate(lines):
-        stripped = line.strip()
-        if stripped in POOL_SECTION.values():
-            marks.append((i, stripped))
-        elif stripped in SUMMARY_PLAIN_SECTIONS:
-            marks.append((i, stripped.rstrip("：")))
+        name = SUMMARY_HEADER_NAMES.get(line.strip())
+        if name is not None:
+            marks.append((i, name))
     bounds: dict[str, tuple[int, int]] = {}
     for idx, (start, name) in enumerate(marks):
         end = marks[idx + 1][0] if idx + 1 < len(marks) else len(lines)
@@ -924,6 +940,66 @@ class SummarySync:
             report.append(f"summary: --accept-json 未匹配到锚: {', '.join(sorted(self.unknown_accepts))}")
 
 
+def _collapse_blank_lines(lines: list[str]) -> list[str]:
+    out: list[str] = []
+    for line in lines:
+        line = line.rstrip()
+        if line or (out and out[-1]):
+            out.append(line)
+    while out and not out[-1]:
+        out.pop()
+    return out
+
+
+def _rarity_section_body(body: list[str], entries: list[dict], known_titles: set[str]) -> list[str]:
+    """说明行在前;条目按品级分块,块内按注册表顺序,禁用条目排在块末,注册表外的旧条目排最后。"""
+    order = {(entry["rarity"], entry["title"]): i for i, entry in enumerate(entries)}
+    notes: list[str] = []
+    groups: dict[str, list[tuple[bool, int, int, str]]] = {rarity: [] for rarity in SUMMARY_RARITY_ORDER}
+    for line in body:
+        stripped = line.strip()
+        if not stripped:
+            continue
+        match = SUMMARY_RARITY_ENTRY.match(stripped)
+        if not match:
+            notes.append(stripped)
+            continue
+        rarity = match.group(2)
+        title, _ = split_titled(match.group(3), known_titles)
+        group = groups[rarity]
+        group.append((match.group(1) == "#", order.get((rarity, title), len(order)), len(group), stripped))
+    out = list(notes)
+    for rarity in SUMMARY_RARITY_ORDER:
+        items = sorted(groups[rarity])
+        if not items:
+            continue
+        if out:
+            out.append("")
+        out.extend(item[3] for item in items)
+    return out
+
+
+def normalize_summary_layout(text: str, sections: dict[str, list[dict]]) -> str:
+    """统一排版:方括号标题、节与节之间空一行;带品级的节按品级分块重排。手写描述与说明行原样保留。"""
+    lines = text.splitlines()
+    bounds = summary_section_bounds(lines)
+    known_titles = {entry["title"] for items in sections.values() for entry in items}
+    first = min((start for start, _ in bounds.values()), default=len(lines))
+    blocks: list[list[str]] = []
+    preamble = _collapse_blank_lines(lines[:first])
+    if preamble:
+        blocks.append(preamble)
+    for name in sorted(bounds, key=SUMMARY_SECTION_ORDER.index):
+        start, end = bounds[name]
+        body = lines[start + 1 : end]
+        if name in SUMMARY_RARITY_SECTIONS:
+            content = _rarity_section_body(body, sections.get(name, []), known_titles)
+        else:
+            content = _collapse_blank_lines(body)
+        blocks.append([SUMMARY_SECTION_HEADERS[name], *content])
+    return "\n\n".join("\n".join(block) for block in blocks) + "\n"
+
+
 def sync_summary(
     truth: Truth,
     current_text: str,
@@ -940,7 +1016,7 @@ def sync_summary(
     sync.handle_section("事件遗物", False, report)
     sync.pair_cross_section_moves()
     sync.schedule_inserts(prune)
-    text = sync.render()
+    text = normalize_summary_layout(sync.render(), sync.sections)
     sync.report_changes(report, prune)
     return text
 

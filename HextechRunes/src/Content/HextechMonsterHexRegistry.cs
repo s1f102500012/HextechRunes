@@ -36,7 +36,6 @@ internal static class HextechMonsterHexRegistry
 		Monster<AstralBodyRune>(MonsterHexKind.AstralBody, HextechRarityTier.Gold),
 		Monster<TankEngineRune>(MonsterHexKind.TankEngine, HextechRarityTier.Gold),
 		Monster<ShrinkEngineRune>(MonsterHexKind.ShrinkEngine, HextechRarityTier.Gold),
-		Monster<GetExcitedRune>(MonsterHexKind.GetExcited, HextechRarityTier.Gold),
 		Monster<TwiceThriceRune>(MonsterHexKind.TwiceThrice, HextechRarityTier.Gold),
 		Monster<LoopRune>(MonsterHexKind.Loop, HextechRarityTier.Gold),
 		Monster<ServantMasterRune>(MonsterHexKind.ServantMaster, HextechRarityTier.Gold),
@@ -68,7 +67,6 @@ internal static class HextechMonsterHexRegistry
 		Monster<CantTouchThisRune>(MonsterHexKind.CantTouchThis, HextechRarityTier.Prismatic),
 		Monster<MasterOfDualityRune>(MonsterHexKind.MasterOfDuality, HextechRarityTier.Prismatic),
 		Monster<GoldrendRune>(MonsterHexKind.Goldrend, HextechRarityTier.Prismatic),
-		Monster<FeelTheBurnRune>(MonsterHexKind.FeelTheBurn, HextechRarityTier.Prismatic, disabled: true),
 		Monster<BackToBasicsRune>(MonsterHexKind.BackToBasics, HextechRarityTier.Prismatic),
 		Monster<EntomancerHex>(MonsterHexKind.MadScientist, HextechRarityTier.Prismatic),
 		Monster<FeyMagicRune>(MonsterHexKind.FeyMagic, HextechRarityTier.Prismatic),
@@ -103,7 +101,6 @@ internal static class HextechMonsterHexRegistry
 		Monster<OmniDragonSoulRune>(MonsterHexKind.OmniDragonSoul, HextechRarityTier.Prismatic),
 
 		Monster<CorrosionRune>(MonsterHexKind.Corrosion, HextechRarityTier.Silver),
-		Monster<BrutalityRune>(MonsterHexKind.Brutality, HextechRarityTier.Silver, disabled: true),
 		Monster<JudicatorRune>(MonsterHexKind.Judicator, HextechRarityTier.Gold),
 		Monster<SoulEaterRune>(MonsterHexKind.SoulEater, HextechRarityTier.Gold),
 		Monster<DeathHarvestRune>(MonsterHexKind.DeathHarvest, HextechRarityTier.Gold),

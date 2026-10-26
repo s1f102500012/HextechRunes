@@ -1,8 +1,24 @@
 namespace HextechRunes;
 
-internal sealed class MoreTheMerrierEnemyHex : HextechEnemyHexEffect
+internal sealed class MoreTheMerrierEnemyHex : HextechEnemyHexEffect, IHextechEnemyMaxHpCoefficientProvider
 {
 	internal override MonsterHexKind Kind => MonsterHexKind.MoreTheMerrier;
+
+	internal override int PersistentOrder => 37;
+
+	// 最大生命与由心及物同一做法：开战时的所有敌人、战斗中新加入的敌人各结算一次，首领转阶段重放时随最大生命一起补算。
+	internal override async Task ApplyPersistentToEnemy(HextechEnemyHexContext context, Creature creature, int? maxHpBaseOverride, bool replayOneShotPowers)
+	{
+		if (HextechCombatProcTracker.TryMarkPersistentHexApplied(context.Tracking.MoreTheMerrierApplied, creature, replayOneShotPowers))
+		{
+			await context.Modifier.ReapplyMonsterMaxHpCoefficients(creature, maxHpBaseOverride);
+		}
+	}
+
+	public decimal GetMaxHpBonusFraction(HextechEnemyHexContext context, Creature creature)
+	{
+		return GetMultiplier(context) - 1m;
+	}
 
 	internal override decimal ModifyDamageMultiplicative(HextechEnemyHexContext context, Creature? target, decimal amount, ValueProp props, Creature? dealer, CardModel? cardSource)
 	{

@@ -85,6 +85,7 @@ internal sealed partial class HextechMayhemModifier
 			|| CombatTracking.StatsOnStatsOnStatsApplied.Contains(combatId)
 			|| CombatTracking.MadScientistApplied.Contains(combatId)
 			|| CombatTracking.MindToMatterApplied.Contains(combatId)
+			|| CombatTracking.MoreTheMerrierApplied.Contains(combatId)
 			|| CombatTracking.TankEngineStacks.GetValueOrDefault(combatId, 0) > 0;
 	}
 
