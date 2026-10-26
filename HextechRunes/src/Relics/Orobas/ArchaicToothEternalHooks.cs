@@ -34,7 +34,8 @@ internal static class ArchaicToothEternalHooks
 		private static void Prefix(ArchaicTooth __instance, out ConversionScope __state)
 		{
 			__state = new ConversionScope(__instance,
-				HextechMayhemModifier.IsEnabledForRun(__instance.Owner.RunState), Current.Value);
+				HextechMayhemModifier.IsEnabledForRun(__instance.Owner.RunState)
+					&& !HextechGodslayerTrial.IsTrialRun(__instance.Owner.RunState), Current.Value);
 			Current.Value = __state;
 		}
 
@@ -69,7 +70,8 @@ internal static class ArchaicToothEternalHooks
 		private static void Postfix(ArchaicTooth __instance, CardModel starterCard, CardModel __result)
 		{
 			if (!starterCard.Keywords.Contains(CardKeyword.Eternal)
-				|| !HextechMayhemModifier.IsEnabledForRun(starterCard.Owner.RunState))
+				|| !HextechMayhemModifier.IsEnabledForRun(starterCard.Owner.RunState)
+				|| HextechGodslayerTrial.IsTrialRun(starterCard.Owner.RunState))
 			{
 				return;
 			}

@@ -170,7 +170,7 @@
   "HEXTECH_SIGNAL_ECHO_2": "Vocês acharam mesmo que o poder hextec era um presente? Não passa do andaime que deixei dentro da Torre.",
   "HEXTECH_SIGNAL_ECHO_3": "Querem deixá-lo de lado? Sem o que eu construí, vocês não passariam do primeiro andar.",
   "HEXTECH_SIGNAL_ECHO_4": "Então subam de mãos vazias. Quero ver em que andar vocês vão se espatifar.",
-  "HEXTECH_GODSLAYER_TRIAL_ON": "Provação do Matador de Deuses ativada: partidas solo desligam todo o conteúdo hextec e concedem Matador de Deuses no Ato 1. Ela se desliga sozinha quando você mata o deus no topo da Torre.",
+  "HEXTECH_GODSLAYER_TRIAL_ON": "Provação do Matador de Deuses ativada: em partidas solo você não recebe nenhum hextec, mas os inimigos continuam recebendo hextec com a configuração padrão. Você recebe Matador de Deuses no Ato 1. Ela se desliga sozinha quando você mata o deus no topo da Torre.",
   "HEXTECH_GODSLAYER_TRIAL_OFF": "Provação do Matador de Deuses desativada.",
   "HEXTECH_GODSLAYER_TRIAL_EXIT": "Sair da Provação do Matador de Deuses",
   "HEXTECH_GODSLAYER_FINALE_1": "…Pare.",

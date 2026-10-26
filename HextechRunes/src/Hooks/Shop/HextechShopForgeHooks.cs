@@ -45,7 +45,9 @@ internal static class HextechShopForgeHooks
 		// 模组总开关:商店随机锻造器是无条件注入普通局的少数泄漏点之一,按本局冻结值门控。
 		// 无 run/modifier 时:联机局固定 false(实时本地配置在两端可能不同,而这里门控的是
 		// MerchantInventory 模型写入,按本地配置各走一边会库存分叉);单机局退回实时配置。
-		if (!HextechMayhemModifier.IsEnabledForRun(player.RunState))
+		// 弑神试炼局我方不拿任何模组内容，商店也不卖锻造器。
+		if (!HextechMayhemModifier.IsEnabledForRun(player.RunState)
+			|| HextechGodslayerTrial.IsTrialRun(player.RunState))
 		{
 			return;
 		}

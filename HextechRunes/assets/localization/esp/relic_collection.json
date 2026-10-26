@@ -170,7 +170,7 @@
   "HEXTECH_SIGNAL_ECHO_2": "¿De verdad creían que el poder hextech era un regalo? No es más que el andamio que dejé dentro de la Aguja.",
   "HEXTECH_SIGNAL_ECHO_3": "¿Quieren prescindir de él? Sin lo que yo construí, no pasarían del primer piso.",
   "HEXTECH_SIGNAL_ECHO_4": "Entonces suban con las manos vacías. Ya veremos en qué piso se estrellan.",
-  "HEXTECH_GODSLAYER_TRIAL_ON": "Prueba del Matadioses activada: las partidas en solitario desactivan todo el contenido hextech y otorgan Matadioses en el Acto 1. Se desactiva sola al matar al dios en la cima de la Aguja.",
+  "HEXTECH_GODSLAYER_TRIAL_ON": "Prueba del Matadioses activada: en partidas en solitario no tendrás ningún hextech, pero los enemigos seguirán obteniéndolo con la configuración predeterminada. Recibirás Matadioses en el Acto 1. Se desactiva sola al matar al dios en la cima de la Aguja.",
   "HEXTECH_GODSLAYER_TRIAL_OFF": "Prueba del Matadioses desactivada.",
   "HEXTECH_GODSLAYER_TRIAL_EXIT": "Salir de la Prueba del Matadioses",
   "HEXTECH_GODSLAYER_FINALE_1": "…Detente.",

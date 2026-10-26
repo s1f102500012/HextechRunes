@@ -40,7 +40,8 @@ internal static class OrobasPlusUpgrades
 			// 图鉴传入无 Owner 的 canonical 模型。单机旧局/控制台可能没有 Mayhem modifier，
 			// 沿用统一开关判断；联机缺少同步快照时该入口不会采用各端本地配置。
 			bool active = starterRelic.IsMutable && starterRelic.Owner is Player owner
-				&& HextechMayhemModifier.IsEnabledForRun(owner.RunState);
+				&& HextechMayhemModifier.IsEnabledForRun(owner.RunState)
+				&& !HextechGodslayerTrial.IsTrialRun(owner.RunState);
 			__result = ResolveUpgrade(starterRelic, __result, active);
 		}
 	}

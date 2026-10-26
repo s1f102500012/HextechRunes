@@ -98,8 +98,6 @@ internal static partial class HextechRuneSelectionCoordinator
 			// 多个敌方海克斯再丢弃，否则仍会推进原版 Niche 随机流。
 			if (modifier.FreezeModActiveForRunAndCheckDisabled())
 			{
-				// 弑神试炼局同样关闭模组内容，只在第一幕补发弑神；中途关掉界面时本幕保持未决，下次进入再弹。
-				await HextechGodslayerTrial.GrantForFirstActAsync(runState, modifier, actIndex);
 				modifier.SetMonsterHexesForAct(actIndex, []);
 				modifier.SetStageResolved(actIndex, true);
 				HextechEnemyUi.Refresh(modifier);
@@ -116,6 +114,9 @@ internal static partial class HextechRuneSelectionCoordinator
 			{
 				return;
 			}
+
+			// 弑神试炼局我方没有海克斯：第一幕在敌方海克斯之后补发弑神；中途退出时本幕保持未决，读档后重新走一遍。
+			await HextechGodslayerTrial.GrantForFirstActAsync(runState, modifier, actIndex);
 
 			// 退出清理期间选择界面被原版清掉，任务链会在 State 仍指向本局时续跑到这里；此时不能标记本幕已决。
 			if (!IsCurrentRunInProgress(runState))
