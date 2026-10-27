@@ -86,7 +86,7 @@ public sealed class SignalNoiseConsoleCmd : AbstractConsoleCmd
 		return base.GetArgumentCompletions(player, args);
 	}
 
-	// 直接把弑神给到本局，用来测建筑师的对话替换，不经过试炼局。
+	// 直接把弑神给到本局；对话替换只在试炼局生效，测结局要先 trial on 再开新局。
 	private static CmdResult GrantGodslayer(Player? player)
 	{
 		if (player == null)
@@ -100,7 +100,7 @@ public sealed class SignalNoiseConsoleCmd : AbstractConsoleCmd
 		}
 
 		TaskHelper.RunSafely(RelicCmd.Obtain(ModelDb.Relic<GodslayerRune>().ToMutable(), player));
-		return new CmdResult(success: true, "已获得弑神。");
+		return new CmdResult(success: true, "已获得弑神（只有试炼局里才会替换建筑师对话）。");
 	}
 
 	private static string GetUsage()

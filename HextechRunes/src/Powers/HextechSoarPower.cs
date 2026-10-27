@@ -15,6 +15,13 @@ public sealed class HextechSoarPower : HextechPowerBase
 		return target == Owner && props.IsPoweredAttack() ? DamageMultiplier : 1m;
 	}
 
+	// 表现：持有期间立绘漂浮摇晃（HextechSoarFloatDriver 自行在失去翱翔后落地）。
+	public override Task AfterApplied(Creature? applier, CardModel? cardSource)
+	{
+		HextechSoarFloatDriver.EnsureFloating(Owner);
+		return Task.CompletedTask;
+	}
+
 	public override async Task AfterTurnEnd(PlayerChoiceContext choiceContext, CombatSide side)
 	{
 		if (side == CombatSide.Enemy && Amount > 0)
