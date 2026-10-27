@@ -200,6 +200,8 @@ internal static class HextechAssetHooks
 			HextechVitalSparkPower => ModelDb.Power<VitalSparkPower>().Icon,
 			HextechHangPower => ModelDb.Power<HangPower>().Icon,
 			HextechNeurosurgePower => ModelDb.Power<NeurosurgePower>().Icon,
+			HextechSoarPower => ModelDb.Power<SoarPower>().Icon,
+			HextechHexPower => ModelDb.Power<HexPower>().Icon,
 			_ => null
 		};
 		if (vanillaIcon != null)
