@@ -92,10 +92,30 @@ public sealed class EnchantmentMasterRune : HextechRelicBase
 		IReadOnlyList<EnchantmentModel> options = candidateOptions[cardIndex];
 		EnchantmentModel canonical = options[HextechRunesApi.StableIndex(runState, options.Count, "enchantment-master", netId, "enchant")];
 
-		CardCmd.Enchant(canonical.ToMutable(), target, 1m);
+		// 牌组里的牌全都有附魔时,候选只剩被多重附魔类模组放宽了 CanEnchant 的牌,而实际施加仍可能被原版
+		// CardCmd.Enchant 或这些模组拒绝并抛异常。本方法同步执行,异常会直接打断战斗胜利钩子,战斗结束卡死;
+		// 施加失败只放弃这一次附魔。原版的抛出点在写入状态之前,两端同样失败,不会分叉。
+		try
+		{
+			CardCmd.Enchant(canonical.ToMutable(), target, 1m);
+		}
+		catch (Exception ex)
+		{
+			SponsorLog.Warn(LogTag, $"Skipped enchanting {target.Id.Entry} with {canonical.Id.Entry}: {ex.GetType().Name}: {ex.Message}");
+			return Task.CompletedTask;
+		}
+
 		SponsorLog.Info(LogTag, $"Enchanted {target.Id.Entry} with {canonical.Id.Entry}");
-		Flash();
-		CardCmd.Preview(target);
+		try
+		{
+			Flash();
+			CardCmd.Preview(target);
+		}
+		catch (Exception ex)
+		{
+			SponsorLog.Warn(LogTag, $"Enchant preview failed for {target.Id.Entry}: {ex.GetType().Name}: {ex.Message}");
+		}
+
 		return Task.CompletedTask;
 	}
 

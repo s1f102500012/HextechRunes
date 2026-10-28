@@ -93,6 +93,18 @@ internal static partial class Program
 	}
 
 	[HextechTest]
+	private static void HopperSkipsTrainingDummyEventTargets()
+	{
+		foreach (Type dummy in new[] { typeof(BattleFriendV1), typeof(BattleFriendV2), typeof(BattleFriendV3) })
+		{
+			Expect(ThievingHopperEnemyHex.IsTrainingDummy((MonsterModel)RuntimeHelpers.GetUninitializedObject(dummy)), $"{dummy.Name} is a training dummy and cannot steal");
+		}
+
+		Expect(!ThievingHopperEnemyHex.IsTrainingDummy((MonsterModel)RuntimeHelpers.GetUninitializedObject(typeof(ThievingHopper))), "ordinary enemies can still steal");
+		Expect(!ThievingHopperEnemyHex.IsTrainingDummy(null), "creatures without a monster model are not dummies");
+	}
+
+	[HextechTest]
 	private static void BloodIdolNonCombatLossLeavesOneHp()
 	{
 		Equal(1, BloodIdolEnemyHex.NonCombatHpAfterGold(1), "collecting gold at one HP cannot kill a player outside combat");
