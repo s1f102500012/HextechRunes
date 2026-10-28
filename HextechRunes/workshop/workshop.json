@@ -4,7 +4,7 @@
   "description": "[h1] Supported Languages [/h1]\nEnglish\n简体中文\n한국어 (Contributors: 我有幸福症, oatone, Nark)\nEspañol\n日本語\nPortuguês do Brasil (Contributor: floca)\nภาษาไทย\nРусский (Contributor: Dragon enjoyer)\n\n[h1] Introduction [/h1]\nThis mod adds a Hextech Rune system inspired by League of Legends to Slay the Spire 2. It is a popular large-scale expansion mod for Slay the Spire 2.\n\nThere are currently 300+ Hextech Runes with a wide variety of effects. At the start of each act, you choose one random Hextech Rune, while monsters also randomly gain a Hextech of the same rarity — both sides then fight under ever-changing rules.\n\nThe mod also adds character-specific Hextechs, stat forgers, brand-new cards, and statistics feedback, giving every run a different build direction and challenge pacing.\n\n[img]https://i.mji.rip/2026/06/19/7459c0449d26c3e1a35bd5b020bd3961.png[/img]\n[img]https://i.mji.rip/2026/06/19/a7431d3a5ca25b7c5fa80026a0ba2496.webp[/img]\n\nIf you enjoy my mod, you can support me on Afdian: https://ifdian.net/a/Lu-Ran\nGithub: https://github.com/s1f102500012/HextechRunes\nQQ Group: 1077728669",
   "updateDescription": false,
   "visibility": "public",
-  "changeNote": "海斗0.9.9热修：\n修复了“升级：猫头鹰法官”的翱翔与“升级：幽灵骑士”的恶咒能力图标显示为占位图的问题；\n敌人拥有翱翔时，会略微漂浮在空中并轻微摇晃；\n修复了部分对局中建筑师事件的对话异常；",
+  "changeNote": "海斗0.9.9热修2：\n接入Steam游玩统计，会向Steam上报本模组的游玩时长与游戏次数；\n“升级：偷窃草蜢”不再让训练人偶事件中的靶子偷牌；",
   "tags": [
     "Gameplay",
     "Modifiers",

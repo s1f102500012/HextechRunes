@@ -1,6 +1,7 @@
 using System.Globalization;
 using Godot;
 using MegaCrit.Sts2.Core.Models.Enchantments;
+using MegaCrit.Sts2.Core.Models.Monsters;
 using MegaCrit.Sts2.Core.MonsterMoves.Intents;
 using MegaCrit.Sts2.Core.MonsterMoves.MonsterMoveStateMachine;
 using MegaCrit.Sts2.Core.Nodes.Combat;
@@ -20,12 +21,17 @@ internal sealed class ThievingHopperEnemyHex : HextechEnemyHexEffect
 	{
 		return enemy.Side == CombatSide.Enemy && !enemy.IsDead && !enemy.IsStunned
 			&& !HasTheftBlockingPower(enemy.Powers)
+			&& !IsTrainingDummy(enemy.Monster)
 			&& enemy.CombatId is uint id && enemy.CombatState is { } combat && combat.RunState == context.RunState
 			&& !IsProtectedBoss(combat.Encounter?.RoomType, enemy.IsPrimaryEnemy)
 			&& HextechCombatProcTracker.GetGlobalProcsInCombat(context.Tracking, TheftKey(id)) == 0
 			&& enemy.Monster is { } monster && monster.NextMove.Id != EscapeMoveId
 			&& !monster.NextMove.Intents.Any(i => i.IntentType is IntentType.Escape or IntentType.Stun);
 	}
+
+	// 训练人偶事件的靶子只有一个什么都不做的行动，是给玩家限时输出用的；偷牌逃跑会让事件直接没有靶子可打。
+	internal static bool IsTrainingDummy(MonsterModel? monster)
+		=> monster is BattleFriendV1 or BattleFriendV2 or BattleFriendV3;
 
 	internal static bool IsProtectedBoss(RoomType? roomType, bool isPrimaryEnemy)
 		=> roomType == RoomType.Boss && isPrimaryEnemy;

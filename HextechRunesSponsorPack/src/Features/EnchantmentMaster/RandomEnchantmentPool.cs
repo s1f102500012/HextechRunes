@@ -1,3 +1,4 @@
+using MegaCrit.Sts2.Core.Entities.Cards;
 using MegaCrit.Sts2.Core.Models;
 using MegaCrit.Sts2.Core.Models.Enchantments;
 
@@ -38,13 +39,21 @@ internal static class RandomEnchantmentPool
 		List<EnchantmentModel> legal = [];
 		foreach (EnchantmentModel enchantment in pool)
 		{
-			if (CanEnchantSafely(enchantment, card))
+			if (CanEnchantSafely(enchantment, card) && HasRequiredTarget(enchantment, card))
 			{
 				legal.Add(enchantment);
 			}
 		}
 
 		return legal;
+	}
+
+	// 原版墨影(Inky)的 CanEnchant 不看目标:打出时对 cardPlay.Target 施加虚弱(只有群体牌改用全体敌人)。
+	// 原版只把它附在小刀上;随机附到自身/无目标/队友目标的牌上,打出时 Target 为空,出牌管线抛异常,牌悬着卡死。
+	internal static bool HasRequiredTarget(EnchantmentModel enchantment, CardModel card)
+	{
+		return enchantment is not Inky
+			|| card.TargetType is TargetType.AnyEnemy or TargetType.AllEnemies;
 	}
 
 	private static bool CanEnchantSafely(EnchantmentModel enchantment, CardModel card)

@@ -1,4 +1,6 @@
+using System.Runtime.CompilerServices;
 using HarmonyLib;
+using HextechRunes;
 using MegaCrit.Sts2.Core.Modding;
 
 namespace HextechRunesSponsorPack;
@@ -9,6 +11,7 @@ public static class ModEntry
 	private const string PrerequisiteAssemblyName = "HextechRunes";
 	private const string HarmonyId = "Natsuki.HextechRunesSponsorPack";
 	private const string LogTag = "Init";
+	private const ulong WorkshopItemId = 3749708876UL;
 
 	private static readonly object InitializeLock = new();
 	private static bool _waitingForPrerequisite;
@@ -106,6 +109,8 @@ public static class ModEntry
 			SponsorLog.Error(LogTag, $"Patch application aborted: {ex}");
 		}
 
+		StartWorkshopPlaytimeTracking();
+
 		if (_patchesApplied)
 		{
 			SponsorLog.Info(LogTag, "Loaded and registered HextechRunes sponsor-pack content.");
@@ -114,6 +119,26 @@ public static class ModEntry
 		{
 			SponsorLog.Error(LogTag, "Sponsor-pack content is registered, but required patches did not all apply; affected features stay inactive (see the patch summary above).");
 		}
+	}
+
+	// 让 Steam 统计拓展包创意工坊物品的游玩时长。本体旧版没有这个 API 时 JIT 会在进入方法时抛
+	// MissingMethodException,所以调用单独放在不内联的方法里,由外层捕获,不影响内容注册。
+	private static void StartWorkshopPlaytimeTracking()
+	{
+		try
+		{
+			StartWorkshopPlaytimeTrackingCore();
+		}
+		catch (Exception ex)
+		{
+			SponsorLog.Warn(LogTag, $"Workshop playtime is not reported: {ex.GetType().Name}: {ex.Message}");
+		}
+	}
+
+	[MethodImpl(MethodImplOptions.NoInlining)]
+	private static void StartWorkshopPlaytimeTrackingCore()
+	{
+		HextechRunesApi.StartWorkshopPlaytimeTracking(WorkshopItemId);
 	}
 
 	// 兼容本体与二创(synergy)版:两者都打包了程序集名为 "HextechRunes" 的 dll(暴露同样的 HextechRunesApi)。

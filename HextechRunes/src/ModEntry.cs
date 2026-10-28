@@ -30,6 +30,7 @@ public static class ModEntry
 			HextechModelPoolRegistrar.RegisterModels();
 			HextechRuneConfiguration.Initialize();
 			HextechTelemetry.Initialize();
+			HextechWorkshopPlaytime.Start(HextechWorkshopPlaytime.HextechRunesItemId);
 			HextechIntegratedStrategyEventsCompat.Install();
 			// 选择界面特效的数据与贴图在后台预先解码，避免第一次打开选择界面时卡一下。
 			HextechKiwiVfxPlayer.BeginWarmup();

@@ -110,6 +110,32 @@ internal static partial class Program
 
 	}
 
+	// 墨影打出时对出牌目标施加虚弱,只能随机附在选敌人目标或群体攻击的牌上,否则打出时目标为空、悬牌卡死。
+	[HextechTest]
+	private static void RandomEnchantmentPoolOnlyGivesInkyToEnemyTargetedCards()
+	{
+		EnchantmentModel inky = (Inky)RuntimeHelpers.GetUninitializedObject(typeof(Inky));
+		EnchantmentModel steady = (Steady)RuntimeHelpers.GetUninitializedObject(typeof(Steady));
+		EnchantmentModel[] pool = [ inky, steady ];
+		foreach ((TargetType target, bool allowed) in new[]
+		{
+			(TargetType.AnyEnemy, true),
+			(TargetType.AllEnemies, true),
+			(TargetType.Self, false),
+			(TargetType.None, false),
+			(TargetType.RandomEnemy, false),
+			(TargetType.AnyAlly, false)
+		})
+		{
+			CardModel card = (Bash)RuntimeHelpers.GetUninitializedObject(typeof(Bash));
+			SetAutoProperty(card, nameof(CardModel.Type), CardType.Skill);
+			SetAutoProperty(card, nameof(CardModel.TargetType), target);
+			Expect(inky.CanEnchant(card), $"vanilla Inky.CanEnchant ignores the {target} target");
+			Equal(allowed, RandomEnchantmentPool.GetLegalEnchantments(card, pool).Contains(inky), $"Inky legality for a {target} card");
+			Expect(RandomEnchantmentPool.GetLegalEnchantments(card, pool).Contains(steady), $"other enchantments stay legal for a {target} card");
+		}
+	}
+
 	// 复合附魔只剩一个只读迁移壳:恒不可附、只保留 SavedEnchantmentsJson 这一个 [SavedProperty](net-id 布局不变)、
 	// 保留 OnEnchant 作为读档迁移入口。真正的迁移路径要 ModelDb + SaveUtil 造内层附魔,测试进程里无法执行。
 	[HextechTest]

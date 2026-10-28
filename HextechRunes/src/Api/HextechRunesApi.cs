@@ -373,6 +373,15 @@ public static class HextechRunesApi
 	}
 
 	/// <summary>
+	/// 让 Steam 为该创意工坊物品统计游玩时长与会话数;在模组入口调用一次即可,重复调用会被忽略。
+	/// Steam 未初始化或调用失败时只记日志,不抛异常。
+	/// </summary>
+	public static void StartWorkshopPlaytimeTracking(ulong publishedFileId)
+	{
+		HextechWorkshopPlaytime.Start(publishedFileId);
+	}
+
+	/// <summary>
 	/// 运行种子稳定随机:在 [0, <paramref name="count"/>) 中取一个下标,不消耗任何共享 RNG。
 	/// 输入为本局种子、当前幕、当前总层数与盐(按顺序以 "|" 连接),两端输入一致就得到同一结果,可在联机两端对称执行。
 	/// 同一层内重复抽取须在盐里放入区分量(序号、玩家等)。算法与本体 HextechStableRandom 相同且保持不变。
