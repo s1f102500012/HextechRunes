@@ -13,8 +13,13 @@ internal static class HextechForgeGrantHelper
 
 	// firstOrdinal 让中断后的补发从已完成的序号接着走：序号与 player.Relics.Count 都是候选盐值，
 	// 背包没有其他变化时，接续第 k 个与一次发完时的第 k 个候选相同。afterEachForge 在每一步（含被配置禁用而拦下的一步）
-	// 结束后调用，供调用方把进度写进存档。
-	internal static async Task<bool> TryObtainRandomForges(Player player, int count, int firstOrdinal = 0, Action? afterEachForge = null)
+	// 结束后调用，供调用方把进度写进存档。afterObtained 在每个锻造器获得后调用（被配置拦下时也会调用，由回调自己的获得流程再拦一次）。
+	internal static async Task<bool> TryObtainRandomForges(
+		Player player,
+		int count,
+		int firstOrdinal = 0,
+		Action? afterEachForge = null,
+		Func<RelicModel, Task>? afterObtained = null)
 	{
 		for (int i = firstOrdinal; i < firstOrdinal + count; i++)
 		{
@@ -30,6 +35,11 @@ internal static class HextechForgeGrantHelper
 			}
 
 			await ObtainSelectedForge(player, selected, syncObtainedRelic: false);
+			if (afterObtained != null)
+			{
+				await afterObtained(selected);
+			}
+
 			afterEachForge?.Invoke();
 		}
 

@@ -229,12 +229,23 @@ internal static partial class Program
 	private static void EnemyHexCountStateNormalizesMissingAndOutOfRangeValues()
 	{
 		SequenceEqual(new[] { 1, 1, 1 }, HextechRuneConfiguration.NormalizePlayerHexCounts(null), "null player count snapshot");
-		SequenceEqual(new[] { 1, 2, 3 }, HextechHexCountState.NormalizeEnemyCounts(null), "null enemy count snapshot");
-		SequenceEqual(new[] { 0, 6, 3 }, HextechHexCountState.NormalizeEnemyCounts([ -1, 7 ]), "partial clamped enemy count snapshot");
+		SequenceEqual(new[] { 2, 2, 2 }, HextechHexCountState.NormalizeEnemyCounts(null), "null enemy count snapshot");
+		SequenceEqual(new[] { 0, 6, 2 }, HextechHexCountState.NormalizeEnemyCounts([ -1, 7 ]), "partial clamped enemy count snapshot");
 
 		HextechHexCountState state = new(HextechHexCountState.NormalizeEnemyCounts);
 		state.Set([ 2, 3, 4, 5 ]);
 		SequenceEqual(new[] { 2, 3, 4 }, state.Snapshot, "state should keep exactly three normalized act counts");
+	}
+
+	// 只迁移仍是旧默认值 1/2/3 的配置;玩家改过的数量、已迁移过的配置都不动。
+	[HextechTest]
+	private static void EnemyHexCountMigrationOnlyRewritesOldDefault()
+	{
+		(int version, int[] migrated) = HextechRuneConfiguration.MigrateEnemyHexCountsForTests(45, [ 1, 2, 3 ]);
+		Equal(CurrentConfigVersion, version, "migrated config version");
+		SequenceEqual(new[] { 2, 2, 2 }, migrated, "old default enemy counts migrate to the new default");
+		SequenceEqual(new[] { 1, 3, 3 }, HextechRuneConfiguration.MigrateEnemyHexCountsForTests(45, [ 1, 3, 3 ]).EnemyHexCountsByAct, "customized enemy counts stay");
+		SequenceEqual(new[] { 1, 2, 3 }, HextechRuneConfiguration.MigrateEnemyHexCountsForTests(46, [ 1, 2, 3 ]).EnemyHexCountsByAct, "a later manual 1/2/3 stays");
 	}
 
 	[HextechTest]
@@ -242,7 +253,7 @@ internal static partial class Program
 	{
 		HextechRunConfigurationSnapshot snapshot = HextechRuneConfiguration.GetDefaultSnapshot();
 		SequenceEqual(new[] { 1, 1, 1 }, snapshot.PlayerHexCountsByAct, "default player act counts");
-		SequenceEqual(new[] { 1, 2, 3 }, snapshot.EnemyHexCountsByAct, "default enemy act counts");
+		SequenceEqual(new[] { 2, 2, 2 }, snapshot.EnemyHexCountsByAct, "default enemy act counts");
 		Equal(1, snapshot.PlayerRuneRerollLimit, "default player reroll limit");
 		Equal(1, snapshot.MonsterHexRerollLimit, "default monster reroll limit");
 		SequenceEqual(
@@ -506,7 +517,7 @@ internal static partial class Program
 
 		context.ResetForDebugMonsterHex(2, MonsterHexKind.PandorasBox, HextechRarityTier.Prismatic);
 
-		SequenceEqual(new[] { 1, 2, 3 }, context.EnemyHexCounts.Snapshot, "debug reset enemy count snapshot");
+		SequenceEqual(new[] { 2, 2, 2 }, context.EnemyHexCounts.Snapshot, "debug reset enemy count snapshot");
 		Equal(0, context.HexCountRecoveryBaseline, "debug reset recovery baseline");
 		Equal(0, context.MonsterHexStrengthTierFloor, "debug reset strength floor");
 		Equal(0, context.EnemyTezcatarasMercyCombatCounter, "debug reset tezcataras counter");

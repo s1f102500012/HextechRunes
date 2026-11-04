@@ -68,7 +68,12 @@ public sealed class HundredRefinementsRune : HextechRelicBase
 			return;
 		}
 
-		await HextechForgeGrantHelper.ObtainRandomForges(Owner, Math.Max(0, DynamicVars["ForgeCount"].IntValue));
+		// 锻体顶替的是卡牌奖励，换来的锻造器按奖励算，复视照常复制。
+		Player owner = Owner;
+		_ = await HextechForgeGrantHelper.TryObtainRandomForges(
+			owner,
+			Math.Max(0, DynamicVars["ForgeCount"].IntValue),
+			afterObtained: forge => DoubleVisionRune.DuplicateReplicatedForge(owner, forge));
 	}
 
 	private static IReadOnlyList<HundredRefinementsRune> GetActiveRunes(Player player)

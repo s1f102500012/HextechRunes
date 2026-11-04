@@ -21,10 +21,12 @@ public sealed class BrutalityRune : HextechRelicBase
 		}
 
 		Flash();
-		if (Owner.Creature.CurrentHp > 1)
+		// 走原版失去生命流程(与放血相同的伤害属性)，撕裂等按本场失去生命次数计数的牌和能力才会算上它；
+		// 失去量截到当前生命 - 1，保持不会自杀。
+		decimal hpLoss = Math.Min(DynamicVars["HpLoss"].BaseValue, Owner.Creature.CurrentHp - 1);
+		if (hpLoss > 0m)
 		{
-			decimal nextHp = Math.Max(1m, Owner.Creature.CurrentHp - DynamicVars["HpLoss"].BaseValue);
-			await CreatureCmd.SetCurrentHp(Owner.Creature, nextHp);
+			await CreatureCmd.Damage(choiceContext, Owner.Creature, hpLoss, ValueProp.Unblockable | ValueProp.Unpowered, null, null);
 		}
 
 		await CardPileCmd.Draw(choiceContext, DynamicVars.Cards.BaseValue, Owner, fromHandDraw: false);

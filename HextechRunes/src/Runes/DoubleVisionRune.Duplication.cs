@@ -234,6 +234,26 @@ public sealed partial class DoubleVisionRune
 		}
 	}
 
+	// 卡牌奖励的替代选项（百炼成钢的锻体）在所有端按同步选择对称执行，原锻造器本身也是各端各自获得、不广播。
+	// 复制份照同样方式在所有端各自获得:不走本地持有者闸门和 syncObtainedRelic 广播,否则远端会多拿一份。
+	// 附魔锻造器拾起时的选牌走选择同步协议,所有端一起进入,与原锻造器一致。
+	internal static async Task DuplicateReplicatedForge(Player player, RelicModel forge)
+	{
+		ModelId forgeId = forge.CanonicalId();
+		if (forgeId == ModelId.none)
+		{
+			return;
+		}
+
+		foreach (DoubleVisionRune rune in GetEventActiveRunes(player))
+		{
+			RelicModel copy = ModelDb.GetById<RelicModel>(forgeId).ToMutable();
+			rune.Flash();
+			await RunWithCommandDuplicationSuppressed(
+				() => HextechForgeGrantHelper.ObtainSelectedForge(player, copy, syncObtainedRelic: false));
+		}
+	}
+
 	private async Task DuplicateForgeById(Player player, ModelId forgeId)
 	{
 		// (B1)附魔锻造的 AfterObtained 会开交互式选牌(FromDeckForEnchantment),必须走「持有者开UI+SyncLocalChoice、

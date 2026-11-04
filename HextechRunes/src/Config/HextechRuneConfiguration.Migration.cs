@@ -142,6 +142,12 @@ internal static partial class HextechRuneConfiguration
 		{
 			config.MonsterHexRerollLimit = DefaultMonsterHexRerollLimit;
 		}
+
+		// 敌方海克斯数量默认由 1/2/3 改为 2/2/2:只迁移仍是旧默认值的配置,玩家改过的保持不变。
+		if (previousConfigVersion < 46 && config.EnemyHexCountsByAct is [ 1, 2, 3 ])
+		{
+			config.EnemyHexCountsByAct = GetDefaultEnemyHexCountsByAct();
+		}
 	}
 
 	private static void ClampLoadedConfigValues(RuneConfig config)
@@ -229,6 +235,19 @@ internal static partial class HextechRuneConfiguration
 		};
 		RuneConfig normalized = NormalizeLoadedConfig(config);
 		return (normalized.ConfigVersion, normalized.MonsterHexRerollLimit);
+	}
+
+	internal static (int ConfigVersion, int[] EnemyHexCountsByAct) MigrateEnemyHexCountsForTests(
+		int configVersion,
+		int[] enemyHexCounts)
+	{
+		RuneConfig config = new()
+		{
+			ConfigVersion = configVersion,
+			EnemyHexCountsByAct = enemyHexCounts
+		};
+		RuneConfig normalized = NormalizeLoadedConfig(config);
+		return (normalized.ConfigVersion, normalized.EnemyHexCountsByAct!);
 	}
 
 	private static HashSet<string> GetPlayerRuneIds(IEnumerable<Type> runeTypes)
