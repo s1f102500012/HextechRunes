@@ -95,6 +95,7 @@ reward.event-option | MegaCrit.Sts2.Core.Events.EventOption.Chosen() | finalizer
 reward.from-serializable | MegaCrit.Sts2.Core.Rewards.Reward.FromSerializable(SerializableReward,Player) | postfix(400)
 reward.gain-gold | MegaCrit.Sts2.Core.Commands.PlayerCmd.GainGold(Decimal,Player,Boolean) | finalizer(400) postfix(400) prefix(400)
 reward.maw-bank-income | MegaCrit.Sts2.Core.Models.Relics.MawBank.AfterRoomEntered(AbstractRoom) | finalizer(400) postfix(400) prefix(400)
+reward.paels-wing-sacrifice | MegaCrit.Sts2.Core.Models.Relics.PaelsWing.OnSacrifice() | finalizer(400) postfix(400) prefix(400)
 reward.potion-procure | MegaCrit.Sts2.Core.Commands.PotionCmd.TryToProcure(PotionModel,Player,Int32) | finalizer(400) postfix(400) prefix(400)
 reward.relic-obtain | MegaCrit.Sts2.Core.Commands.RelicCmd.Obtain(RelicModel,Player,Int32) | finalizer(400) postfix(400) prefix(600)
 reward.relic-select | MegaCrit.Sts2.Core.Rewards.RelicReward.OnSelect(*) | postfix(400) prefix(400)

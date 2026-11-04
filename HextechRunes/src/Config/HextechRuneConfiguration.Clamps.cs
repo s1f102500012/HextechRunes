@@ -3,7 +3,7 @@ namespace HextechRunes;
 internal static partial class HextechRuneConfiguration
 {
 	private static readonly int[] DefaultPlayerHexCountsByAct = [ 1, 1, 1 ];
-	private static readonly int[] DefaultEnemyHexCountsByAct = [ 1, 2, 3 ];
+	private static readonly int[] DefaultEnemyHexCountsByAct = [ 2, 2, 2 ];
 	private static readonly HextechRarityWeights DefaultRuneRarityWeights = new(1, 1, 1);
 	private static readonly HextechRarityWeights[] DefaultRuneRarityWeightsByAct =
 	[

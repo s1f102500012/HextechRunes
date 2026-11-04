@@ -99,12 +99,15 @@ internal static partial class HextechCombatHooks
 	[HextechPatch("combat.die-for-you.target", "为你而死")]
 	private static class DieForYouTargetPatch
 	{
+		// 第二个参数(未格挡伤害)在原版里名为 "_"，按位置 __1 绑定。
 		[HarmonyPostfix]
-		private static void Postfix(DieForYouPower __instance, Creature target, Creature __result)
+		private static void Postfix(DieForYouPower __instance, Creature target, decimal __1, Creature __result)
 		{
 			// 替死生效 = 把原本指向主人(玩家)的伤害目标改成了 Osty 自己(__instance.Owner)。
+			// 原版对完全格挡(未格挡伤害为 0)的攻击也会询问改派目标，那时 Osty 实际没有替死，不能扣滑溜。
 			Creature? petOwnerCreature = __instance.Owner.PetOwner?.Creature;
 			if (petOwnerCreature == null
+				|| __1 < 1m
 				|| __result != __instance.Owner
 				|| target != petOwnerCreature
 				|| !IsVanillaFixActiveFor(petOwnerCreature))

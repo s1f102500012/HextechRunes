@@ -9,10 +9,19 @@ public sealed partial class SolidTimeRune
 	private static readonly JsonSerializerOptions JsonOptions = new(JsonSerializerDefaults.Web);
 	private string? _lastLoggedCorruptStoredCardsJson;
 
-	private void AppendStoredCard(CardModel deckCard)
+	private void AppendStoredCard(CardModel deckCard, Creature? playTarget)
 	{
 		List<StoredCard> cards = DecodeStoredCards();
-		cards.Add(StoredCard.From(deckCard));
+		StoredCard stored = StoredCard.From(deckCard);
+		// 只能指定队友的牌（灵魂绑定）记下第一次打出时绑定的队友，之后每场开战都给同一个人。
+		if (deckCard.TargetType == TargetType.AnyAlly
+			&& playTarget?.Player is Player targetPlayer
+			&& targetPlayer != Owner)
+		{
+			stored = stored with { TargetPlayerNetId = targetPlayer.NetId };
+		}
+
+		cards.Add(stored);
 		_removedCardsJson = JsonSerializer.Serialize(cards, JsonOptions);
 		_lastLoggedCorruptStoredCardsJson = null;
 	}
@@ -131,7 +140,8 @@ public sealed partial class SolidTimeRune
 		string Entry,
 		int Upgrades,
 		int? MadScienceCardType = null,
-		int? MadScienceRider = null)
+		int? MadScienceRider = null,
+		ulong? TargetPlayerNetId = null)
 	{
 		public static StoredCard From(CardModel card)
 		{

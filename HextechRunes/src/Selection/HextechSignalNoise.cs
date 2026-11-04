@@ -17,7 +17,7 @@ internal static class HextechSignalNoise
 	private const string LogTag = "SignalNoise";
 	private const string ProgressFileName = "signal_noise.json";
 	private static readonly string[] HanLanguages = ["zhs", "zht"];
-	private const double TriggerChance = 0.001;
+	private const double TriggerChance = 0.005;
 
 	/// <summary>本机调试：设为 1 时每次打开都出噪声，片段按顺序轮换，不受每局一次的限制。</summary>
 	private const string DebugEnvironmentVariable = "HEXTECH_SIGNAL_NOISE_DEBUG";

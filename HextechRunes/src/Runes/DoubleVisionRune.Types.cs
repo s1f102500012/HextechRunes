@@ -42,6 +42,20 @@ public sealed partial class DoubleVisionRune
 		public bool WasGoldStolenBack { get; set; }
 	}
 
+	// 佩尔之翼献祭换来的遗物：卡牌奖励在所有端按同步选择执行，复制也在所有端各自进行，不走广播。
+	private sealed class ReplicatedRelicRewardScope : RewardDuplicationScope
+	{
+		public ReplicatedRelicRewardScope(Player player, IReadOnlyList<DoubleVisionRune> runes)
+			: base(runes)
+		{
+			Player = player;
+		}
+
+		public Player Player { get; }
+	}
+
+	private sealed record PaelsWingSacrificeState(Player? PreviousOwner);
+
 	// 一次事件选项内获得的遗物先只记账，等原选项 Task 完成后再按获得顺序逐个复制：
 	// 原版在选项内可能连续获得多件，复制必须串行，且收尾后迟到的异步获得不再并入本批。
 	internal sealed class EventRelicTransaction

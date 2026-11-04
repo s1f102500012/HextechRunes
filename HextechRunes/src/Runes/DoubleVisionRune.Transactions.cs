@@ -69,6 +69,9 @@ public sealed partial class DoubleVisionRune
 			case DirectCommandRewardScope commandScope:
 				RestoreCommandRewardScope(commandScope);
 				break;
+			case PaelsWingSacrificeState sacrificeState:
+				PaelsWingSacrificeOwner.Value = sacrificeState.PreviousOwner;
+				break;
 			case EventRelicRecordScope recordScope:
 				EventRelicObtainDepth.Value = recordScope.PreviousObtainDepth;
 				break;
@@ -82,7 +85,41 @@ public sealed partial class DoubleVisionRune
 
 	internal static object? BeginDirectRelicReward(RelicModel relic, Player player)
 	{
-		return BeginEventRelicRecording(relic, player) ?? (object?)BeginDirectCommandReward(player);
+		return BeginPaelsWingRelicReward(player)
+			?? BeginEventRelicRecording(relic, player)
+			?? (object?)BeginDirectCommandReward(player);
+	}
+
+	/// <summary>
+	/// 佩尔之翼献祭（卡牌奖励的替代选项）：原版在 OnSacrifice 的同步段里直接调 RelicCmd.Obtain，
+	/// 此时外层奖励选择已压住命令复制，所以单独标记这一次获得。标记只认一次，取用后清空，
+	/// 被获得遗物自己在拾取流程里再获得的遗物不跟着复制。
+	/// </summary>
+	internal static object? BeginPaelsWingSacrifice(Player? owner)
+	{
+		PaelsWingSacrificeState state = new(PaelsWingSacrificeOwner.Value);
+		PaelsWingSacrificeOwner.Value = owner;
+		return state;
+	}
+
+	internal static void CompletePaelsWingSacrifice(object? state)
+	{
+		if (state is PaelsWingSacrificeState sacrificeState)
+		{
+			PaelsWingSacrificeOwner.Value = sacrificeState.PreviousOwner;
+		}
+	}
+
+	private static ReplicatedRelicRewardScope? BeginPaelsWingRelicReward(Player player)
+	{
+		if (!ReferenceEquals(PaelsWingSacrificeOwner.Value, player))
+		{
+			return null;
+		}
+
+		PaelsWingSacrificeOwner.Value = null;
+		IReadOnlyList<DoubleVisionRune> runes = GetEventActiveRunes(player);
+		return runes.Count == 0 ? null : new ReplicatedRelicRewardScope(player, runes);
 	}
 
 	internal static Task<RelicModel> CompleteDirectRelicRewardAsync(Task<RelicModel> originalTask, object? duplicationState)
@@ -93,6 +130,11 @@ public sealed partial class DoubleVisionRune
 			return RecordEventRelicAsync(originalTask, recordScope);
 		}
 
+		if (duplicationState is ReplicatedRelicRewardScope replicatedScope)
+		{
+			return CompleteReplicatedRelicRewardAsync(originalTask, replicatedScope);
+		}
+
 		if (duplicationState is not DirectCommandRewardScope scope)
 		{
 			return originalTask;
@@ -100,6 +142,22 @@ public sealed partial class DoubleVisionRune
 
 		RestoreCommandRewardScope(scope);
 		return CompleteDirectRelicRewardAsync(originalTask, scope);
+	}
+
+	private static async Task<RelicModel> CompleteReplicatedRelicRewardAsync(Task<RelicModel> originalTask, ReplicatedRelicRewardScope scope)
+	{
+		RelicModel obtainedRelic = await originalTask;
+		if (!ReferenceEquals(obtainedRelic.Owner, scope.Player) || scope.Player.Creature.IsDead)
+		{
+			return obtainedRelic;
+		}
+
+		foreach (DoubleVisionRune rune in scope.Runes)
+		{
+			await rune.DuplicateObtainedRelic(scope.Player, obtainedRelic, syncReward: false);
+		}
+
+		return obtainedRelic;
 	}
 
 	private static EventRelicRecordScope? BeginEventRelicRecording(RelicModel relic, Player player)

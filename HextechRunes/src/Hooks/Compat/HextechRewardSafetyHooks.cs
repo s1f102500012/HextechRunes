@@ -354,6 +354,29 @@ internal static class HextechRewardSafetyHooks
 		private static Exception? Finalizer(object? __state, Exception? __exception) => AbandonScopeAfterSynchronousFailure(__state, __exception);
 	}
 
+	// 佩尔之翼献祭换来的遗物也算奖励。献祭在所有端执行，复制同样在所有端各自进行（见 BeginPaelsWingSacrifice）。
+	// 原版在调用 RelicCmd.Obtain 前没有 await,前缀设置的标记能覆盖到这次获得。
+	[HarmonyPatch(typeof(PaelsWing), nameof(PaelsWing.OnSacrifice), new Type[0])]
+	[HextechPatch("reward.paels-wing-sacrifice", "复视奖励事务")]
+	private static class PaelsWingSacrificePatch
+	{
+		[HarmonyPrefix]
+		private static void Prefix(PaelsWing __instance, out object? __state)
+		{
+			__state = DoubleVisionRune.BeginPaelsWingSacrifice(__instance.Owner);
+		}
+
+		[HarmonyPostfix]
+		private static void Postfix(ref object? __state)
+		{
+			DoubleVisionRune.CompletePaelsWingSacrifice(__state);
+			__state = null;
+		}
+
+		[HarmonyFinalizer]
+		private static Exception? Finalizer(object? __state, Exception? __exception) => AbandonScopeAfterSynchronousFailure(__state, __exception);
+	}
+
 	[HarmonyPatch(typeof(EventOption), nameof(EventOption.Chosen), new Type[0])]
 	[HextechPatch("reward.event-option", "复视奖励事务")]
 	private static class EventOptionChosenPatch

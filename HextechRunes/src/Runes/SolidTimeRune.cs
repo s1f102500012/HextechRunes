@@ -40,7 +40,7 @@ public sealed partial class SolidTimeRune : HextechRelicBase
 			return;
 		}
 
-		AppendStoredCard(deckCard);
+		AppendStoredCard(deckCard, cardPlay.Target);
 		Flash();
 		await CardPileCmd.RemoveFromDeck(deckCard, showPreview: false);
 	}
@@ -73,7 +73,13 @@ public sealed partial class SolidTimeRune : HextechRelicBase
 
 			CardModel card = CreateCombatCard(combatState, cards[i]);
 			card.SetToFreeThisCombat();
-			Creature? target = PickTarget(card, combatState, i);
+			Creature? target = PickTarget(card, cards[i], combatState, i);
+			if (target == null && card.TargetType == TargetType.AnyAlly)
+			{
+				HextechLog.Info("SolidTime", $"Skipped stored ally power without a living teammate: card={card.Id}");
+				continue;
+			}
+
 			await ApplyStoredPowerDirectly(choiceContext, card, target);
 		}
 	}
