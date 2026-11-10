@@ -6,7 +6,7 @@ internal sealed class SpeedDemonEnemyHex : HextechEnemyHexEffect
 
 	internal override async Task BeforePlayerSideTurnStart(HextechEnemyHexContext context, HextechCombatState combatState, IReadOnlyList<Creature> players)
 	{
-		foreach (uint combatId in context.Tracking.SpeedDemonPending.ToList())
+		foreach (uint combatId in context.Tracking.SpeedDemonPending.OrderBy(static id => id).ToList())
 		{
 			Creature? creature = combatState.GetCreature(combatId);
 			context.Tracking.SpeedDemonPending.Remove(combatId);

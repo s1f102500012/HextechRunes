@@ -1,4 +1,5 @@
 using System.Text.Json;
+using System.Text.Json.Serialization;
 
 namespace HextechRunes;
 
@@ -116,7 +117,10 @@ internal sealed partial class HextechMayhemModifier
 		int RandomForgeShopPrice,
 		bool RandomForgeDirectGrant,
 		bool ModEnabled,
-		int ChaosRuneChancePercent)
+		int ChaosRuneChancePercent,
+		// 普通局为 false 不写出，存档 JSON 与不带该字段时逐字节一致。
+		[property: JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)]
+		bool GodslayerTrial)
 	{
 		public RunConfigurationSnapshotJson(HextechRunConfigurationSnapshot snapshot)
 			: this(
@@ -134,7 +138,8 @@ internal sealed partial class HextechMayhemModifier
 				snapshot.RandomForgeShopPrice,
 				snapshot.RandomForgeDirectGrant,
 				snapshot.ModEnabled,
-				snapshot.ChaosRuneChancePercent)
+				snapshot.ChaosRuneChancePercent,
+				snapshot.GodslayerTrial)
 		{
 		}
 

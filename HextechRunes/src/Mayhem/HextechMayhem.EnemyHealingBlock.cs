@@ -23,7 +23,7 @@ internal sealed partial class HextechMayhemModifier
 
 	private async Task ApplyDelayedEnemyHealingBlocks(HextechCombatState combatState)
 	{
-		foreach ((uint combatId, int block) in CombatTracking.DelayedEnemyHealingBlock.ToList())
+		foreach ((uint combatId, int block) in CombatTracking.DelayedEnemyHealingBlock.OrderBy(static entry => entry.Key).ToList())
 		{
 			CombatTracking.DelayedEnemyHealingBlock.Remove(combatId);
 			Creature? creature = combatState.GetCreature(combatId);
