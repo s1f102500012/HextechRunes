@@ -8,10 +8,10 @@ namespace HextechRunes;
 /// 战斗内 creature 节点视觉附件的统一宿主:战斗房间就绪、召唤加入、节点就绪三个时机各只补一次,
 /// 再按固定顺序把节点交给各附件的 <c>TryAttach</c>。新增附件按是否依赖节点注册表加进
 /// <see cref="AttachPreRegistry"/> 或 <see cref="AttachPostRegistry"/>,
-/// 不再各自去补同一批原版方法。
+/// 各附件自身不补丁这几个原版方法。
 /// </summary>
 /// <remarks>
-/// 顺序即语义:节点注册表在光环类附件之后、灼烧/玻璃大炮之前重建,与各附件此前的安装序一致。
+/// 顺序即语义:光环类附件先挂,再重建节点注册表,最后挂依赖注册表的灼烧/玻璃大炮。
 /// 附件的 <c>TryAttach</c> 必须自行容忍重复调用与失效节点。
 /// </remarks>
 internal static class HextechCreatureVisualHost
@@ -36,7 +36,7 @@ internal static class HextechCreatureVisualHost
 		HextechNearDeathFeastVisual.TryAttach(node);
 	}
 
-	/// <summary>在 entity → 节点映射重建之后挂的附件(沿用此前的安装序)。</summary>
+	/// <summary>在 entity → 节点映射重建之后挂的附件,按灼烧、玻璃大炮的顺序。</summary>
 	private static void AttachPostRegistry(NCreature node)
 	{
 		HextechBurnVisual.TryAttach(node);

@@ -53,7 +53,7 @@ internal sealed class HextechNearDeathFeastVisual : HextechBehindCreatureVisual
 			return false;
 		}
 
-		// 原版 glowie / glowie2 共用这张红光纹理，分别为普通混合和加色；不再叠加程序生成的圆环。
+		// 原版 glowie / glowie2 共用这张红光纹理，分别为普通混合和加色；只用这两层，不叠加程序生成的圆环。
 		_glow = CreateSprite(root, "FeastGlow", glowTexture, additive: false);
 		_rays = CreateSprite(root, "FeastRays", glowTexture, additive: true);
 		UpdateTransform(1f);

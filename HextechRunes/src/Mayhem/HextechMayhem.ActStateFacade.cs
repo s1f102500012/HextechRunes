@@ -101,7 +101,13 @@ internal sealed partial class HextechMayhemModifier
 
 	public IReadOnlyList<MonsterHexKind> GetActiveMonsterHexes()
 	{
-		return ActiveMonsterHexCache.Get(ActState, GetCurrentStageIndex(), ShouldRecoverMonsterHexInCombat);
+		return ActiveMonsterHexCache.Get(this, ActState, GetCurrentStageIndex(), IsInCombatRoomForMonsterHexRecovery());
+	}
+
+	// 当前生效的敌方海克斯效果，按注册顺序；返回的数组只读，状态变化后由缓存换成新数组。
+	internal HextechEnemyHexEffect[] GetActiveEnemyHexEffects(out int[] orderIndexes)
+	{
+		return ActiveMonsterHexCache.GetActiveEffects(this, ActState, GetCurrentStageIndex(), IsInCombatRoomForMonsterHexRecovery(), out orderIndexes);
 	}
 
 	public IReadOnlyList<MonsterHexKind> GetActiveMonsterHexesBeforeAct(int actIndex)
@@ -119,9 +125,15 @@ internal sealed partial class HextechMayhemModifier
 		return ActState.GetMonsterHexRows();
 	}
 
-	private bool ShouldRecoverMonsterHexInCombat(int actIndex)
+	internal bool ShouldRecoverMonsterHexInCombat(int actIndex)
 	{
 		return actIndex <= GetCurrentStageIndex() && RunState.CurrentRoom is CombatRoom;
+	}
+
+	// 等于 ShouldRecoverMonsterHexInCombat(GetCurrentStageIndex())：当前阶段恒满足前一项，只剩是否在战斗房间。
+	private bool IsInCombatRoomForMonsterHexRecovery()
+	{
+		return RunState.CurrentRoom is CombatRoom;
 	}
 
 	public void ResetForNewRun()
@@ -159,7 +171,7 @@ internal sealed partial class HextechMayhemModifier
 
 	public bool HasActiveMonsterHex(MonsterHexKind hex)
 	{
-		return ActiveMonsterHexCache.Contains(ActState, GetCurrentStageIndex(), ShouldRecoverMonsterHexInCombat, hex);
+		return ActiveMonsterHexCache.Contains(this, ActState, GetCurrentStageIndex(), IsInCombatRoomForMonsterHexRecovery(), hex);
 	}
 
 	public int GetMonsterHexStrengthTier(MonsterHexKind hex)

@@ -575,4 +575,133 @@ internal static partial class Program
 		Equal(0, HextechEnemyDrawProgress.RecordTotal(legacy, 22, threshold), "legacy per-player progress is read as the team total");
 		Equal(1, HextechEnemyDrawProgress.RecordTotal(legacy, 24, threshold), "pooling continues after the legacy total");
 	}
+
+	// 生效效果缓存与"不走缓存、按注册顺序逐个判断"逐元素相等；遍历中途改动敌方海克斯时，未经过的位置按新状态判断。
+	[HextechTest]
+	private static void ActiveEnemyHexEffectCacheMatchesUncachedPerEffectCheck()
+	{
+		(HextechEnemyHexContext context, _, _) = CreatePrismaticEnemyFixture();
+		HextechMayhemModifier modifier = context.Modifier;
+		MegaCrit.Sts2.Core.Runs.RunState run = context.RunState;
+		List<MegaCrit.Sts2.Core.Rooms.AbstractRoom> rooms = new();
+		AccessTools.Field(typeof(MegaCrit.Sts2.Core.Runs.RunState), "_currentRooms").SetValue(run, rooms);
+		FieldInfo actIndexField = AccessTools.Field(typeof(MegaCrit.Sts2.Core.Runs.RunState), "_currentActIndex");
+		AccessTools.Property(typeof(MegaCrit.Sts2.Core.Runs.RunState), "Acts").SetValue(run, new MegaCrit.Sts2.Core.Models.ActModel[3]);
+		HextechMayhemRunContext runContext = (HextechMayhemRunContext)AccessTools.Field(typeof(HextechMayhemModifier), "_runContext").GetValue(modifier)!;
+		var allEffects = (IReadOnlyList<HextechEnemyHexEffect>)AccessTools.Field(typeof(HextechEnemyHexEffects), "OrderedEffects").GetValue(null)!;
+		MegaCrit.Sts2.Core.Rooms.CombatRoom combatRoom = (MegaCrit.Sts2.Core.Rooms.CombatRoom)RuntimeHelpers.GetUninitializedObject(typeof(MegaCrit.Sts2.Core.Rooms.CombatRoom));
+
+		void Check(string label)
+		{
+			IReadOnlyList<MonsterHexKind> uncachedHexes = runContext.ActState.GetActiveMonsterHexes(
+				modifier.GetCurrentStageIndex(),
+				modifier.ShouldRecoverMonsterHexInCombat);
+			HextechEnemyHexEffect[] expected = allEffects.Where(effect => uncachedHexes.Contains(effect.Kind)).ToArray();
+			SequenceEqual(uncachedHexes, modifier.GetActiveMonsterHexes(), $"{label}: active hexes");
+			SequenceEqual(expected, HextechEnemyHexEffects.GetActive(modifier), $"{label}: lazy active effects");
+			SequenceEqual(expected, modifier.GetActiveEnemyHexEffects(out int[] orders), $"{label}: cached active effects");
+			SequenceEqual(expected.Select(effect => IndexOf(allEffects, effect)), orders, $"{label}: registration positions");
+			SequenceEqual(
+				allEffects.Select(effect => uncachedHexes.Contains(effect.Kind)),
+				allEffects.Select(effect => modifier.HasActiveMonsterHex(effect.Kind)),
+				$"{label}: per-kind membership");
+			Equal(
+				HextechEnemyHexDispatcher.Transform(modifier, 0, static (effect, _, count) => count + 1),
+				expected.Length,
+				$"{label}: dispatcher visits each active effect once");
+		}
+
+		Check("empty");
+		modifier.SetMonsterHexesForAct(0, [ MonsterHexKind.GlassCannon, MonsterHexKind.FrostWraith ]);
+		Check("unresolved act outside combat");
+		rooms.Add(combatRoom);
+		Check("unresolved act recovered in combat");
+		rooms.Clear();
+		Check("left combat");
+		modifier.SetStageResolved(0, true);
+		Check("act resolved");
+		Expect(modifier.DebugAddMonsterHex(MonsterHexKind.PandorasBox), "debug add");
+		Check("debug add carried hex");
+		actIndexField.SetValue(run, 1);
+		modifier.SetMonsterHexesForAct(1, [ MonsterHexKind.HandOfBaron ]);
+		Check("next act outside combat");
+		rooms.Add(combatRoom);
+		Check("next act in combat");
+		Expect(modifier.DebugRemoveMonsterHex(MonsterHexKind.FrostWraith), "debug remove");
+		Check("debug remove");
+		int extraStage = modifier.ActivateExtraStage("cache-test");
+		modifier.SetMonsterHexesForAct(extraStage, [ MonsterHexKind.SpeedDemon ]);
+		Check("extra stage active");
+		modifier.ClearActiveExtraStage();
+		Check("extra stage cleared");
+		runContext.ResetForEndlessLoop(0);
+		Check("endless loop reset");
+		modifier.SavedCarriedMonsterHexes = [ (int)MonsterHexKind.Thornmail ];
+		modifier.SavedResolvedActs = [ 1, 1, 0 ];
+		Check("saved state restored");
+		runContext.ResetForDebugMonsterHex(0, MonsterHexKind.Slap, HextechRarityTier.Prismatic);
+		actIndexField.SetValue(run, 0);
+		rooms.Clear();
+		Check("debug set only");
+
+		// 遍历中途：已经过的位置不回头，之后的位置按改动后的状态判断。
+		runContext.ResetForDebugMonsterHex(0, MonsterHexKind.FrostWraith, HextechRarityTier.Prismatic);
+		Expect(modifier.DebugAddMonsterHex(MonsterHexKind.GlassCannon), "mid-iteration setup");
+		HextechActiveEnemyHexCursor cursor = new(modifier);
+		List<MonsterHexKind> visited = new();
+		while (cursor.MoveNext(out HextechEnemyHexEffect? effect))
+		{
+			visited.Add(effect.Kind);
+			if (effect.Kind == MonsterHexKind.FrostWraith)
+			{
+				Expect(modifier.DebugAddMonsterHex(MonsterHexKind.SpeedDemon), "add earlier hex mid-iteration");
+				Expect(modifier.DebugAddMonsterHex(MonsterHexKind.HandOfBaron), "add later hex mid-iteration");
+				Expect(modifier.DebugRemoveMonsterHex(MonsterHexKind.GlassCannon), "remove later hex mid-iteration");
+			}
+		}
+
+		SequenceEqual(new[] { MonsterHexKind.FrostWraith, MonsterHexKind.HandOfBaron }, visited, "mid-iteration changes apply to later positions only");
+		Check("after mid-iteration changes");
+
+		static int IndexOf(IReadOnlyList<HextechEnemyHexEffect> effects, HextechEnemyHexEffect target)
+		{
+			for (int i = 0; i < effects.Count; i++)
+			{
+				if (ReferenceEquals(effects[i], target))
+				{
+					return i;
+				}
+			}
+
+			return -1;
+		}
+	}
+
+	// 生效效果 Kind 互不相同时，逐项连乘与按 Kind 分组的结果逐位一致（含小数位数）。
+	[HextechTest]
+	private static void DistinctHexMultiplierChainMatchesGroupedCombination()
+	{
+		decimal[][] cases =
+		[
+			[],
+			[ 1m ],
+			[ 1.50m, 0.75m ],
+			[ 1.2m, 1.30m, 0.5m, 1.000m, 2m ],
+			[ 0.9m, 1.15m, 1.07m, 1.33333333333333333333333333m, 0.999999999999m ]
+		];
+		MonsterHexKind[] kinds = Enum.GetValues<MonsterHexKind>();
+		foreach (decimal[] multipliers in cases)
+		{
+			decimal grouped = HextechEnemyCoefficientHelper.CombineMultipliersByHex(
+				multipliers.Select((multiplier, index) => (kinds[index], multiplier)));
+			decimal chained = 1m;
+			foreach (decimal multiplier in multipliers)
+			{
+				chained = HextechEnemyCoefficientHelper.MultiplyDistinctHexMultiplier(chained, multiplier);
+			}
+
+			string label = $"[{string.Join(", ", multipliers)}]";
+			SequenceEqual(decimal.GetBits(grouped), decimal.GetBits(chained), $"{label}: bitwise equal");
+		}
+	}
 }

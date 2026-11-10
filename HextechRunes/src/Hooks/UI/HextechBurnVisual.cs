@@ -30,8 +30,8 @@ internal sealed class HextechBurnVisual : HextechCreatureAttachedVisual
 	private CpuParticles2D? _sparks;
 	// Spine 骨骼发射:火焰/火星发射点每帧跟随骨骼位置(火贴着身体各部位烧、随动画摆动);
 	// 立绘无 Spine 或原生 API 缺失时保持静态矩形发射带。
-	// 实测(headless 探针):SpineBoneData.get_name 返回空串,get_global_bone_transform 按名查找
-	// 永远失败并回退成 sprite 原点(火聚成一个固定点的事故根因)——所以必须缓存骨骼对象、
+	// SpineBoneData.get_name 返回空串,get_global_bone_transform 按名查找永远失败并回退成 sprite 原点
+	// (火会聚成一个固定点)——所以必须缓存骨骼对象、
 	// 每帧读 get_world_x/get_world_y(骨架本地坐标,y 已是 Godot 朝向)再经 sprite.ToGlobal 转换。
 	private Node2D? _spineSpriteNode;
 	private ulong _spineSpriteInstanceId;
@@ -60,7 +60,8 @@ internal sealed class HextechBurnVisual : HextechCreatureAttachedVisual
 	private static bool TryGetIntensity(NCreature creature, out float intensity)
 	{
 		intensity = 0f;
-		if (creature.Entity is not { IsAlive: true } entity || !entity.HasPower<HextechBurnPower>())
+		// 没有灼烧时 GetPowerAmount 为 0，下面的 amount <= 0 已经拦下，不必先 HasPower 再扫一遍能力。
+		if (creature.Entity is not { IsAlive: true } entity)
 		{
 			return false;
 		}
@@ -87,7 +88,7 @@ internal sealed class HextechBurnVisual : HextechCreatureAttachedVisual
 
 		// 火焰主体与烟画在生物身后,火星画在身前——形成"被火包裹"的前后层次。
 		// 不能用负 ZIndex 表达"身后":Godot 2D 的 z 排序是全局比较,z=-1 无论挂在哪都会沉到
-		// 全局 z=0 的场景背景之下(实测两次只剩 z=+1 的火星可见)。正确做法:全部保持 z=0、
+		// 全局 z=0 的场景背景之下,只剩 z=+1 的部分可见。因此全部保持 z=0、
 		// 挂进 NCreature 内部,用子节点树顺序控制前后(back 移到 index 0 → 先画 → 被立绘盖住;
 		// front 追加在末尾 → 后画 → 盖在立绘上)。顺带天然跟随受击闪烁与死亡淡出的 modulate。
 		_backRoot = new Node2D { Name = NodeName + "_Back", Visible = false };
@@ -97,7 +98,7 @@ internal sealed class HextechBurnVisual : HextechCreatureAttachedVisual
 		Creature.MoveChild(_backRoot, 0);
 
 		_flames = CreateFlames(width, height);
-		// 高大立绘会把身后的火焰完全挡死(实测法师类敌人几乎看不到火);身前再叠一层
+		// 高大立绘会把身后的火焰完全挡死(法师类敌人几乎看不到火);身前再叠一层
 		// 缩小调淡的火焰,保证任何体型下"身上着火"都可读,又不至于糊住立绘细节。
 		_flamesFront = CreateFlames(width, height, front: true);
 		_smoke = CreateSmoke(width, height);
@@ -331,7 +332,7 @@ internal sealed class HextechBurnVisual : HextechCreatureAttachedVisual
 				if (world.Y >= 0f)
 				{
 					// 骨架原点在脚底、身体骨骼一律 y<0;y>=0 的是 root/地面/阴影类控制骨,
-					// 不属于身体(实测机甲骑士有一根脚下 +400 的控制骨,发射后火飘到腿间空隙)。
+					// 不属于身体(例如机甲骑士有一根脚下 +400 的控制骨,从它发射的火会飘到腿间空隙)。
 					continue;
 				}
 

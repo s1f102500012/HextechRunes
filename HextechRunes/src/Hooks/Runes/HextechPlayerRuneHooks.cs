@@ -101,15 +101,18 @@ internal static partial class HextechPlayerRuneHooks
 		[HarmonyPostfix]
 		private static void Postfix(CardModel __instance, ref IEnumerable<CardTag> __result)
 		{
+			// 各条件都是只读判断，先判牌的类型，再枚举标签、扫遗物。
 			Player? owner = TryGetMutableCardOwner(__instance);
-			if (!__result.Contains(CardTag.Shiv) && HextechKnifeHelper.ShouldTreatSovereignBladeAsShiv(__instance, owner))
+			if (__instance is SovereignBlade
+				&& !__result.Contains(CardTag.Shiv)
+				&& HextechKnifeHelper.ShouldTreatSovereignBladeAsShiv(__instance, owner))
 			{
 				__result = __result.Append(CardTag.Shiv);
 			}
 
-			if (__result.Contains(CardTag.Strike)
-				|| owner?.GetRelic<DeviantCognitionRune>() == null
-				|| __instance.Type != CardType.Attack)
+			if (__instance.Type != CardType.Attack
+				|| __result.Contains(CardTag.Strike)
+				|| owner?.GetRelic<DeviantCognitionRune>() == null)
 			{
 				return;
 			}

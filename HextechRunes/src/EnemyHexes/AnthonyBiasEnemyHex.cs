@@ -24,7 +24,14 @@ internal sealed class AnthonyBiasEnemyHex : HextechEnemyHexEffect
 
 	private static decimal GetMultiplier(HextechEnemyHexContext context)
 	{
-		int deckCards = context.RunState.Players.Sum(static player => player.Deck.Cards.Count);
+		// 数值每次现算、不缓存；按索引累加不分配，checked 与 Enumerable.Sum 的溢出行为一致。
+		IReadOnlyList<Player> players = context.RunState.Players;
+		int deckCards = 0;
+		for (int i = 0; i < players.Count; i++)
+		{
+			deckCards = checked(deckCards + players[i].Deck.Cards.Count);
+		}
+
 		return 1m + (deckCards / (CardsPerPercentPerPlayer * context.ScalingPlayerCount)) * 0.01m;
 	}
 }
