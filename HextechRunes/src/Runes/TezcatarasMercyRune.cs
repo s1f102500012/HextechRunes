@@ -5,12 +5,28 @@ namespace HextechRunes;
 public sealed class TezcatarasMercyRune : HextechSharedCombatVictoryRuneBase
 {
 	private int _combatCounter;
+	private int _rewardDropCount;
+	private string _recentRewardRelicIds = "";
 
 	[SavedProperty(SerializationCondition.SaveIfNotTypeDefault)]
 	public int SavedCombatCounter
 	{
 		get => _combatCounter;
 		set => _combatCounter = Math.Max(0, value);
+	}
+
+	[SavedProperty(SerializationCondition.SaveIfNotTypeDefault)]
+	public int SavedRewardDropCount
+	{
+		get => _rewardDropCount;
+		set => _rewardDropCount = Math.Max(0, value);
+	}
+
+	[SavedProperty(SerializationCondition.SaveIfNotTypeDefault)]
+	public string SavedRecentRewardRelicIds
+	{
+		get => _recentRewardRelicIds;
+		set => _recentRewardRelicIds = value ?? "";
 	}
 
 	protected override IEnumerable<DynamicVar> CanonicalVars =>
@@ -26,7 +42,14 @@ public sealed class TezcatarasMercyRune : HextechSharedCombatVictoryRuneBase
 			return;
 		}
 
-		RelicModel waxRelic = HextechAncientRelicHelper.CreateRepeatableWaxRelic(Owner, "tezcataras-mercy-wax-relic", _combatCounter);
+		RelicModel waxRelic = HextechAncientRelicHelper.CreateRepeatableWaxRelic(
+			Owner,
+			"tezcataras-mercy-wax-relic",
+			room.RoomType,
+			_rewardDropCount,
+			HextechRewardRelicRoll.ParseRecent(_recentRewardRelicIds).ToHashSet(StringComparer.Ordinal));
+		SavedRewardDropCount = _rewardDropCount + 1;
+		SavedRecentRewardRelicIds = HextechRewardRelicRoll.PushRecent(_recentRewardRelicIds, waxRelic.Id.Entry);
 		SaveManager.Instance.MarkRelicAsSeen(waxRelic);
 		room.AddExtraReward(Owner, new HextechWaxRelicReward(waxRelic, Owner));
 
