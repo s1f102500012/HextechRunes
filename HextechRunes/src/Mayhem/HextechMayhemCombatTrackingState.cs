@@ -136,8 +136,31 @@ internal sealed partial class HextechMayhemCombatTrackingState
 		HextechMayhemCombatTrackingSerializer.ClearPhase(this, CombatTrackingClearPhase.EnemyTurnStart);
 	}
 
-	public void Reset()
+	// atCombatStart：原版在调用 BeforeCombatStart 钩子之前就把 IsInProgress 置为 true，开战那次重置不算异常。
+	public void Reset(bool atCombatStart = false)
 	{
+		if (!atCombatStart)
+		{
+			WarnIfCombatInProgress("reset");
+		}
+
 		HextechMayhemCombatTrackingSerializer.Clear(this);
+	}
+
+	// 战斗追踪只该在战斗开始/结束与读档时整体清空或还原。战斗进行中被整体改写会让这一端的敌方海克斯
+	// 计数与另一端分叉（#47 疑似此类），留下调用栈方便下次从玩家日志定位来源。
+	internal static void WarnIfCombatInProgress(string operation)
+	{
+		if (CombatManager.Instance?.IsInProgress != true)
+		{
+			return;
+		}
+
+		string stack = string.Join(" <- ", new System.Diagnostics.StackTrace(2, false).GetFrames()
+			.Select(static frame => frame.GetMethod())
+			.Where(static method => method != null)
+			.Take(8)
+			.Select(static method => $"{method!.DeclaringType?.Name}.{method.Name}"));
+		HextechLog.Warn("CombatTracking", $"Combat tracking {operation} while combat is in progress: {stack}");
 	}
 }

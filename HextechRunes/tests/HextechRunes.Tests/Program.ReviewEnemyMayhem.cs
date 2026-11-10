@@ -79,15 +79,15 @@ internal static partial class Program
 		Expect(missing.Find() == null, "the negative result is cached until another assembly loads");
 	}
 
-	// 单机（或非联机战斗）时，Power 的「每回合 1 次」退回调用方自己的本地标记。
+	// Power 的「每回合 1 次」只看能力实例自己的标记，单机联机一致。
 	[HextechTest]
-	private static void ReviewOwnerTurnProcFallsBackToLocalFlagOutsideNetworkCombat()
+	private static void ReviewOwnerTurnProcUsesInstanceFlag()
 	{
 		bool triggered = false;
-		Expect(!HextechCombatProcTracker.HasOwnerTurnProcTriggered(null, "review-proc", triggered), "not triggered yet");
-		Expect(HextechCombatProcTracker.TryConsumeOwnerTurnProc(null, "review-proc", ref triggered), "first consume succeeds");
+		Expect(!HextechCombatProcTracker.HasOwnerTurnProcTriggered(triggered), "not triggered yet");
+		Expect(HextechCombatProcTracker.TryConsumeOwnerTurnProc(ref triggered), "first consume succeeds");
 		Expect(triggered, "the local flag records the trigger");
-		Expect(HextechCombatProcTracker.HasOwnerTurnProcTriggered(null, "review-proc", triggered), "triggered after consuming");
-		Expect(!HextechCombatProcTracker.TryConsumeOwnerTurnProc(null, "review-proc", ref triggered), "second consume in the same turn fails");
+		Expect(HextechCombatProcTracker.HasOwnerTurnProcTriggered(triggered), "triggered after consuming");
+		Expect(!HextechCombatProcTracker.TryConsumeOwnerTurnProc(ref triggered), "second consume in the same turn fails");
 	}
 }

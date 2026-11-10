@@ -1,4 +1,3 @@
-using System.Diagnostics.CodeAnalysis;
 using Godot;
 
 namespace HextechRunes;
@@ -103,40 +102,18 @@ public abstract partial class HextechRelicBase
 		return $"{assemblyName}:{runtimeType.FullName ?? runtimeType.Name}";
 	}
 
-	// 联机战斗中改用 Mayhem 的共享计数（两端一致）；单机或拿不到 Modifier 时走本地计数。
-	private bool TryGetNetworkProcTracker([NotNullWhen(true)] out HextechMayhemModifier? modifier)
-	{
-		modifier = ShouldUseNetworkCombatHistory() ? HextechMayhemModifier.FindIn(Owner.RunState) : null;
-		return modifier != null;
-	}
-
-	protected bool TryGetNetworkTurnProcCount(string procKey, out int count)
-	{
-		if (!TryGetNetworkProcTracker(out HextechMayhemModifier? modifier))
-		{
-			count = 0;
-			return false;
-		}
-
-		count = modifier.GetPlayerRuneProcsThisTurn(Owner, procKey);
-		return true;
-	}
-
+	// 每回合/每场计数一律记在持有这件遗物的实例上，单机联机同一套逻辑。
+	// 以前联机时改记在 Mayhem Modifier 的共享账上，但那份账不进联机校验，也不跟遗物实例绑定：
+	// #47 里房主那份账漏记了一次腐化树枝的触发，第二次生成两端序号不同而分歧，直到生成结果不同才被校验发现。
+	// 遗物自己的字段由各端同一组钩子推进，清零时机由调用方在战斗/回合边界决定。
 	protected bool HasTurnProcReachedLimit(string procKey, int localCount, int maxPerTurn)
 	{
-		if (TryGetNetworkTurnProcCount(procKey, out int networkCount))
-		{
-			return networkCount >= maxPerTurn;
-		}
-
 		return localCount >= maxPerTurn;
 	}
 
 	protected int GetTurnProcCount(string procKey, int localCount)
 	{
-		return TryGetNetworkTurnProcCount(procKey, out int networkCount)
-			? networkCount
-			: localCount;
+		return localCount;
 	}
 
 	protected bool HasTurnProcTriggered(string procKey, bool localTriggered)
@@ -146,25 +123,7 @@ public abstract partial class HextechRelicBase
 
 	protected bool TryConsumeTurnProc(string procKey, ref int localCount, int maxPerTurn)
 	{
-		if (maxPerTurn <= 0)
-		{
-			return false;
-		}
-
-		if (TryGetNetworkProcTracker(out HextechMayhemModifier? modifier))
-		{
-			if (!modifier.TryConsumePlayerRuneProcThisTurn(Owner, procKey, maxPerTurn))
-			{
-				return false;
-			}
-
-			localCount = modifier.GetPlayerRuneProcsThisTurn(Owner, procKey);
-			UpdateTurnScopedStateIdentity();
-			InvokeDisplayAmountChanged();
-			return true;
-		}
-
-		if (localCount >= maxPerTurn)
+		if (maxPerTurn <= 0 || localCount >= maxPerTurn)
 		{
 			return false;
 		}
@@ -188,31 +147,16 @@ public abstract partial class HextechRelicBase
 	}
 
 	// 只读、不消费。ModifyCardPlayCount 等引擎可能针对同一次出牌重复调用的钩子只应在这里取序号;
-	// 真正的消费(推进共享计数)必须放在每次真实出牌只触发一次的钩子里调用 ConsumeCombatProcOrdinal,
-	// 否则联机各端序号推进次数不一致会导致稳定随机结果分叉。
+	// 真正的消费必须放在每次真实出牌只触发一次的钩子里调用 ConsumeCombatProcOrdinal,
+	// 否则各端序号推进次数不一致会导致稳定随机结果分叉。
 	protected int PeekCombatProcOrdinal(string procKey, int localCount)
 	{
-		if (TryGetNetworkProcTracker(out HextechMayhemModifier? modifier))
-		{
-			return modifier.GetPlayerRuneProcsInCombat(Owner, procKey);
-		}
-
 		return localCount;
 	}
 
-	// 联机读写 Mayhem 的每场计数（战斗结束清零）；单机用调用方的 localCount，它的清零时机由调用方决定。
 	protected int ConsumeCombatProcOrdinal(string procKey, ref int localCount)
 	{
-		if (TryGetNetworkProcTracker(out HextechMayhemModifier? modifier))
-		{
-			int ordinal = modifier.ConsumePlayerRuneProcInCombat(Owner, procKey);
-			localCount = ordinal + 1;
-			return ordinal;
-		}
-
-		int localOrdinal = localCount;
-		localCount++;
-		return localOrdinal;
+		return localCount++;
 	}
 
 	protected void FlashDeferred(IEnumerable<Creature>? targets = null)

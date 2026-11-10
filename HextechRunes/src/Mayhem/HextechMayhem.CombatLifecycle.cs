@@ -6,7 +6,7 @@ internal sealed partial class HextechMayhemModifier
 	{
 		HextechCombatHooks.ResetTransientCombatState();
 		HextechGoldrendSync.BeginCombat(RunState);
-		ResetCombatTracking();
+		ResetCombatTracking(atCombatStart: true);
 		HextechMultiplayerScalingCompat.RefreshHostScalingFlagForLocalHost(this);
 		if (RunState.CurrentRoom is CombatRoom currentCombatRoom)
 		{

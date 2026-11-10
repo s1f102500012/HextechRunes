@@ -38,7 +38,7 @@ public sealed class HextechInfernalDragonSoulPower : HextechPowerBase
 
 	public override async Task AfterCardPlayed(PlayerChoiceContext context, CardPlay cardPlay)
 	{
-		if (HextechCombatProcTracker.HasOwnerTurnProcTriggered(Owner.Player, nameof(HextechInfernalDragonSoulPower), _triggeredThisTurn)
+		if (HextechCombatProcTracker.HasOwnerTurnProcTriggered(_triggeredThisTurn)
 			|| Amount <= 0m
 			|| !Owner.IsAlive
 			|| !cardPlay.IsFirstInSeries
@@ -55,7 +55,7 @@ public sealed class HextechInfernalDragonSoulPower : HextechPowerBase
 			return;
 		}
 
-		if (!HextechCombatProcTracker.TryConsumeOwnerTurnProc(Owner.Player, nameof(HextechInfernalDragonSoulPower), ref _triggeredThisTurn))
+		if (!HextechCombatProcTracker.TryConsumeOwnerTurnProc(ref _triggeredThisTurn))
 		{
 			return;
 		}

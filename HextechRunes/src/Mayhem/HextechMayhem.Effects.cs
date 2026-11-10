@@ -25,31 +25,6 @@ internal sealed partial class HextechMayhemModifier
 		}
 	}
 
-	internal int GetPlayerRuneProcsThisTurn(Player player, string procKey)
-	{
-		return HextechCombatProcTracker.GetPlayerRuneProcsThisTurn(CombatTracking, player, procKey);
-	}
-
-	internal bool TryConsumePlayerRuneProcThisTurn(Player player, string procKey, int maxPerTurn)
-	{
-		return HextechCombatProcTracker.TryConsumePlayerRuneProcThisTurn(CombatTracking, player, procKey, maxPerTurn);
-	}
-
-	internal int GetPlayerRuneProcsInCombat(Player player, string procKey)
-	{
-		return HextechCombatProcTracker.GetPlayerRuneProcsInCombat(CombatTracking, player, procKey);
-	}
-
-	internal int ConsumePlayerRuneProcInCombat(Player player, string procKey)
-	{
-		return HextechCombatProcTracker.ConsumePlayerRuneProcInCombat(CombatTracking, player, procKey);
-	}
-
-	internal int ConsumeGlobalProcInCombat(string procKey)
-	{
-		return HextechCombatProcTracker.ConsumeGlobalProcInCombat(CombatTracking, procKey);
-	}
-
 	private bool TrackPlayerAttackCardPlayedThisTurn(CardPlay cardPlay)
 	{
 		return HextechCombatProcTracker.TrackPlayerAttackCardPlayedThisTurn(CombatTracking, cardPlay);

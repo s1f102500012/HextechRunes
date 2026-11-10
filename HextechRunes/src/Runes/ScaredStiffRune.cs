@@ -5,6 +5,18 @@ public sealed class ScaredStiffRune : HextechRelicBase
 	private bool _autoPlaying;
 	private int _autoPlayTargetsThisCombat;
 
+	// 稳定随机的本地序号（见 ConsumeCombatProcOrdinal）。单机不在战斗开始清零，按现状保留；
+	// 联机每场清零，各端都从同一场的 0 开始，不受谁读过档影响。
+	public override Task BeforeCombatStart()
+	{
+		if (IsNetworkMultiplayer())
+		{
+			_autoPlayTargetsThisCombat = 0;
+		}
+
+		return base.BeforeCombatStart();
+	}
+
 	public override bool IsAvailableForPlayer(Player player)
 	{
 		return IsIroncladPlayer(player);

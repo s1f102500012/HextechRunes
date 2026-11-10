@@ -2,9 +2,19 @@ namespace HextechRunes;
 
 public sealed class HappyAccidentRune : HextechRelicBase
 {
-	// 单机稳定随机的本地序号（见 ConsumeCombatProcOrdinal）：不在战斗开始清零，跨战斗累加、读档归零；
-	// 联机改用 Mayhem 的每场计数。改成每场清零会改变单机的随机结果，按现状保留。
+	// 稳定随机的本地序号（见 ConsumeCombatProcOrdinal）。单机不在战斗开始清零，跨战斗累加、读档归零，
+	// 改成每场清零会改变单机的随机结果，按现状保留；联机每场清零，各端都从同一场的 0 开始，不受谁读过档影响。
 	private int _localStatusOrbOrdinal;
+
+	public override Task BeforeCombatStart()
+	{
+		if (IsNetworkMultiplayer())
+		{
+			_localStatusOrbOrdinal = 0;
+		}
+
+		return base.BeforeCombatStart();
+	}
 
 	protected override IEnumerable<DynamicVar> CanonicalVars =>
 	[
