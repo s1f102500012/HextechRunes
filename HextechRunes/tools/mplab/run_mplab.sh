@@ -14,12 +14,17 @@ MODS_DIR="$GAME_DIR/mods"
 LAB_MOD_DIR="$MODS_DIR/HextechMpLab"
 STEAM_APPID_FILE="$GAME_DIR/steam_appid.txt"
 STEAM_APP_ID="${STS2_STEAM_APP_ID:-2868840}"
+WORKSHOP_DIR="${GAME_APP:h:h:h}/workshop/content/$STEAM_APP_ID"
 OUT="${HEXTECH_MPLAB_OUT:-/tmp/hextech-mplab-$(date +%Y%m%d-%H%M%S)}"
 SEED="${HEXTECH_MPLAB_SEED:-HEXTECHLAB}"
 TIMEOUT_SEC="${HEXTECH_MPLAB_TIMEOUT_SEC:-420}"
 CLIENT_DELAY_SEC="${HEXTECH_MPLAB_CLIENT_DELAY_SEC:-15}"
 QUIT_AFTER="${HEXTECH_MPLAB_QUIT_AFTER:-60000}"
 CLIENT_HOME="$OUT/client-home"
+# HEXTECH_MPLAB_ONLY_MODS="HextechRunes,..."：主机也用独立 HOME，两端设置里只启用这些模组（不动本机真实设置）。
+ONLY_MODS="${HEXTECH_MPLAB_ONLY_MODS:-}"
+HOST_HOME="$HOME"
+[[ -n "$ONLY_MODS" ]] && HOST_HOME="$OUT/host-home"
 
 mkdir -p "$OUT" "$CLIENT_HOME"
 print "输出目录: $OUT"
@@ -28,13 +33,43 @@ print "输出目录: $OUT"
 # 否则全新档会跳过加载所有模组,主机直接判 ModMismatch。只复制 settings/profile,不带任何 run 存档。
 REAL_SAVE_ROOT="$HOME/Library/Application Support/SlayTheSpire2"
 CLIENT_SAVE_ROOT="$CLIENT_HOME/Library/Application Support/SlayTheSpire2"
-for dir in "$REAL_SAVE_ROOT"/steam/*/ "$REAL_SAVE_ROOT"/default/*/; do
-  [[ -f "$dir/settings.save" ]] || continue
-  rel="${dir#$REAL_SAVE_ROOT/}"
-  mkdir -p "$CLIENT_SAVE_ROOT/$rel"
-  cp "$dir/settings.save" "$CLIENT_SAVE_ROOT/$rel/settings.save"
-  [[ -f "$dir/profile.save" ]] && cp "$dir/profile.save" "$CLIENT_SAVE_ROOT/$rel/profile.save"
-done
+copy_settings() {
+  local target_root="$1"
+  for dir in "$REAL_SAVE_ROOT"/steam/*/ "$REAL_SAVE_ROOT"/default/*/; do
+    [[ -f "$dir/settings.save" ]] || continue
+    rel="${dir#$REAL_SAVE_ROOT/}"
+    mkdir -p "$target_root/$rel"
+    cp "$dir/settings.save" "$target_root/$rel/settings.save"
+    [[ -f "$dir/profile.save" ]] && cp "$dir/profile.save" "$target_root/$rel/profile.save"
+    if [[ -n "$ONLY_MODS" ]]; then
+      python3 - "$target_root/$rel/settings.save" "$ONLY_MODS" "$MODS_DIR" "$WORKSHOP_DIR" <<'PY'
+import json, pathlib, sys
+path, mods, mods_dir, workshop_dir = sys.argv[1], [m for m in sys.argv[2].split(",") if m], sys.argv[3], sys.argv[4]
+# 没列在设置里的模组默认启用：把本机找得到的其他模组在两种来源下都显式禁用。
+ids = set()
+for root in (mods_dir, workshop_dir):
+    for manifest in pathlib.Path(root).glob("*/*.json") if pathlib.Path(root).is_dir() else []:
+        try:
+            mod_id = json.load(open(manifest, encoding="utf-8")).get("id")
+        except Exception:
+            continue
+        if isinstance(mod_id, str):
+            ids.add(mod_id)
+entries = [{"id": m, "is_enabled": True, "source": "mods_directory"} for m in mods]
+for mod_id in sorted(ids - set(mods)):
+    for source in ("mods_directory", "steam_workshop"):
+        entries.append({"id": mod_id, "is_enabled": False, "source": source})
+for mod_id in mods:
+    entries.append({"id": mod_id, "is_enabled": False, "source": "steam_workshop"})
+data = json.load(open(path))
+data["mod_settings"] = {"mod_list": entries, "mods_enabled": True}
+json.dump(data, open(path, "w"))
+PY
+    fi
+  done
+}
+copy_settings "$CLIENT_SAVE_ROOT"
+[[ -n "$ONLY_MODS" ]] && copy_settings "$HOST_HOME/Library/Application Support/SlayTheSpire2"
 
 print "== 构建驱动"
 # 先落日志再判 dotnet 自身的退出码:管道接 grep 会吞掉构建失败。
@@ -76,7 +111,7 @@ trap cleanup EXIT
 print "== 启动主机"
 (
   cd "$GAME_DIR"
-  HEXTECH_MPLAB_ROLE=host HEXTECH_MPLAB_PLAYERS=2 HEXTECH_MPLAB_SEED="$SEED" HEXTECH_MPLAB_MAX_SEC="$TIMEOUT_SEC" \
+  HOME="$HOST_HOME" HEXTECH_MPLAB_ROLE=host HEXTECH_MPLAB_PLAYERS=2 HEXTECH_MPLAB_SEED="$SEED" HEXTECH_MPLAB_MAX_SEC="$TIMEOUT_SEC" \
     exec "$GAME_BIN" --headless --fastmp=host_standard --quit-after "$QUIT_AFTER" --log-file "$OUT/host.log" > "$OUT/host.stdout" 2>&1
 ) &
 host_pid=$!
