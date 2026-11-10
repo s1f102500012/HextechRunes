@@ -1,6 +1,6 @@
 # 遥测服务部署与数据布局
 
-- app：`/opt/hextech-runes-telemetry/app`，部署 `server.js`、`community.js`、`http-util.js`、`labels.json`、`public/`。改完先 `node --check server.js` 再重启 `hextech-runes-telemetry`。
+- app：`/opt/hextech-runes-telemetry/app`，部署 `server.js`、`community.js`、`http-util.js`、`labels.json`、`public/`，以及可选的 `sensitive-words.txt`（社区配置的敏感词表，缺失时不做敏感词过滤）。改完先 `node --check server.js` 再重启 `hextech-runes-telemetry`。
 - data：`/opt/hextech-runes-telemetry/data`，属主 `hextelemetry`。服务器需要装 `zstd`。
 
 ## 原始库

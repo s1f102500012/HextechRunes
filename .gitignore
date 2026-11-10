@@ -8,9 +8,7 @@
 **/node_modules/
 **/__pycache__/
 **/workshop/content/
-**/workshop-beta/content/
 **/analytics/*_latest.csv
-.tools/
 **/releases/
 HextechRunes/server/hextech-telemetry/data/
 .env
@@ -25,3 +23,4 @@ HextechRunes/server/hextech-telemetry/data/
 *.db
 *.pem
 *.key
+.claude/
