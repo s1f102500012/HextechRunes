@@ -5,7 +5,7 @@ internal sealed class EightPennyGateEnemyHex : HextechEnemyHexEffect
 	internal override MonsterHexKind Kind => MonsterHexKind.EightPennyGate;
 
 	// 只读：这个钩子会在真正出牌之外被调用（随机数预测等模组拿预览牌模拟出牌时会直接调到它），
-	// 在这里记"本回合已消耗"会让只在本机发生的预览占掉名额，联机两端对同一张牌的去向判断不同（#22）。
+	// 在这里记"本回合已消耗"会让只在本机发生的预览占掉名额，联机两端对同一张牌的去向判断不同。
 	// 所以每次都从两端同步的出牌记录里重新数本回合之前已打出的计数牌。
 	internal override (PileType, CardPilePosition)? ModifyCardPlayResultPileTypeAndPosition(
 		HextechEnemyHexContext context,

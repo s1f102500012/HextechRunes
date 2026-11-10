@@ -25,8 +25,8 @@ internal sealed class StokeRestSiteOption : RestSiteOption
 
 	// 基类的 RestSiteOption.Icon 写死从 PreloadManager.Cache 取 res://images/ui/rest_site/option_stoke.png,
 	// 而模组的 PCK 只能挂在 res://HextechRunes/ 下、无法提供该 base-game 命名空间的真实资源。
-	// 图标改由 HextechAssetHooks 的 RestSiteOption.Icon 前缀补丁直接返回这里解析出的纹理(见 ResolveIcon),
-	// 因此本选项不再声明任何需要预载的资源(避免预载器尝试加载不存在的路径并产生噪声)。
+	// 图标由 HextechAssetHooks 的 RestSiteOption.Icon 前缀补丁直接返回这里解析出的纹理(见 ResolveIcon),
+	// 因此本选项不声明任何需要预载的资源(避免预载器尝试加载不存在的路径并产生噪声)。
 	private static Texture2D? _icon;
 
 	public override string OptionId => OptionIdValue;
@@ -73,11 +73,10 @@ internal sealed class StokeRestSiteOption : RestSiteOption
 	/// 解析「添柴」休息室选项的图标:复用原版 Stoke 卡牌的立绘(真实磁盘资源,任何端、任何时机都能稳定加载,
 	/// 不依赖会被房间切换卸载的 AssetCache 别名)。供 <see cref="HextechAssetHooks"/> 的 RestSiteOption.Icon 补丁调用。
 	///
-	/// 此前的实现把一张别名贴图塞进 <c>PreloadManager.Cache</c>,但该缓存会在进入休息室房间时按「本地玩家选项」
-	/// 卸载未被引用的资源 —— 对非遗物持有方(联机另一端)而言这张别名被判为多余而清掉,导致取图返回 null、
-	/// 渲染思考气泡时抛 <c>NotImplementedException</c>。该异常发生在 <c>RestSiteSynchronizer.ChooseOption</c>
-	/// 的 <c>BeforePlayerOptionChosen</c> 阶段(早于把选项写入 RestSiteChoices / 移除已选项),会让一端中断而另一端跑完,
-	/// 进而在离开休息室时校验和分叉(StateDivergence 踢人)。返回稳定纹理后该链条整体消除。
+	/// 不能把别名贴图塞进 <c>PreloadManager.Cache</c>:该缓存进入休息室时按「本地玩家选项」卸载未引用资源,
+	/// 非遗物持有方那端会清掉别名,取图返回 null、渲染思考气泡时抛 <c>NotImplementedException</c>。该异常发生在
+	/// <c>RestSiteSynchronizer.ChooseOption</c> 的 <c>BeforePlayerOptionChosen</c> 阶段(早于写入 RestSiteChoices / 移除已选项),
+	/// 会让一端中断而另一端跑完,离开休息室时校验和分叉(StateDivergence 踢人)。
 	/// </summary>
 	internal static Texture2D? ResolveIcon()
 	{

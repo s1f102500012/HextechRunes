@@ -134,7 +134,7 @@ public sealed class EarthAwakensRune : DrawThresholdRuneBase
 		return CreatureCmd.Damage(choiceContext, targets, boulder.Amount, ValueProp.Unpowered, boulder.Owner);
 	}
 
-	// 跳过理由：原版 RollingBoulderPower.AfterPlayerTurnStart（0.107.1/0.110.0/0.111.0 反编译一致）每块滚石各自播放
+	// 跳过理由：原版 RollingBoulderPower.AfterPlayerTurnStart（0.107.1/0.111.0 反编译一致）每块滚石各自播放
 	// 滚石动画并等它结束，原版 Hook 逐个等待监听者，几块滚石就要依次滚几遍；没有能合并多块 Instanced 能力的 Hook。
 	// 激活条件：持有本符文且身上有两块以上滚石时，第一块被调用时一起滚全部滚石，同一次分发里其余滚石直接跳过；
 	// 只有一块或没有本符文时走原版。替换体保留原版的闪光、伤害（Unpowered、来源为持有者）与滚后 +Damage 成长。

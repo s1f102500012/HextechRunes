@@ -1,7 +1,7 @@
 namespace HextechRunes;
 
 // 生命部分是持续的最大生命系数(×1.5)而非一次性发放:与巨人化共用 HextechMaxHpScaling 管线,
-// 之后的所有最大生命增减都按系数放大,顶栏面板"生命系数"也随之显示 150%(玩家实报此前显示 100%)。
+// 之后的所有最大生命增减都按系数放大,顶栏面板"生命系数"也随之显示 150%。
 public sealed class AstralBodyRune : HextechRelicBase, IHextechMaxHpScalingRune
 {
 	private const decimal DamageMultiplierValue = 0.9m;

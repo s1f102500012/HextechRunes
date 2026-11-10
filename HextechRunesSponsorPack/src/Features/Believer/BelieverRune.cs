@@ -9,8 +9,8 @@ namespace HextechRunesSponsorPack;
 
 // 信徒(棱彩,仅单人):击败 BOSS+6 / 精英+3 / 小怪+1 充能,满 6 排队一次「神迹」;获得时也排队一次。
 //
-// 神迹**不再**在战斗胜利 hook 里直接 EnterRoom —— 那会在战斗胜利流程中途把战斗房连同奖励一起弹掉,导致:
-// 打完 Boss 不自动进下一层(要 SL)、SL 时事件丢失、末战拿到信徒无法结算。改为只记一个存档计数 SavedPendingMiracles,
+// 神迹**不**在战斗胜利 hook 里直接 EnterRoom —— 那会在战斗胜利流程中途把战斗房连同奖励一起弹掉,导致:
+// 打完 Boss 不自动进下一层(要 SL)、SL 时事件丢失、末战拿到信徒无法结算。只记一个存档计数 SavedPendingMiracles,
 // 由 MiracleEventTriggerPatch 在「战斗领奖屏点继续→开图」这个流程空闲的干净交接点安全注入。
 // 计数在那一刻才于内存里消耗(晚于最后一次存档),所以 SL 回到事件中途会落到「计数仍 >0」的存档 → 神迹重现而非消失。
 public sealed class BelieverRune : HextechRelicBase

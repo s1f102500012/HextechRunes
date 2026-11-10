@@ -13,7 +13,7 @@ public sealed class RallyingCallRune : HextechRelicBase
 			return;
 		}
 
-		// 只取抽牌堆(手牌里的同名牌不再连带打出)。模型 ID 不受语言、升级后缀或附魔显示名影响;
+		// 只取抽牌堆(手牌里的同名牌不连带打出)。模型 ID 不受语言、升级后缀或附魔显示名影响;
 		// 快照和连锁 guard 防止打出途中洗回抽牌堆的牌重复入队。
 		CardModel[] matches = SnapshotMatches(cardPlay.Card, PileType.Draw.GetPile(Owner).Cards);
 		if (matches.Length == 0)

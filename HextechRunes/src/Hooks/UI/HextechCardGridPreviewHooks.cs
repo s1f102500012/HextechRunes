@@ -7,13 +7,13 @@ namespace HextechRunes;
 /// <summary>
 /// 牌组界面"查看升级"取消勾选的兜底还原:原版 NCardGrid 的还原链路没有为
 /// "已升级但仍可继续升级"的卡(升级:打击/防御的无限升级)设计过——原版不存在
-/// MaxUpgradeLevel&gt;1 的卡(已扫全部41个覆写),取消勾选后部分格子停留在 +1 预览
-/// (玩家实报)。这里在开关切到 false 时强制把每个格子还原到基础卡并清预览旗标,
+/// MaxUpgradeLevel&gt;1 的卡(已扫全部41个覆写),取消勾选后部分格子停留在 +1 预览。
+/// 这里在开关切到 false 时强制把每个格子还原到基础卡并清预览旗标,
 /// 纯表现层,不触碰任何卡牌数据。
 /// </summary>
 internal static class HextechCardGridPreviewHooks
 {
-	// 原版 NCardGrid._cardRows(0.107.1 / 0.110.0 / 0.111.0)。
+	// 原版 NCardGrid._cardRows(0.107.1 / 0.111.0)。
 	private static readonly FieldInfo? CardRowsField = HextechHookReflection.TryGetField(typeof(NCardGrid), "_cardRows");
 
 	// 原版 NGridCardHolder._isPreviewingUpgrade(同上)。

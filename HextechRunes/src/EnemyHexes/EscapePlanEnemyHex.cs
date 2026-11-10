@@ -24,7 +24,7 @@ internal sealed class EscapePlanEnemyHex : HextechEnemyHexEffect
 
 	internal override Task AfterEnemyHealthThreshold(HextechEnemyHexContext context, Creature target, uint combatId)
 	{
-		// 立即触发:掉到阈值以下的瞬间就获得格挡+缩小(不再拖到下个回合)。
+		// 立即触发:掉到阈值以下的瞬间就获得格挡+缩小,不等到下个回合。
 		return ApplyEscapePlan(context, target);
 	}
 

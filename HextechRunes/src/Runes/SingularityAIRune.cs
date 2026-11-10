@@ -14,7 +14,7 @@ public sealed class SingularityAIRune : HextechRelicBase
 			return;
 		}
 
-		// 此前缺这层过滤会把 Ancient 稀有度的禁忌魔典(ForbiddenGrimoire)纳入并生成 → 联机下打出时 power 应用两端
+		// 必须过滤:否则会生成 Ancient 稀有度的禁忌魔典(ForbiddenGrimoire) → 联机下打出时 power 应用两端
 		// 分叉(client 上了 power、host 没上)→ StateDivergence 掉线。
 		List<CardModel> powerPool = BuildStableCombatGenerationPool(
 			Owner.Character.CardPool.GetUnlockedCards(Owner.UnlockState, Owner.RunState.CardMultiplayerConstraint),

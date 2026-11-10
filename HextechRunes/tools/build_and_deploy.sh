@@ -1,7 +1,7 @@
 #!/bin/zsh
 set -euo pipefail
 
-# 构建 HextechRunes 三个变体 + 加载器 + PCK,默认部署到游戏 mods 目录。
+# 构建 HextechRunes 两个变体(0.107.1 / 0.111.0) + 加载器 + PCK,默认部署到游戏 mods 目录。
 #   HEXTECH_DEPLOY=0         只构建,不部署。
 #   HEXTECH_UPDATE_LATEST=1  发布时显式开启:用本次 dist 改写 server/hextech-telemetry/public/latest-version.json。
 #   STS2_GAME_APP=<.app>     覆盖游戏安装位置。

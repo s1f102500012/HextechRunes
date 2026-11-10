@@ -73,7 +73,7 @@ public sealed class EntropyDecrease : EnchantmentModel
 		return Task.CompletedTask;
 	}
 
-	// 战后移出牌组走附魔自己的模型回调,不再对 Hook.AfterCombatEnd 打补丁:牌组卡的附魔本来就在
+	// 战后移出牌组走附魔自己的模型回调,不对 Hook.AfterCombatEnd 打补丁:牌组卡的附魔本来就在
 	// RunState.IterateHookListeners 的枚举里(0.111 RunState.cs 第 550-566 行,牌组卡与其附魔排在最前),
 	// 战斗副本的附魔排在其后。
 	//

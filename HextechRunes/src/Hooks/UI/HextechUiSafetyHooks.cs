@@ -12,7 +12,7 @@ namespace HextechRunes;
 
 internal static class HextechUiSafetyHooks
 {
-	// 原版 NMultiplayerPlayerIntentHandler 的私有字段(0.107.1 / 0.110.0 / 0.111.0)。
+	// 原版 NMultiplayerPlayerIntentHandler 的私有字段(0.107.1 / 0.111.0)。
 	private static readonly FieldInfo? IntentCardInPlayAwaitingPlayerChoiceField = TryGetField(typeof(NMultiplayerPlayerIntentHandler), "_cardInPlayAwaitingPlayerChoice");
 	private static readonly FieldInfo? IntentCardThinkyDotsField = TryGetField(typeof(NMultiplayerPlayerIntentHandler), "_cardThinkyDots");
 	private static readonly FieldInfo? IntentHitboxField = TryGetField(typeof(NMultiplayerPlayerIntentHandler), "_hitbox");
@@ -233,7 +233,7 @@ internal static class HextechUiSafetyHooks
 	/// <c>GetTree().CreateTween()</c>,持有者不在树上时抛空引用;没有 Hook 能在动画前取消它。
 	/// 激活条件:只对海克斯遗物(<see cref="HextechCatalog.IsHextechCustomRelic"/>)的持有者生效,
 	/// 原版与第三方遗物的异常原样抛出(设计哲学第 2 节:兜底只限本模组能证明是自己造成的对象)。
-	/// 版本:0.107.1 / 0.110.0 / 0.111.0 原方法逻辑一致,已进原版拷贝守卫;<see cref="Priority.Low"/> 让他人前缀先跑。
+	/// 版本:0.107.1 / 0.111.0 原方法逻辑一致,已进原版拷贝守卫;<see cref="Priority.Low"/> 让他人前缀先跑。
 	/// </remarks>
 	[HarmonyPatch(typeof(NRelicInventoryHolder), nameof(NRelicInventoryHolder.PlayNewlyAcquiredAnimation), typeof(Vector2?), typeof(Vector2?))]
 	[HextechPatch("ui.safety.newly-acquired-animation", "遗物获取动画安全")]
@@ -276,7 +276,7 @@ internal static class HextechUiSafetyHooks
 	/// <c>Reparent</c> 并调用 <c>NCardPlayQueue.ReAddCardAfterPlayerChoice</c>,卡牌节点已脱树时抛异常,打断联机恢复流程;
 	/// 原版没有 Hook 能拦下这一步。
 	/// 激活条件:只在"等待中的卡牌节点存在但已无有效父节点"时跳过,其它情况交给原版。
-	/// 版本:0.107.1 / 0.110.0 / 0.111.0 原方法一致,已进原版拷贝守卫;<see cref="Priority.Low"/> 让他人前缀先跑。
+	/// 版本:0.107.1 / 0.111.0 原方法一致,已进原版拷贝守卫;<see cref="Priority.Low"/> 让他人前缀先跑。
 	/// </remarks>
 	[HarmonyPatch(typeof(NMultiplayerPlayerIntentHandler), "BeforeActionReadyToResumeAfterPlayerChoice")]
 	[HextechPatch("ui.safety.multiplayer-intent", "联机意图恢复安全", Optional = true)]
@@ -304,7 +304,7 @@ internal static class HextechUiSafetyHooks
 	/// <c>Reparent</c> 并播放进出牌堆动画,卡牌节点失效时抛异常;原版没有 Hook 能拦下这一步。
 	/// 替换体复刻原版的"退订事件 + 移出队列",只省略对失效卡牌节点的重挂与动画。
 	/// 激活条件:只在找到对应队列项且其卡牌节点缺失/脱树时跳过,其它情况交给原版。
-	/// 版本:0.107.1 / 0.110.0 / 0.111.0 原方法一致,已进原版拷贝守卫;<see cref="Priority.Low"/> 让他人前缀先跑。
+	/// 版本:0.107.1 / 0.111.0 原方法一致,已进原版拷贝守卫;<see cref="Priority.Low"/> 让他人前缀先跑。
 	/// </remarks>
 	[HarmonyPatch(typeof(NCardPlayQueue), "BeforeRemoteCardPlayResumedAfterPlayerChoice")]
 	[HextechPatch("ui.safety.card-play-queue", "联机出牌队列恢复安全", Optional = true)]

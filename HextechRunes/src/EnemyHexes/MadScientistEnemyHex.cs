@@ -3,7 +3,7 @@ namespace HextechRunes;
 /// <summary>
 /// 升级：蜂群术士（MonsterHexKind.MadScientist；枚举名是兼容契约，类名按 {Kind}EnemyHex 约定随之保留）：敌人减少最大生命值，并获得 1 层原版人体蜂房。
 /// 晕眩由原版 PersonalHivePower 负责（受到攻击伤害时往攻击者抽牌堆随机位置加晕眩，奥斯提归到主人），
-/// 本类不再自己往牌堆加牌。
+/// 本类不自己往牌堆加牌。
 /// </summary>
 internal sealed class MadScientistEnemyHex : HextechEnemyHexEffect, IHextechEnemyMaxHpCoefficientProvider
 {

@@ -65,7 +65,7 @@ internal static class HextechAncientRelicHelper
 		return ModelDb.GetById<RelicModel>(ModelDb.GetId(relicType)).ToMutable();
 	}
 
-	// 稀有度按战斗类型加权（HextechRewardRelicRoll），不再走原版 RelicFactory.RollRarity，
+	// 稀有度按战斗类型加权（HextechRewardRelicRoll），不走原版 RelicFactory.RollRarity，
 	// 免得消耗 PlayerRng.Rewards 改变原版后续奖励序列；最近掉过的蜡制遗物在候选够用时排除。
 	public static RelicModel CreateRepeatableWaxRelic(
 		Player player,

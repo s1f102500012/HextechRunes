@@ -32,7 +32,7 @@ public sealed class JeweledGauntletRune : HextechRelicBase
 		}
 
 		// 这里只 peek 不消费:本钩子可能被引擎/UI 针对同一次出牌重复求值(预测轮询只在
-		// 本地端发生),在这里推进联机共享序号会让各端推进次数不一致→稳定随机结果分叉(玩家实报断线)。
+		// 本地端发生),在这里推进联机共享序号会让各端推进次数不一致→稳定随机结果分叉而断线。
 		int ordinal = _replayRollsThisCombat;
 		bool shouldReplay = HextechStableRandom.PercentChance(
 			(RunState)Owner.RunState,

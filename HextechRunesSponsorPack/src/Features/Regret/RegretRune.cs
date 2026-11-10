@@ -25,7 +25,7 @@ public sealed class RegretRune : HextechRelicBase
 		get => 0;
 		set
 		{
-			// 旧档兼容:重做后的符文不再有永久增伤。属性名与类型必须保留(SavedProperty 集合决定联机 net-id 布局),
+			// 旧档兼容:本符文没有永久增伤。属性名与类型必须保留(SavedProperty 集合决定联机 net-id 布局),
 			// 读档时丢弃旧值、恒为 0。
 		}
 	}

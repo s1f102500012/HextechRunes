@@ -75,7 +75,7 @@ public sealed class TwiceThriceRune : HextechRelicBase
 		return attacksPlayedBefore % AttacksPerReplay + playCount >= AttacksPerReplay;
 	}
 
-	// 单机与联机统一读原版战斗完成历史（CardPlayFinished），不再维护本地计数。原版每次打出先记完成历史、
+	// 单机与联机统一读原版战斗完成历史（CardPlayFinished），不维护本地计数。原版每次打出先记完成历史、
 	// 再依次派发 AfterCardPlayed；一呼百应等排在本符文之前的监听者在自己的 AfterCardPlayed 里嵌套自动打出攻击牌时，
 	// 外层那张已在历史里、而本符文的 AfterCardPlayed 还没执行。本地计数会少算外层这张，导致单机与联机追加次数不同。
 	// 历史只含本场（原版在战斗结束与重置时清空），战斗外读到 0。

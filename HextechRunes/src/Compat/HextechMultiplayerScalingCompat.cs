@@ -4,7 +4,7 @@ internal static class HextechMultiplayerScalingCompat
 {
 	private const string BetterMultiplayerScalingAssemblyName = "BetterMultiplayerScaling";
 
-	// 每只敌人进场都会问一次，按名缓存，不再每次扫全部程序集。
+	// 每只敌人进场都会问一次，按名缓存，不必每次扫全部程序集。
 	private static readonly HextechLoadedAssemblyLookup BetterMultiplayerScalingAssembly =
 		new(BetterMultiplayerScalingAssemblyName, StringComparison.OrdinalIgnoreCase);
 

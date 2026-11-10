@@ -353,7 +353,7 @@ internal static class HextechExternalContentRegistry
 	}
 
 	// 首个写入者生效：同键再次登记不同的值只按预算告警、不覆盖，登记相同的值静默忽略。
-	// 字符串按 Ordinal 比较，委托按目标与方法比较（EqualityComparer.Default 与原先的 == / != 一致），类型值按模型类型身份比较。
+	// 字符串按 Ordinal 比较，委托按目标与方法比较（EqualityComparer.Default），类型值按模型类型身份比较。
 	private static bool TryStoreFirstWriter<TKey, TValue>(
 		Dictionary<TKey, TValue> store,
 		TKey key,

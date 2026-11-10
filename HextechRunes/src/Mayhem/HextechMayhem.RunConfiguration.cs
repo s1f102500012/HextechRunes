@@ -96,7 +96,7 @@ internal sealed partial class HextechMayhemModifier
 			return "";
 		}
 
-		// 该 JSON 进 SavedProperty 参与双端比对，集合字段用排序数组序列化，
+		// 该 JSON 存在 Modifier 上，不参与原版联机校验，两端一致靠本模组保证；集合字段用排序数组序列化，
 		// 不依赖 HashSet 未文档化的插入序枚举；属性名与原 record 一致，Restore 仍反序列化回原类型。
 		HextechRunConfigurationSnapshot normalized = HextechRuneConfiguration.NormalizeSnapshot(snapshot);
 		return JsonSerializer.Serialize(new RunConfigurationSnapshotJson(normalized), HextechTelemetry.JsonOptions);

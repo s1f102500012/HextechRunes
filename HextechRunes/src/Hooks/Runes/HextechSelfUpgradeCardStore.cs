@@ -138,8 +138,8 @@ internal static class HextechSelfUpgradeCardStore
 	}
 
 	// 原版 DowngradeInternal(魔法骑士降级等)会用 canonical 克隆整体替换 _dynamicVars,
-	// 把本 store 加在 BaseValue 上的累计值清零(玩家实报:升级铁斩波被降级后还原成 5/5,
-	// 下场战斗从牌库本体重新克隆才恢复)。降级只应回退"升级",不应吞掉打出累计,这里把记账值补回去。
+	// 把本 store 加在 BaseValue 上的累计值清零(例如升级铁斩波被降级后还原成 5/5,
+	// 直到下场战斗从牌库本体重新克隆)。降级只应回退"升级",不应吞掉打出累计,这里把记账值补回去。
 	[HarmonyPatch(typeof(CardModel), nameof(CardModel.DowngradeInternal), new Type[0])]
 	[HextechPatch("card.self-upgrade.downgrade", "自升级卡牌存储")]
 	private static class DowngradePatch

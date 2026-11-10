@@ -6,8 +6,8 @@ namespace HextechRunes;
 
 internal static partial class HextechCombatHooks
 {
-	// NHealthBar._creature 与 _hpLabel（0.107.1/0.110.0/0.111.0 原版私有字段）：濒死时血条显示负血量用；
-	// 缺失时只跳过这段显示（Prepare 返回 false），不再连带把濒死狂宴整个标为不可用。
+	// NHealthBar._creature 与 _hpLabel（0.107.1/0.111.0 原版私有字段）：濒死时血条显示负血量用；
+	// 缺失时只跳过这段显示（Prepare 返回 false），不连带把濒死狂宴整个标为不可用。
 	private static readonly FieldInfo HealthBarCreatureField = TryGetField(typeof(NHealthBar), "_creature")!;
 	private static readonly FieldInfo HealthBarHpLabelField = TryGetField(typeof(NHealthBar), "_hpLabel")!;
 

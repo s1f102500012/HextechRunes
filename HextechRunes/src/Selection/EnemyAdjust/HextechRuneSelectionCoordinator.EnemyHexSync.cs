@@ -34,7 +34,7 @@ internal static partial class HextechRuneSelectionCoordinator
 
 		bool isAuthorityLocal = syncContext != null && IsLocalPlayer(runManager, syncContext.AuthorityPlayer);
 		// choiceOrdinal>0 时无新 hex 可调整(syncContext 为 null):只读展示【本幕新增】的敌方 hex。
-		// 不能回退到 activeMonsterHexes(前几幕累积集),否则会把历史敌方海克斯一起显示(玩家实报);
+		// 不能回退到 activeMonsterHexes(前几幕累积集),否则会把历史敌方海克斯一起显示;
 		// 本幕无新增时面板按空集隐藏。纯显示、不触发任何同步。
 		return CreateEnemyHexAdjustmentOptions(
 			modifier,

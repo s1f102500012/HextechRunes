@@ -47,7 +47,7 @@ public abstract partial class HextechRelicBase
 	private int _turnScopedTurnNumber = -1;
 
 	// "每回合 N 次"按持有者自己的回合计：原版 TurnNumber 在该玩家开始新回合（含额外回合）时递增，
-	// 队友的额外回合不变。联机计数（Modifier 记账）按同一口径只在参与回合的玩家开始回合时清零。
+	// 队友的额外回合不变。单机联机都按这个口径在遗物实例上计数。
 	protected void EnsureTurnScopedStateCurrent(Action resetState)
 	{
 		HextechCombatState? combatState = Owner?.Creature.CombatState;
@@ -87,8 +87,7 @@ public abstract partial class HextechRelicBase
 	}
 
 	// 每回合/每场计数一律记在持有这件遗物的实例上，单机联机同一套逻辑。
-	// 以前联机时改记在 Mayhem Modifier 的共享账上，但那份账不进联机校验，也不跟遗物实例绑定：
-	// #47 里房主那份账漏记了一次腐化树枝的触发，第二次生成两端序号不同而分歧，直到生成结果不同才被校验发现。
+	// 不记在 Mayhem Modifier 上：Modifier 上的状态不参与原版联机校验，也不跟遗物实例绑定，两端漏记会悄悄分叉。
 	// 遗物自己的字段由各端同一组钩子推进，清零时机由调用方在战斗/回合边界决定。
 	protected bool HasTurnProcReachedLimit(int localCount, int maxPerTurn)
 	{

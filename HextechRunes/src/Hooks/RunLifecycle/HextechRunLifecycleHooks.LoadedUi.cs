@@ -150,7 +150,8 @@ internal static partial class HextechRunLifecycleHooks
 		HextechLog.Warn("Mayhem", $"ResumePendingActSelectionAfterLoad timed out: currentRun={IsCurrentRun(runState)} act={runState.CurrentActIndex} room={runState.CurrentRoom?.GetType().Name ?? "null"}");
 	}
 
-	// 顶栏初始化是同步回调，只能启动不能等待；刷新只读本局状态并更新本地 UI，两端各自执行，不影响共享状态。
+	// 顶栏初始化是同步回调，只能启动不能等待。刷新会经 ResolveCurrentStageIndex 激活额外阶段、并从遗物恢复
+	// 已结算幕次（写本局状态），触发时机取决于各端界面何时就绪。
 	private static void ScheduleEnemyUiRefresh(Func<RunState?> resolveRun, string reason)
 	{
 		TaskHelper.RunSafely(RefreshEnemyUiWhenReady(resolveRun, reason));

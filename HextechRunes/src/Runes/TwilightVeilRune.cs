@@ -31,7 +31,7 @@ public sealed class TwilightVeilRune : HextechRelicBase
 
 	public override Task AfterPlayerTurnStartEarly(PlayerChoiceContext choiceContext, Player player)
 	{
-		// 任意玩家的首个回合开始后才开始镜像:此前的应用(出生自带/战斗开始时/开局海克斯)一律不偷。
+		// 任意玩家的首个回合开始后才开始镜像:在那之前的应用(出生自带/战斗开始时/开局海克斯)一律不偷。
 		_armed = true;
 		return Task.CompletedTask;
 	}

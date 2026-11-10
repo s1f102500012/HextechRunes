@@ -1,7 +1,7 @@
 #!/bin/zsh
 set -euo pipefail
 
-# 构建 HextechRunesSponsorPack 三个变体 + 加载器 + PCK,默认部署到游戏 mods 目录。
+# 构建 HextechRunesSponsorPack 两个变体(0.107.1 / 0.111.0) + 加载器 + PCK,默认部署到游戏 mods 目录。
 #   HEXTECH_SPONSOR_DEPLOY=0          只构建,不部署。
 #   STS2_GAME_APP=<.app>              覆盖游戏安装位置。
 # 加载器与本体共用源码(见 loader/HextechRunesSponsorPack.Loader.csproj),构建步骤与多版本清单工具

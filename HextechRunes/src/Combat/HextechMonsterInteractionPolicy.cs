@@ -37,7 +37,7 @@ internal static class HextechMonsterInteractionPolicy
 
 	// 结构性怪物 buff = 正常挂在敌方身上，且剥除会让遭遇脚本、战斗结束或死亡流程断裂的 power。
 	// 玩家牌、玩家协作、Osty 和怪物施加给玩家的 power 不属于敌方剥除策略，不能为图省事混进此处。
-	// 曾把全部"动画/形态状态机"类也列入(防幽灵鳗 SkittishPower 卡死),现已逐个核验收窄:
+	// "动画/形态状态机"类逐个核验后不整体列入:
 	//  - Skittish 的卡死根因是 Block 出场动画悬空,已由 RemoveMonsterBuffSafely 补出场后安全剥除;
 	//  - Smoggy/Burrowed/Hibernate/CurlUp/HardenedShell/SentryMode/Shadowmeld/Shroud/Sneaky/
 	//    Covered/Surprise/Soar/Flutter/SpectrumShift 反编译核验为一次性动画或自带 AfterRemoved 清理,可正常剥除;
@@ -68,7 +68,7 @@ internal static class HextechMonsterInteractionPolicy
 
 	/// <summary>
 	/// 安全剥除怪物增益:对有"进场动画等待出场"状态机的 power(幽灵鳗 Skittish),先补出场动画再移除,
-	/// 否则 Spine 状态机停在 Block 态、下一次动画触发永远等不到(玩家实报"感受燃烧打四鳗卡死"的根因)。
+	/// 否则 Spine 状态机停在 Block 态、下一次动画触发永远等不到,战斗卡死。
 	/// 感受燃烧/升级:暴露的剥除一律走这里。
 	/// </summary>
 	public static async Task RemoveMonsterBuffSafely(PowerModel power)

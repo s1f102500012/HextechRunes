@@ -28,7 +28,7 @@ internal static partial class HextechFormVfxSafetyHooks
 
 	// 跳过型前缀：原版 AddFormVfx 直接往 %FormVfx 容器挂节点，缺容器即空引用，且没有"挂载形态特效"的 Hook。
 	// 激活条件：容器缺失（跳过纯视觉挂载），或持有战争交响乐（按保留规则自行挂载）；其余情况走原版。
-	// 默认 Priority.Low，让其他模组的前缀先执行；目标 IL 由原版拷贝守卫冻结（0.110.0/0.111.0）。
+	// 默认 Priority.Low，让其他模组的前缀先执行；目标 IL 由原版拷贝守卫冻结（0.111.0）。
 	[HarmonyPatch(typeof(NCreatureVisuals), nameof(NCreatureVisuals.AddFormVfx), typeof(NFormVfx))]
 	[HextechPatch("compat.form-vfx.add", "形态特效容器安全")]
 	private static class AddFormVfxPatch

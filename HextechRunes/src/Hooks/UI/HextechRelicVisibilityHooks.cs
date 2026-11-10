@@ -273,7 +273,7 @@ internal static partial class HextechRelicVisibilityHooks
 	/// 跳过型前缀:原版私有 <c>NRelicInventoryHolder.DoFlash</c> 把闪光粒子实例化进 <c>GlobalUi.AboveTopBarVfxContainer</c>
 	/// (不是持有者的子节点),隐藏持有者挡不住它,原版也没有 Hook 或开关能阻止这一次实例化。
 	/// 激活条件:玩家打开了「显示隐藏遗物开关」并勾选隐藏(<see cref="ShouldHideUi"/>);未勾选时原样执行原版。
-	/// 版本:0.107.1 / 0.110.0 / 0.111.0 原方法一致,已进原版拷贝守卫;<see cref="Priority.Low"/> 让他人前缀先跑。
+	/// 版本:0.107.1 / 0.111.0 原方法一致,已进原版拷贝守卫;<see cref="Priority.Low"/> 让他人前缀先跑。
 	/// </remarks>
 	[HarmonyPatch(typeof(NRelicInventoryHolder), "DoFlash", new Type[0])]
 	[HextechPatch("ui.relic-visibility.holder-do-flash", Feature)]

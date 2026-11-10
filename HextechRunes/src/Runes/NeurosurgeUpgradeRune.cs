@@ -2,7 +2,7 @@ namespace HextechRunes;
 
 // 升级：精神过载(仅骨妹) —— 持有时,打出精神过载不再施加原版减益,改为施加本模组的同名正面效果
 // HextechNeurosurgePower(你的回合开始时对所有敌人施加等同于层数的灾厄)。
-// 只在卡牌 OnPlay 处替换施加对象;不再触碰原版 NeurosurgePower 的 Type/AfterSideTurnStart,
+// 只在卡牌 OnPlay 处替换施加对象;不触碰原版 NeurosurgePower 的 Type/AfterSideTurnStart,
 // 也不需要人工制品的特判(正面效果本来就不会被拦)。
 public sealed class NeurosurgeUpgradeRune : CardUpgradeRuneBase<Neurosurge>
 {

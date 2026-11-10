@@ -8,7 +8,7 @@ namespace HextechRunes;
 /// </summary>
 internal static class HextechHoverTipAccess
 {
-	// 原版 HoverTip.<Description>k__BackingField(0.107.1 / 0.110.0 / 0.111.0 均为自动属性)。
+	// 原版 HoverTip.<Description>k__BackingField(0.107.1 / 0.111.0 均为自动属性)。
 	private static readonly FieldInfo? DescriptionField = HextechHookReflection.TryGetField(typeof(HoverTip), "<Description>k__BackingField");
 
 	// 原版 HoverTip.<Icon>k__BackingField(同上)。

@@ -15,7 +15,7 @@ internal static partial class HextechRuneConfiguration
 	[
 		// 腐化树枝生成分布加权(攻击40/技能20/能力40)后无限风险可控,转为默认启用。
 		new(16, [ typeof(CorruptedBranchRune) ], []),
-		// 感受燃烧/回力OK镖重做为"获得时给卡"(0.8.4 数据驱动重做),转为默认启用。
+		// 感受燃烧/回力OK镖重做为"获得时给卡",转为默认启用。
 		new(17, [ typeof(FeelTheBurnRune), typeof(OkBoomerangRune) ], []),
 		// 星界躯体改为百分比生命加成(50%)后强度自洽,转为默认启用。
 		new(18, [ typeof(AstralBodyRune) ], []),

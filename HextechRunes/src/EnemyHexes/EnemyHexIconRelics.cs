@@ -1,6 +1,6 @@
 namespace HextechRunes;
 
-// 敌方专属海克斯的图标/标题/描述载体 relic：只作为 MonsterHexIconRelicTypes 的模型，
+// 敌方专属海克斯的图标/标题/描述载体 relic：只作为 HextechCustomModelRegistry.EnemyHexIconRelicTypes 的模型，
 // 不进玩家 rune 池（不在 HextechPlayerRuneRegistry），IsAvailableForPlayer=false 双保险。
 // 图标按约定路径 res://HextechRunes/images/relics/{stem}.png；文件缺失时
 // HextechRelicBase.GetResolvedIconPath 回退占位图，不会崩。
