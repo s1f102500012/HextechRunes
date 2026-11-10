@@ -42,7 +42,7 @@ public sealed class CircleOfDeathRune : HextechRelicBase
 
 		// 候选保持 HittableEnemies 的原顺序（不按 CombatId 排序），与 HextechRuneTargeting.PickRandomHittableEnemy
 		// 不同口径；换用它会改变同一盐值选中的目标，所以不合并。
-		int targetOrdinal = ConsumeCombatProcOrdinal(nameof(CircleOfDeathRune), ref _localTargetRollOrdinal);
+		int targetOrdinal = ConsumeCombatProcOrdinal(ref _localTargetRollOrdinal);
 		Creature target = enemies[HextechStableRandom.Index(
 			(RunState)Owner.RunState,
 			enemies.Count,

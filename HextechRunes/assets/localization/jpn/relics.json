@@ -589,7 +589,6 @@
   "proteinShakeRune.enemyDescription": "敵が[gold]ブロック[/gold]を得る時、代わりに同じ量のHPを回復する。失ったHPを超える分は[gold]ブロック[/gold]として得る。",
   "goldenSpatulaRune.enemyDescription": "敵は[blue]25[/blue]/[blue]30[/blue]/[blue]45[/blue]%の最大HPを獲得し、与えるダメージは[blue]25[/blue]/[blue]30[/blue]/[blue]45[/blue]%増加しますが、回復とブロックは[blue]50%[/blue]減少します。",
   "hailToTheKingRune.enemyDescription": "エリートとボスの戦闘では、すべての敵は開始時に最大HPの[blue]3[/blue]/[blue]5[/blue]/[blue]8[/blue]%に等しい[blue]{Stacks}[/blue][gold]アーティファクト[/gold]に加えて[gold]プレート[/gold]と[gold]再生[/gold]を獲得します。戦闘。",
-  "eightPennyGateRune.enemyDescription": "各プレイヤーが各ターンにプレイする最初の[blue]0[/blue]/[blue]1[/blue]/[blue]2[/blue]枚の非パワーカードは廃棄される。",
   "HUNGRY_HEX.title": "口：飢餓",
   "HUNGRY_HEX.description": "各プレイヤーが毎ターンにプレイする最初の[blue]0[/blue]/[blue]1[/blue]/[blue]2[/blue]枚の非パワーカードは廃棄される。",
   "HUNGRY_HEX.flavor": "次の一枚は、ちょうどいい匂いがする。",

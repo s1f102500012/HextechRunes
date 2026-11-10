@@ -33,7 +33,7 @@ public sealed class JeweledGauntletRune : HextechRelicBase
 
 		// 这里只 peek 不消费:本钩子可能被引擎/UI 针对同一次出牌重复求值(预测轮询只在
 		// 本地端发生),在这里推进联机共享序号会让各端推进次数不一致→稳定随机结果分叉(玩家实报断线)。
-		int ordinal = PeekCombatProcOrdinal(nameof(JeweledGauntletRune), _replayRollsThisCombat);
+		int ordinal = _replayRollsThisCombat;
 		bool shouldReplay = HextechStableRandom.PercentChance(
 			(RunState)Owner.RunState,
 			ReplayChancePercent,
@@ -60,7 +60,7 @@ public sealed class JeweledGauntletRune : HextechRelicBase
 
 		if (_pendingReplayRolls.Remove(cardPlay.Card, out bool shouldReplay))
 		{
-			ConsumeCombatProcOrdinal(nameof(JeweledGauntletRune), ref _replayRollsThisCombat);
+			ConsumeCombatProcOrdinal(ref _replayRollsThisCombat);
 			if (shouldReplay)
 			{
 				Flash();

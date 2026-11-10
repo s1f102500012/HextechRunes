@@ -589,7 +589,6 @@
   "proteinShakeRune.enemyDescription": "Когда враг должен получить [gold]защиту[/gold], вместо этого он восполняет столько же ОЗ. Всё, что сверх потерянных ОЗ, он по-прежнему получает как [gold]защиту[/gold].",
   "goldenSpatulaRune.enemyDescription": "Враг получает [blue]25[/blue]/[blue]30[/blue]/[blue]45[/blue]% макс. ОЗ и наносит на [blue]25[/blue]/[blue]30[/blue]/[blue]45[/blue]% больше урона, но получает на [blue]50%[/blue] меньше исцеления и защиты.",
   "hailToTheKingRune.enemyDescription": "В боях с Элитой и Боссом все враги получают [blue]{Stacks}[/blue] [gold]Артефакта[/gold], а также [gold]панцирь[/gold] и [gold]Регенерацию[/gold] в размере [blue]3[/blue]/[blue]5[/blue]/[blue]8[/blue]% от своих макс. ОЗ в начале боя.",
-  "eightPennyGateRune.enemyDescription": "Первые [blue]0[/blue]/[blue]1[/blue]/[blue]2[/blue] карты, не являющиеся Талантом, которые каждый игрок разыгрывает за ход, сжигаются.",
   "HUNGRY_HEX.title": "Я голоден",
   "HUNGRY_HEX.description": "Первые [blue]0[/blue]/[blue]1[/blue]/[blue]2[/blue] карты, не являющиеся Талантом, которые каждый игрок разыгрывает за ход, сжигаются.",
   "HUNGRY_HEX.flavor": "Твоя следующая карта пахнет как надо.",

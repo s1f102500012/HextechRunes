@@ -1,6 +1,5 @@
 using Godot;
 using MegaCrit.Sts2.Core.Nodes.Combat;
-using MegaCrit.Sts2.Core.Nodes.Rooms;
 
 namespace HextechRunes;
 
@@ -22,12 +21,6 @@ internal static class HextechCreatureNodeRegistry
 		}
 
 		Nodes[node.Entity] = node;
-	}
-
-	// 原版 GetCreatureNode 只是在节点列表里按 Entity 查找，不会抛异常。
-	internal static NCreature? SafeGetCreatureNode(NCombatRoom room, Creature creature)
-	{
-		return room.GetCreatureNode(creature);
 	}
 
 	internal static NCreature? TryGet(Creature? creature)

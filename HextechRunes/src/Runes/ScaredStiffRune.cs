@@ -52,7 +52,7 @@ public sealed class ScaredStiffRune : HextechRelicBase
 
 				card.ExhaustOnNextPlay = true;
 				HextechCombatState combatState = Owner.Creature.CombatState!;
-				int targetOrdinal = ConsumeCombatProcOrdinal(nameof(ScaredStiffRune), ref _autoPlayTargetsThisCombat);
+				int targetOrdinal = ConsumeCombatProcOrdinal(ref _autoPlayTargetsThisCombat);
 				Creature? target = HextechRuneTargeting.PickRandomHittableEnemy(
 					Owner,
 					combatState,

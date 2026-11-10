@@ -91,7 +91,7 @@ internal static partial class Program
 		{
 			string id = kind.ToString();
 			Expect(HextechRuneConfiguration.GetDefaultDisabledMonsterHexIds().Contains(id), $"new configs disable enemy {kind} by default");
-			Expect(!HextechMonsterHexRegistry.Registrations.Single(row => row.Kind == kind).Disabled, $"enemy {kind} default-off stays configurable, not hard-removed");
+			Expect(HextechContentRegistry.MonsterHexMetadata.EnabledKindsByRarity.Values.Any(kinds => kinds.Contains(kind)), $"enemy {kind} default-off stays configurable, not hard-removed");
 
 			(int version, IReadOnlySet<string> migrated) = HextechRuneConfiguration.MigrateDisabledMonsterHexIdsForTests(below - 1, [customMonsterId]);
 			Equal(CurrentConfigVersion, version, $"v{below - 1} monster config should land on current version");

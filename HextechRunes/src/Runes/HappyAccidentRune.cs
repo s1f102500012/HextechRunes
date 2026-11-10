@@ -45,7 +45,7 @@ public sealed class HappyAccidentRune : HextechRelicBase
 		Flash();
 		for (int i = 0; i < orbCount; i++)
 		{
-			int orbOrdinal = ConsumeCombatProcOrdinal(nameof(HappyAccidentRune), ref _localStatusOrbOrdinal);
+			int orbOrdinal = ConsumeCombatProcOrdinal(ref _localStatusOrbOrdinal);
 			OrbModel orb = HextechStableCombatSpawns.CreateOrb(
 				(RunState)Owner.RunState,
 				Owner,

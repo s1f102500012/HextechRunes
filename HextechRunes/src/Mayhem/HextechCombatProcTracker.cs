@@ -85,11 +85,6 @@ internal static class HextechCombatProcTracker
 
 	// 非遗物模型（Power）的「持有者每回合 1 次」：记在能力实例自己的标记上（由调用方在持有者回合开始时清），
 	// 与 HextechRelicBase.TryConsumeTurnProc 同口径，不再借用 Modifier 的共享账（见那里的说明）。
-	public static bool HasOwnerTurnProcTriggered(bool localTriggered)
-	{
-		return localTriggered;
-	}
-
 	public static bool TryConsumeOwnerTurnProc(ref bool localTriggered)
 	{
 		if (localTriggered)

@@ -16,7 +16,7 @@ public sealed class SomethingForNothingRune : TurnScopedRelicBase
 		get
 		{
 			EnsureTurnScopedStateCurrent();
-			return HasTurnProcTriggered(nameof(SomethingForNothingRune), _discountTriggeredThisTurn);
+			return HasTurnProcTriggered(_discountTriggeredThisTurn);
 		}
 		set
 		{
@@ -42,7 +42,7 @@ public sealed class SomethingForNothingRune : TurnScopedRelicBase
 
 		EnsureTurnScopedStateCurrent();
 		if (cardPlay.Card.EnergyCost.CostsX
-			|| !TryConsumeTurnProc(nameof(SomethingForNothingRune), ref _discountTriggeredThisTurn))
+			|| !TryConsumeTurnProc(ref _discountTriggeredThisTurn))
 		{
 			return Task.CompletedTask;
 		}

@@ -3,9 +3,7 @@ namespace HextechRunes;
 public sealed class GoliathRune : HextechRelicBase, IHextechMaxHpScalingRune, IHextechHealingMultiplierProvider
 {
 	private const decimal ScaleValue = 1.35m;
-	private const decimal MaxHpBonusPercentValue = (ScaleValue - 1m) * 100m;
 	private const decimal StatMultiplierValue = 1.2m;
-	private const decimal SustainBonusPercentValue = (StatMultiplierValue - 1m) * 100m;
 
 	private int _baseMaxHp;
 
@@ -28,9 +26,7 @@ public sealed class GoliathRune : HextechRelicBase, IHextechMaxHpScalingRune, IH
 	[
 		new DynamicVar("DamageMultiplier", StatMultiplierValue),
 		new DynamicVar("SustainMultiplier", StatMultiplierValue),
-		new DynamicVar("Scale", ScaleValue),
-		new DynamicVar("MaxHpBonusPercent", MaxHpBonusPercentValue),
-		new DynamicVar("SustainBonusPercent", SustainBonusPercentValue)
+		new DynamicVar("Scale", ScaleValue)
 	];
 
 	public decimal MaxHpScale => DynamicVars["Scale"].BaseValue;

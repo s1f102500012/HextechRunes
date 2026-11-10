@@ -20,16 +20,12 @@ internal static class HextechSavedPropertyNetIdHooks
 	private const BindingFlags StaticNonPublic = BindingFlags.NonPublic | BindingFlags.Static;
 
 	private static bool _registrationFrozen;
-	private static bool _canonicalized;
 
 	/// <summary>
 	/// 冻结点(ExecuteEssential 后缀)是否已过。此后再注入 SavedProperty 载体会绕过规范排序
 	/// (见 HextechSavedPropertyBootstrap.InjectModelType 的告警)。与规范化成功与否无关。
 	/// </summary>
 	internal static bool IsRegistrationFrozen => _registrationFrozen;
-
-	/// <summary>规范化是否真正完成(两张表已按规范布局重建、位宽已写入)。失败时保持 false,只用于日志与诊断。</summary>
-	internal static bool IsCanonicalized => _canonicalized;
 
 	private static void CanonicalizeNetIdMapPostfix()
 	{
@@ -72,7 +68,6 @@ internal static class HextechSavedPropertyNetIdHooks
 				return;
 			}
 
-			_canonicalized = true;
 			HextechLog.Info("MultiplayerCompat", $"Canonicalized SavedProperty net-id map: vanilla={vanillaNames.Count} total={canonical.Count} bitSize={SavedPropertiesTypeCache.NetIdBitSize}.");
 		}
 		catch (Exception ex)

@@ -31,7 +31,7 @@ public sealed class TriPrismRune : TurnScopedRelicBase
 
 	public override Task AfterModifyingCardPlayCount(CardModel card)
 	{
-		if (ShouldTrigger(card) && TryConsumeTurnProc(nameof(TriPrismRune), ref _triggeredThisTurn))
+		if (ShouldTrigger(card) && TryConsumeTurnProc(ref _triggeredThisTurn))
 		{
 			Flash();
 		}
@@ -42,7 +42,7 @@ public sealed class TriPrismRune : TurnScopedRelicBase
 	private bool ShouldTrigger(CardModel card)
 	{
 		EnsureTurnScopedStateCurrent();
-		return !HasTurnProcTriggered(nameof(TriPrismRune), _triggeredThisTurn)
+		return !HasTurnProcTriggered(_triggeredThisTurn)
 			&& card.Owner == Owner
 			&& HextechColorlessCardHelper.IsColorlessCard(card);
 	}

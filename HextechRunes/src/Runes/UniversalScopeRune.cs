@@ -56,7 +56,7 @@ public abstract class UniversalScopeRuneBase : HextechRelicBase
 
 		int combinedChancePercent = CombineChancePercent(
 			activeScopes.Select(static scope => scope.DynamicVars["ChancePercent"].IntValue));
-		int rollOrdinal = ConsumeCombatProcOrdinal(nameof(UniversalScopeRuneBase), ref _refundRollsThisCombat);
+		int rollOrdinal = ConsumeCombatProcOrdinal(ref _refundRollsThisCombat);
 		if (!RollTrigger(cardPlay, rollOrdinal, combinedChancePercent))
 		{
 			return;

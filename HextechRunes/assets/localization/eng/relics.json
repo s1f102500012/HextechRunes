@@ -589,7 +589,6 @@
   "proteinShakeRune.enemyDescription": "Whenever an enemy would gain [gold]Block[/gold], it heals that much HP instead. Any amount beyond its missing HP is still gained as [gold]Block[/gold].",
   "goldenSpatulaRune.enemyDescription": "The enemy gains [blue]25[/blue]/[blue]30[/blue]/[blue]45[/blue]% Max HP and deals [blue]25[/blue]/[blue]30[/blue]/[blue]45[/blue]% more damage, but gains [blue]50%[/blue] less healing and Block.",
   "hailToTheKingRune.enemyDescription": "In Elite and Boss combats, all enemies gain [blue]{Stacks}[/blue] [gold]Artifact[/gold], plus [gold]Plating[/gold] and [gold]Regen[/gold] equal to [blue]3[/blue]/[blue]5[/blue]/[blue]8[/blue]% of their Max HP at the start of combat.",
-  "eightPennyGateRune.enemyDescription": "The first [blue]0[/blue]/[blue]1[/blue]/[blue]2[/blue] non-Power cards each player plays each turn are Exhausted.",
   "HUNGRY_HEX.title": "I Hunger",
   "HUNGRY_HEX.description": "The first [blue]0[/blue]/[blue]1[/blue]/[blue]2[/blue] non-Power cards each player plays each turn are Exhausted.",
   "HUNGRY_HEX.flavor": "Your next card smells just right.",

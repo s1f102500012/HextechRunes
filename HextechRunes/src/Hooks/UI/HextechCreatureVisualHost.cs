@@ -77,7 +77,8 @@ internal static class HextechCreatureVisualHost
 		[HarmonyPostfix]
 		private static void Postfix(NCombatRoom __instance, Creature creature)
 		{
-			Attach(HextechCreatureNodeRegistry.SafeGetCreatureNode(__instance, creature));
+			// 原版 GetCreatureNode 只是在节点列表里按 Entity 查找，不会抛异常。
+			Attach(__instance.GetCreatureNode(creature));
 		}
 	}
 

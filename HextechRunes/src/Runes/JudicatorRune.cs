@@ -7,7 +7,6 @@ public sealed class JudicatorRune : HextechRelicBase
 
 	protected override IEnumerable<DynamicVar> CanonicalVars =>
 	[
-		new EnergyVar(1),
 		new DynamicVar("DamageMultiplier", DamageMultiplierValue),
 		new DynamicVar("DamageBonusPercent", DamageBonusPercentValue)
 	];

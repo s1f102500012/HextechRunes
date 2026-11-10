@@ -30,7 +30,6 @@ public sealed class NearDeathFeastRune : HextechRelicBase
 
 	protected override IEnumerable<DynamicVar> CanonicalVars =>
 	[
-		new DynamicVar("DeathNegativeMaxHpPercent", 50m),
 		new DynamicVar("StrengthPerNegativeHp", 1m)
 	];
 

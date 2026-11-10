@@ -38,7 +38,7 @@ internal static partial class Program
 
 		SetEqual([typeof(PersonalHivePower)], MonsterHexCatalog.GetEnemyHexPowerHoverTipTypes(MonsterHexKind.MadScientist),
 			"the enemy hex hover shows Personal Hive");
-		Expect(HextechMonsterInteractionPolicy.IsMonsterMechanismBuff(new PersonalHivePower()),
+		Expect(!TwilightVeilRune.IsMirrorablePower(new PersonalHivePower()),
 			"Personal Hive stays out of Twilight Veil mirroring");
 	}
 

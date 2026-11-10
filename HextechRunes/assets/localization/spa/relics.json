@@ -589,7 +589,6 @@
   "proteinShakeRune.enemyDescription": "Cuando un enemigo vaya a ganar [gold]Bloqueo[/gold], en su lugar se cura esa misma cantidad de PV. Lo que supere los PV perdidos se sigue ganando como [gold]Bloqueo[/gold].",
   "goldenSpatulaRune.enemyDescription": "El enemigo gana [blue]25[/blue]/[blue]30[/blue]/[blue]45[/blue]% PV máximos e inflige [blue]25[/blue]/[blue]30[/blue]/[blue]45[/blue]% más de daño, pero obtiene [blue]50%[/blue] menos curación y bloqueo.",
   "hailToTheKingRune.enemyDescription": "En los combates de Élite y Jefe, todos los enemigos obtienen [blue]{Stacks}[/blue] [gold]Artefacto[/gold], más [gold]Blindaje[/gold] y [gold]Regeneración[/gold] equivalente a [blue]3[/blue]/[blue]5[/blue]/[blue]8[/blue]% de su PV máximos al inicio de combate.",
-  "eightPennyGateRune.enemyDescription": "Las primeras [blue]0[/blue]/[blue]1[/blue]/[blue]2[/blue] cartas que no sean de Poder que juegue cada jugador en cada turno se agotan.",
   "HUNGRY_HEX.title": "Tengo hambre",
   "HUNGRY_HEX.description": "Las primeras [blue]0[/blue]/[blue]1[/blue]/[blue]2[/blue] cartas que no sean de Poder que juegue cada jugador en cada turno se agotan.",
   "HUNGRY_HEX.flavor": "Tu próxima carta huele justo como debe.",

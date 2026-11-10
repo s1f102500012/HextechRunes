@@ -512,19 +512,6 @@ internal static partial class Program
 	}
 
 	[HextechTest]
-	private static void MonsterHexMetadataKeepsDisabledKindsOutOfRarityPools()
-	{
-		MonsterHexMetadataCatalog metadata = HextechContentRegistry.MonsterHexMetadata;
-		foreach (MonsterHexRegistration disabled in HextechMonsterHexRegistry.Registrations.Where(static registration => registration.Disabled))
-		{
-			Expect(metadata.AllKinds.Contains(disabled.Kind), $"{disabled.Kind} should stay in all-kinds set");
-			Equal(disabled.Rarity, metadata.RarityByKind[disabled.Kind], $"{disabled.Kind} keeps its rarity");
-			Equal(disabled.IconRelicType, metadata.IconRelicTypes[disabled.Kind], $"{disabled.Kind} keeps its icon relic type");
-			Expect(!metadata.EnabledKindsByRarity.Values.Any(kinds => kinds.Contains(disabled.Kind)), $"{disabled.Kind} should not appear in any rarity pool");
-		}
-	}
-
-	[HextechTest]
 	private static void EnemyHexHoverTipsUseExpectedPowerModels()
 	{
 		foreach (MonsterHexKind hex in HextechContentRegistry.MonsterHexMetadata.AllKinds)

@@ -58,7 +58,7 @@ public sealed class RoyalTrialRune : HextechRelicBase
 
 	private CardModel CreateRandomMinionCard(Player owner, HextechCombatState combatState)
 	{
-		int ordinal = ConsumeCombatProcOrdinal(nameof(RoyalTrialRune), ref _generatedMinionsThisCombat);
+		int ordinal = ConsumeCombatProcOrdinal(ref _generatedMinionsThisCombat);
 		return HextechStableCombatSpawns.CreateMinionCard(
 			combatState,
 			owner,

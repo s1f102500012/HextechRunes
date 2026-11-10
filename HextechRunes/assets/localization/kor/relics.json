@@ -589,7 +589,6 @@
   "proteinShakeRune.enemyDescription": "적이 [gold]방어도[/gold]를 얻을 때, 대신 그만큼 체력을 회복합니다. 잃은 체력을 초과하는 만큼은 그대로 [gold]방어도[/gold]로 얻습니다.",
   "goldenSpatulaRune.enemyDescription": "적이 최대 체력을 [blue]25[/blue]/[blue]30[/blue]/[blue]45[/blue]% 얻고 적이 주는 피해가 [blue]25[/blue]/[blue]30[/blue]/[blue]45[/blue]% 증가하지만, 적이 받는 회복량과 얻는 방어도가 [blue]50%[/blue] 감소합니다.",
   "hailToTheKingRune.enemyDescription": "엘리트 및 보스 전투에서 모든 적은 매 전투 시작 시, [gold]인공물[/gold]을 [blue]{Stacks}[/blue] 얻고, 추가로 최대 체력의 [blue]3[/blue]/[blue]5[/blue]/[blue]8[/blue]%만큼 [gold]판금[/gold]과 [gold]재생[/gold]을 얻습니다.",
-  "eightPennyGateRune.enemyDescription": "각 플레이어가 매 턴 처음 사용하는 파워가 아닌 카드 [blue]0[/blue]/[blue]1[/blue]/[blue]2[/blue]장이 소멸됩니다.",
   "HUNGRY_HEX.title": "나는 굶주린다",
   "HUNGRY_HEX.description": "각 플레이어가 매 턴 처음 사용하는 파워가 아닌 카드 [blue]0[/blue]/[blue]1[/blue]/[blue]2[/blue]장이 소멸됩니다.",
   "HUNGRY_HEX.flavor": "네 다음 카드는 딱 좋은 냄새가 나는군.",

@@ -22,7 +22,7 @@ public sealed class SwordFlightRune : TurnScopedRelicBase
 			|| cardPlay.IsAutoPlay
 			|| cardPlay.Card.Owner != Owner
 			|| cardPlay.Card is not SovereignBlade
-			|| !TryConsumeTurnProc(nameof(SwordFlightRune), ref _triggeredThisTurn))
+			|| !TryConsumeTurnProc(ref _triggeredThisTurn))
 		{
 			return;
 		}

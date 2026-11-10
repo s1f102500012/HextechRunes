@@ -86,42 +86,21 @@ public abstract partial class HextechRelicBase
 			&& Owner != null;
 	}
 
-	protected string GetStableTurnProcKey()
-	{
-		return GetStableTurnProcKey(GetType());
-	}
-
-	internal static string GetStableTurnProcKey(Type runtimeType)
-	{
-		if (runtimeType.Assembly == typeof(HextechRelicBase).Assembly)
-		{
-			return runtimeType.Name;
-		}
-
-		string assemblyName = runtimeType.Assembly.GetName().Name ?? "<unknown>";
-		return $"{assemblyName}:{runtimeType.FullName ?? runtimeType.Name}";
-	}
-
 	// 每回合/每场计数一律记在持有这件遗物的实例上，单机联机同一套逻辑。
 	// 以前联机时改记在 Mayhem Modifier 的共享账上，但那份账不进联机校验，也不跟遗物实例绑定：
 	// #47 里房主那份账漏记了一次腐化树枝的触发，第二次生成两端序号不同而分歧，直到生成结果不同才被校验发现。
 	// 遗物自己的字段由各端同一组钩子推进，清零时机由调用方在战斗/回合边界决定。
-	protected bool HasTurnProcReachedLimit(string procKey, int localCount, int maxPerTurn)
+	protected bool HasTurnProcReachedLimit(int localCount, int maxPerTurn)
 	{
 		return localCount >= maxPerTurn;
 	}
 
-	protected int GetTurnProcCount(string procKey, int localCount)
+	protected bool HasTurnProcTriggered(bool localTriggered)
 	{
-		return localCount;
+		return HasTurnProcReachedLimit(localTriggered ? 1 : 0, 1);
 	}
 
-	protected bool HasTurnProcTriggered(string procKey, bool localTriggered)
-	{
-		return HasTurnProcReachedLimit(procKey, localTriggered ? 1 : 0, 1);
-	}
-
-	protected bool TryConsumeTurnProc(string procKey, ref int localCount, int maxPerTurn)
+	protected bool TryConsumeTurnProc(ref int localCount, int maxPerTurn)
 	{
 		if (maxPerTurn <= 0 || localCount >= maxPerTurn)
 		{
@@ -134,10 +113,10 @@ public abstract partial class HextechRelicBase
 		return true;
 	}
 
-	protected bool TryConsumeTurnProc(string procKey, ref bool localTriggered)
+	protected bool TryConsumeTurnProc(ref bool localTriggered)
 	{
 		int localCount = localTriggered ? 1 : 0;
-		if (!TryConsumeTurnProc(procKey, ref localCount, 1))
+		if (!TryConsumeTurnProc(ref localCount, 1))
 		{
 			return false;
 		}
@@ -146,15 +125,10 @@ public abstract partial class HextechRelicBase
 		return true;
 	}
 
-	// 只读、不消费。ModifyCardPlayCount 等引擎可能针对同一次出牌重复调用的钩子只应在这里取序号;
-	// 真正的消费必须放在每次真实出牌只触发一次的钩子里调用 ConsumeCombatProcOrdinal,
+	// 取当前序号并推进。ModifyCardPlayCount 等引擎可能针对同一次出牌重复调用的钩子只读计数字段、不消费;
+	// 消费必须放在每次真实出牌只触发一次的钩子里调用本方法,
 	// 否则各端序号推进次数不一致会导致稳定随机结果分叉。
-	protected int PeekCombatProcOrdinal(string procKey, int localCount)
-	{
-		return localCount;
-	}
-
-	protected int ConsumeCombatProcOrdinal(string procKey, ref int localCount)
+	protected int ConsumeCombatProcOrdinal(ref int localCount)
 	{
 		return localCount++;
 	}

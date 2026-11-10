@@ -16,7 +16,7 @@ public abstract class LimitedDebuffProcRelicBase : TurnScopedRelicBase
 			// 序列化可能发生在回合钩子之外（例如读档后的首个回合钩子之前）：先按持有者回合号懒清零，
 			// 保证写出的是本回合的计数而不是上一回合的残值。
 			EnsureTurnScopedStateCurrent();
-			return GetTurnProcCount(GetProcKey(), _procsThisTurn);
+			return _procsThisTurn;
 		}
 		set
 		{
@@ -36,7 +36,7 @@ public abstract class LimitedDebuffProcRelicBase : TurnScopedRelicBase
 
 	public override bool ShowCounter => HasTurnLimit && IsInLiveCombat;
 
-	public override int DisplayAmount => HasTurnLimit && !IsCanonical ? Math.Max(0, MaxProcsPerTurn - GetTurnProcCount(GetProcKey(), _procsThisTurn)) : 0;
+	public override int DisplayAmount => HasTurnLimit && !IsCanonical ? Math.Max(0, MaxProcsPerTurn - _procsThisTurn) : 0;
 
 	public override async Task AfterPowerAmountChanged(PlayerChoiceContext choiceContext, PowerModel power, decimal amount, Creature? applier, CardModel? cardSource)
 	{
@@ -52,7 +52,7 @@ public abstract class LimitedDebuffProcRelicBase : TurnScopedRelicBase
 
 		if (HasTurnLimit)
 		{
-			if (!TryConsumeTurnProc(GetProcKey(), ref _procsThisTurn, MaxProcsPerTurn))
+			if (!TryConsumeTurnProc(ref _procsThisTurn, MaxProcsPerTurn))
 			{
 				return;
 			}
@@ -83,12 +83,7 @@ public abstract class LimitedDebuffProcRelicBase : TurnScopedRelicBase
 
 	private void UpdateDisplay()
 	{
-		Status = HasTurnLimit && GetTurnProcCount(GetProcKey(), _procsThisTurn) == MaxProcsPerTurn - 1 ? RelicStatus.Active : RelicStatus.Normal;
+		Status = HasTurnLimit && _procsThisTurn == MaxProcsPerTurn - 1 ? RelicStatus.Active : RelicStatus.Normal;
 		InvokeDisplayAmountChanged();
-	}
-
-	private string GetProcKey()
-	{
-		return GetStableTurnProcKey();
 	}
 }

@@ -98,7 +98,7 @@ public sealed class SellOffRune : HextechRelicBase
 		}
 
 		HextechCombatState combatState = Owner.Creature.CombatState!;
-		int targetOrdinal = ConsumeCombatProcOrdinal(nameof(SellOffRune), ref _autoPlayTargetsThisCombat);
+		int targetOrdinal = ConsumeCombatProcOrdinal(ref _autoPlayTargetsThisCombat);
 		Creature? target = RequiresEnemyTarget(card)
 			? HextechRuneTargeting.PickRandomHittableEnemy(
 				Owner,

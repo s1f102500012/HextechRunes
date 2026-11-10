@@ -4,11 +4,6 @@ namespace HextechRunes;
 
 public sealed class MarkovBabbleRune : HextechRelicBase
 {
-	protected override IEnumerable<DynamicVar> CanonicalVars =>
-	[
-		new DynamicVar("OrbCount", 1m)
-	];
-
 	public override bool IsAvailableForPlayer(Player player)
 	{
 		return IsDefectPlayer(player);

@@ -84,10 +84,9 @@ internal static partial class Program
 	private static void ReviewOwnerTurnProcUsesInstanceFlag()
 	{
 		bool triggered = false;
-		Expect(!HextechCombatProcTracker.HasOwnerTurnProcTriggered(triggered), "not triggered yet");
+		Expect(!triggered, "not triggered yet");
 		Expect(HextechCombatProcTracker.TryConsumeOwnerTurnProc(ref triggered), "first consume succeeds");
 		Expect(triggered, "the local flag records the trigger");
-		Expect(HextechCombatProcTracker.HasOwnerTurnProcTriggered(triggered), "triggered after consuming");
 		Expect(!HextechCombatProcTracker.TryConsumeOwnerTurnProc(ref triggered), "second consume in the same turn fails");
 	}
 }

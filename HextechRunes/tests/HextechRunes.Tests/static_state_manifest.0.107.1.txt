@@ -64,7 +64,6 @@ HextechRunes.HextechRuneSelectionCoordinator._actSelectionRun : RunState
 HextechRunes.HextechRuneSelectionScreen.RerollSfxPlayer : AudioStreamPlayer
 HextechRunes.HextechRuneSelectionScreen.SelectSfxPlayer : AudioStreamPlayer
 HextechRunes.HextechRuneSelectionScreen._noiseFragmentFont : Font
-HextechRunes.HextechSavedPropertyNetIdHooks._canonicalized : Boolean
 HextechRunes.HextechSavedPropertyNetIdHooks._registrationFrozen : Boolean
 HextechRunes.HextechSelectionProgress.Changed : Action
 HextechRunes.HextechSignalNoise._currentScreen : WeakReference`1

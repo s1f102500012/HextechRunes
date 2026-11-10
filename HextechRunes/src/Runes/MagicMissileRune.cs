@@ -27,7 +27,7 @@ public sealed class MagicMissileRune : TurnScopedRelicBase
 
 		if (Owner.Creature.CombatState is not HextechCombatState combatState
 			|| HextechRuneTargeting.ResolveCardPlayEnemyTargets(cardPlay, combatState) is not { Count: > 0 } targets
-			|| !TryConsumeTurnProc(nameof(MagicMissileRune), ref _triggeredThisTurn))
+			|| !TryConsumeTurnProc(ref _triggeredThisTurn))
 		{
 			return Task.CompletedTask;
 		}

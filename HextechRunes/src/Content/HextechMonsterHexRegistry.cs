@@ -162,9 +162,8 @@ internal static class HextechMonsterHexRegistry
 
 	private static MonsterHexRegistration Monster<TRelic>(
 		MonsterHexKind kind,
-		HextechRarityTier rarity,
-		bool disabled = false)
+		HextechRarityTier rarity)
 	{
-		return new MonsterHexRegistration(kind, rarity, typeof(TRelic), disabled);
+		return new MonsterHexRegistration(kind, rarity, typeof(TRelic));
 	}
 }

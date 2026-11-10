@@ -589,7 +589,6 @@
   "proteinShakeRune.enemyDescription": "敌人获得[gold]格挡[/gold]时，改为回复等量生命；超出已损失生命值的部分仍获得[gold]格挡[/gold]。",
   "goldenSpatulaRune.enemyDescription": "敌人获得[blue]25[/blue]/[blue]30[/blue]/[blue]45[/blue]%的最大生命值与伤害加成，但获得的治疗量和格挡量减少[blue]50%[/blue]。",
   "hailToTheKingRune.enemyDescription": "在精英和首领战中，所有敌人在战斗开始时获得[blue]{Stacks}[/blue]层[gold]人工制品[/gold]和等同于最大生命值[blue]3[/blue]/[blue]5[/blue]/[blue]8[/blue]%的[gold]覆甲[/gold]与[gold]再生[/gold]。",
-  "eightPennyGateRune.enemyDescription": "玩家每回合最先打出的[blue]0[/blue]/[blue]1[/blue]/[blue]2[/blue]张非能力牌会被消耗。",
   "HUNGRY_HEX.title": "我饥饿",
   "HUNGRY_HEX.description": "玩家每回合最先打出的[blue]0[/blue]/[blue]1[/blue]/[blue]2[/blue]张非能力牌会被消耗。",
   "HUNGRY_HEX.flavor": "你的下一张牌，闻起来正好。",

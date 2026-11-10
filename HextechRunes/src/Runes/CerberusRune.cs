@@ -12,7 +12,7 @@ public sealed class CerberusRune : TurnScopedRelicBase
 			// 序列化可能发生在回合钩子之外（例如读档后的首个回合钩子之前）：先按持有者回合号懒清零，
 			// 保证写出的是本回合的计数而不是上一回合的残值。
 			EnsureTurnScopedStateCurrent();
-			return GetTurnProcCount(nameof(CerberusRune), _attacksPlayedThisTurn);
+			return _attacksPlayedThisTurn;
 		}
 		set
 		{
@@ -24,7 +24,7 @@ public sealed class CerberusRune : TurnScopedRelicBase
 
 	public override bool ShowCounter => IsInLiveCombat;
 
-	public override int DisplayAmount => !IsCanonical ? Math.Max(0, DynamicVars["FreeAttacks"].IntValue - GetTurnProcCount(nameof(CerberusRune), _attacksPlayedThisTurn)) : 0;
+	public override int DisplayAmount => !IsCanonical ? Math.Max(0, DynamicVars["FreeAttacks"].IntValue - _attacksPlayedThisTurn) : 0;
 
 	protected override IEnumerable<DynamicVar> CanonicalVars =>
 	[
@@ -64,12 +64,12 @@ public sealed class CerberusRune : TurnScopedRelicBase
 			return Task.CompletedTask;
 		}
 
-		if (!TryConsumeTurnProc(nameof(CerberusRune), ref _attacksPlayedThisTurn, int.MaxValue))
+		if (!TryConsumeTurnProc(ref _attacksPlayedThisTurn, int.MaxValue))
 		{
 			return Task.CompletedTask;
 		}
 
-		if (GetTurnProcCount(nameof(CerberusRune), _attacksPlayedThisTurn) <= DynamicVars["FreeAttacks"].IntValue)
+		if (_attacksPlayedThisTurn <= DynamicVars["FreeAttacks"].IntValue)
 		{
 			Flash();
 		}
@@ -83,7 +83,7 @@ public sealed class CerberusRune : TurnScopedRelicBase
 		return IsOwnedAttack(card)
 			&& card.Pile?.Type == PileType.Hand
 			&& !card.EnergyCost.CostsX
-			&& !HasTurnProcReachedLimit(nameof(CerberusRune), _attacksPlayedThisTurn, DynamicVars["FreeAttacks"].IntValue);
+			&& !HasTurnProcReachedLimit(_attacksPlayedThisTurn, DynamicVars["FreeAttacks"].IntValue);
 	}
 
 	protected override void ResetTurnScopedState()

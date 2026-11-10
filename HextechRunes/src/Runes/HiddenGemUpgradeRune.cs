@@ -54,7 +54,7 @@ public sealed class HiddenGemUpgradeRune : CardUpgradeRuneBase<HiddenGem>
 			return;
 		}
 
-		int ordinal = rune.ConsumeCombatProcOrdinal(nameof(HiddenGemUpgradeRune), ref rune._localUpgradedPlayOrdinal);
+		int ordinal = rune.ConsumeCombatProcOrdinal(ref rune._localUpgradedPlayOrdinal);
 		CardModel selected = HextechStableRandom.Pick(
 			pool,
 			(RunState)card.Owner.RunState,

@@ -40,7 +40,7 @@ internal static partial class Program
 			string name = power.GetType().Name;
 			Expect(HextechMonsterInteractionPolicy.IsStructuralMonsterBuff(power), $"{name} should be structural");
 			Expect(HextechMonsterInteractionPolicy.ShouldPreserveFromBuffRemoval(power), $"{name} should survive buff removal");
-			Expect(HextechMonsterInteractionPolicy.IsMonsterMechanismBuff(power), $"{name} should not be mirrored to players");
+			Expect(!TwilightVeilRune.IsMirrorablePower(power), $"{name} should not be mirrored to players");
 		}
 
 		PowerModel[] enemyHostedPlayerRelations = [new BackAttackLeftPower(), new BackAttackRightPower()];
@@ -49,7 +49,7 @@ internal static partial class Program
 			string name = power.GetType().Name;
 			Expect(!HextechMonsterInteractionPolicy.IsStructuralMonsterBuff(power), $"{name} should be classified as a player relation rather than structural");
 			Expect(HextechMonsterInteractionPolicy.ShouldPreserveFromBuffRemoval(power), $"{name} should survive enemy buff removal for Surrounded");
-			Expect(HextechMonsterInteractionPolicy.IsMonsterMechanismBuff(power), $"{name} should not be mirrored to players");
+			Expect(!TwilightVeilRune.IsMirrorablePower(power), $"{name} should not be mirrored to players");
 		}
 
 		PowerModel[] removableMonsterMechanisms =
@@ -67,7 +67,7 @@ internal static partial class Program
 			string name = power.GetType().Name;
 			Expect(!HextechMonsterInteractionPolicy.IsStructuralMonsterBuff(power), $"{name} should be removable while its owner is alive");
 			Expect(!HextechMonsterInteractionPolicy.ShouldPreserveFromBuffRemoval(power), $"{name} should be removable by Feel the Burn and upgraded Expose");
-			Expect(HextechMonsterInteractionPolicy.IsMonsterMechanismBuff(power), $"{name} should not be mirrored to players");
+			Expect(!TwilightVeilRune.IsMirrorablePower(power), $"{name} should not be mirrored to players");
 		}
 
 		PowerModel[] nonEnemyPowers =
@@ -98,13 +98,12 @@ internal static partial class Program
 			string name = power.GetType().Name;
 			Expect(!HextechMonsterInteractionPolicy.IsStructuralMonsterBuff(power), $"{name} should not be classified as an enemy structural power");
 			Expect(!HextechMonsterInteractionPolicy.ShouldPreserveFromBuffRemoval(power), $"{name} should not be protected by enemy buff removal policy");
-			Expect(!HextechMonsterInteractionPolicy.IsMonsterMechanismBuff(power), $"{name} should not be classified as a monster mechanism");
 		}
 
 		Expect(!HextechMonsterInteractionPolicy.IsStructuralMonsterBuff(new StrengthPower()), "ordinary strength should not be structural");
-		Expect(HextechMonsterInteractionPolicy.IsMonsterMechanismBuff(new PersonalHivePower()), "personal hive should not be mirrored to players");
-		Expect(HextechMonsterInteractionPolicy.IsMonsterMechanismBuff(new HextechPlayerSlowPower()), "custom Slow should not be mirrored to players");
-		Expect(!HextechMonsterInteractionPolicy.IsMonsterMechanismBuff(new StrengthPower()), "ordinary strength should remain mirrorable");
+		Expect(!TwilightVeilRune.IsMirrorablePower(new PersonalHivePower()), "personal hive should not be mirrored to players");
+		Expect(!TwilightVeilRune.IsMirrorablePower(new HextechPlayerSlowPower()), "custom Slow should not be mirrored to players");
+		Expect(TwilightVeilRune.IsMirrorablePower(new StrengthPower()), "ordinary strength should remain mirrorable");
 	}
 
 	[HextechTest]
@@ -168,10 +167,10 @@ internal static partial class Program
 		Equal(1.08m, HextechPlayerSlowPower.ResolveDamageMultiplier(8m), "positive Slow should increase damage taken on either side");
 		Equal(0.92m, HextechPlayerSlowPower.ResolveDamageMultiplier(-8m), "negative Slow should reduce damage taken on either side");
 		Equal(0m, HextechPlayerSlowPower.ResolveDamageMultiplier(-120m), "negative Slow damage multiplier should floor at zero");
-		Expect(!FrostWraithEnemyHex.ShouldTriggerForRound(1), "enemy Frost Wraith should not trigger on round one");
-		Expect(!FrostWraithEnemyHex.ShouldTriggerForRound(2), "enemy Frost Wraith should wait for three player turns");
-		Expect(FrostWraithEnemyHex.ShouldTriggerForRound(3), "enemy Frost Wraith should trigger at the start of the third player turn");
-		Expect(FrostWraithEnemyHex.ShouldTriggerForRound(6), "enemy Frost Wraith should trigger every three rounds afterward");
+		Expect(!HextechRoundInterval.IsDue(1, FrostWraithEnemyHex.TurnsNeeded), "enemy Frost Wraith should not trigger on round one");
+		Expect(!HextechRoundInterval.IsDue(2, FrostWraithEnemyHex.TurnsNeeded), "enemy Frost Wraith should wait for three player turns");
+		Expect(HextechRoundInterval.IsDue(3, FrostWraithEnemyHex.TurnsNeeded), "enemy Frost Wraith should trigger at the start of the third player turn");
+		Expect(HextechRoundInterval.IsDue(6, FrostWraithEnemyHex.TurnsNeeded), "enemy Frost Wraith should trigger every three rounds afterward");
 		Equal(3, AncientStatueEnemyHex.ResolveCardSlowGain(0), "Ancient Statue tier zero fallback Slow gain");
 		Equal(3, AncientStatueEnemyHex.ResolveCardSlowGain(1), "Ancient Statue tier one Slow gain");
 		Equal(5, AncientStatueEnemyHex.ResolveCardSlowGain(2), "Ancient Statue tier two Slow gain");

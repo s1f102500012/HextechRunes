@@ -21,13 +21,6 @@ public sealed class DiceManiacRune : HextechSharedCombatVictoryRuneBase
 
 	internal int CurrentDropChance => HextechDynamicDropChance.CurrentChance(_dropChanceOffset, BaseDropChance);
 
-	protected override IEnumerable<DynamicVar> CanonicalVars =>
-	[
-		new DynamicVar("DropChance", BaseDropChance),
-		new DynamicVar("ForgeMultiplier", 2m),
-		new DynamicVar("DropChanceStep", DropChanceStep)
-	];
-
 	public override Task ApplySharedCombatVictory(CombatRoom room)
 	{
 		if (Owner.Creature.IsDead)

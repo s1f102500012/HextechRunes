@@ -3,16 +3,12 @@ namespace HextechRunes;
 public sealed class GlassCannonRune : HextechRelicBase
 {
 	private const decimal DamageMultiplierValue = 1.5m;
-	private const decimal DamageBonusPercentValue = (DamageMultiplierValue - 1m) * 100m;
 	private const decimal HealCapPercentValue = 0.7m;
-	private const decimal HealCapDisplayPercentValue = HealCapPercentValue * 100m;
 
 	protected override IEnumerable<DynamicVar> CanonicalVars =>
 	[
 		new DynamicVar("DamageMultiplier", DamageMultiplierValue),
-		new DynamicVar("HealCapPercent", HealCapPercentValue),
-		new DynamicVar("DamageBonusPercent", DamageBonusPercentValue),
-		new DynamicVar("HealCapDisplayPercent", HealCapDisplayPercentValue)
+		new DynamicVar("HealCapPercent", HealCapPercentValue)
 	];
 
 	public decimal HealCapPercent => DynamicVars["HealCapPercent"].BaseValue;

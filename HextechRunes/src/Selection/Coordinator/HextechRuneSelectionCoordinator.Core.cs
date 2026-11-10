@@ -404,7 +404,7 @@ internal static partial class HextechRuneSelectionCoordinator
 		await game.ToSignal(game.GetTree(), SceneTree.SignalName.ProcessFrame);
 	}
 
-	/// <summary>本幕结算完成:写入敌方海克斯、标记已结算、应用地图修正、刷新敌方 UI 并作用到当前敌人,最后存档。</summary>
+	/// <summary>本幕结算完成:写入敌方海克斯、标记已结算、刷新敌方 UI 并作用到当前敌人,最后存档。</summary>
 	private static async Task CompleteStageAsync(RunState runState, HextechMayhemModifier modifier, int actIndex, IReadOnlyList<MonsterHexKind> finalMonsterHexes)
 	{
 		// 敌方质变在本幕海克斯落定时才展开：选择界面里展示和调整的仍是质变本身，与玩家质变"获得时移除自身"一致。
@@ -412,7 +412,6 @@ internal static partial class HextechRuneSelectionCoordinator
 		finalMonsterHexes = HextechEnemyTransmute.ExpandForRun(runState, modifier, $"act-{actIndex}", finalMonsterHexes);
 		modifier.SetMonsterHexesForAct(actIndex, finalMonsterHexes);
 		modifier.SetStageResolved(actIndex, true);
-		modifier.ApplyMapModifiersToCurrentAct(nameof(HandleStageSelection), actIndex);
 		HextechEnemyUi.Refresh(modifier);
 		await modifier.ApplyToCurrentEnemiesIfNeeded();
 		await PersistActSelection(runState, actIndex);

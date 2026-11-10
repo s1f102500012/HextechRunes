@@ -589,7 +589,6 @@
   "proteinShakeRune.enemyDescription": "เมื่อศัตรูจะได้รับ[gold]บล็อก[/gold] จะฟื้นฟู HP เท่ากับจำนวนนั้นแทน ส่วนที่เกิน HP ที่เสียไปยังคงได้รับเป็น[gold]บล็อก[/gold]",
   "goldenSpatulaRune.enemyDescription": "ศัตรูได้รับ HP สูงสุด [blue]25[/blue]/[blue]30[/blue]/[blue]45[/blue]% และสร้างความเสียหายเพิ่มขึ้น [blue]25[/blue]/[blue]30[/blue]/[blue]45[/blue]% แต่ได้รับการฟื้นฟูและบล็อกลดลง [blue]50%[/blue]",
   "hailToTheKingRune.enemyDescription": "ในการต่อสู้กับลูกพี่และบอส ศัตรูทั้งหมดได้รับ [blue]{Stacks}[/blue] [gold]อาคม[/gold] พร้อมทั้ง [gold]เกราะโลหะ[/gold] และ [gold]การฟื้นพลัง[/gold] เท่ากับ [blue]3[/blue]/[blue]5[/blue]/[blue]8[/blue]% ของ HP สูงสุดของพวกมันตอนเริ่มต้นการต่อสู้",
-  "eightPennyGateRune.enemyDescription": "การ์ดที่ไม่ใช่การ์ดพลัง [blue]0[/blue]/[blue]1[/blue]/[blue]2[/blue] ใบแรกที่ผู้เล่นแต่ละคนเล่นในแต่ละเทิร์นจะสลาย",
   "HUNGRY_HEX.title": "ข้าหิว",
   "HUNGRY_HEX.description": "การ์ดที่ไม่ใช่การ์ดพลัง [blue]0[/blue]/[blue]1[/blue]/[blue]2[/blue] ใบแรกที่ผู้เล่นแต่ละคนเล่นในแต่ละเทิร์นจะสลาย",
   "HUNGRY_HEX.flavor": "การ์ดใบถัดไปของเจ้ามีกลิ่นกำลังดี",

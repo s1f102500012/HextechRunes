@@ -37,7 +37,7 @@ public sealed class KingdomArmyRune : HextechRelicBase
 		}
 
 		// 按铸造事件取一次同步序号，与铸造数值或场上的君王之剑数量无关。
-		int ordinal = ConsumeCombatProcOrdinal(nameof(KingdomArmyRune), ref _generatedMinionsThisCombat);
+		int ordinal = ConsumeCombatProcOrdinal(ref _generatedMinionsThisCombat);
 		CardModel card = HextechStableCombatSpawns.CreateMinionCard(combatState, Owner, "kingdom-army", ordinal);
 		Flash();
 		_generating = true;

@@ -4,7 +4,6 @@ public sealed class TrinityRune : HextechRelicBase
 {
 	protected override IEnumerable<DynamicVar> CanonicalVars =>
 	[
-		new EnergyVar(1),
 		new StarsVar(1),
 		new ForgeVar("ForgeAmount", 1)
 	];

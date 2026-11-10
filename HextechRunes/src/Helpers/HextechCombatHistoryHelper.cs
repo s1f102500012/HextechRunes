@@ -1,5 +1,3 @@
-using MegaCrit.Sts2.Core.Combat.History;
-
 namespace HextechRunes;
 
 internal static class HextechCombatHistoryHelper
@@ -24,21 +22,6 @@ internal static class HextechCombatHistoryHelper
 			.Count(entry =>
 				entry.CardPlay.Card.Owner?.NetId == ownerId
 				&& matches(entry.CardPlay.Card));
-	}
-
-	public static int CountOwnedAttackCardsPlayedThisTurn(Player? owner, HextechCombatState? combatState)
-	{
-		if (owner == null || combatState == null)
-		{
-			return 0;
-		}
-
-		ulong ownerId = owner.NetId;
-		return CombatManager.Instance.History.CardPlaysFinished
-			.Count(entry =>
-				entry.HappenedThisTurn(combatState)
-				&& entry.CardPlay.Card.Owner?.NetId == ownerId
-				&& entry.CardPlay.Card.Type == CardType.Attack);
 	}
 
 	public static int CountOwnedCardsDrawn(Player? owner)

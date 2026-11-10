@@ -38,7 +38,7 @@ public sealed class ArchmageRune : HextechRelicBase
 
 	private bool RollTrigger(CardModel sourceCard, out int rollOrdinal)
 	{
-		rollOrdinal = ConsumeCombatProcOrdinal(nameof(ArchmageRune), ref _localFreeCardRollOrdinal);
+		rollOrdinal = ConsumeCombatProcOrdinal(ref _localFreeCardRollOrdinal);
 		return HextechStableRandom.PercentChance(
 			(RunState)Owner.RunState,
 			DynamicVars["ChancePercent"].IntValue,
