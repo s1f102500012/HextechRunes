@@ -226,3 +226,8 @@ public sealed class SpectralKnightHex : EnemyHexIconRelicBase
 public sealed class OwlMagistrateHex : EnemyHexIconRelicBase
 {
 }
+
+/// <summary>精怪魔法（我方同名海克斯已移除，敌方保留）</summary>
+public sealed class FeyMagicHex : EnemyHexIconRelicBase
+{
+}

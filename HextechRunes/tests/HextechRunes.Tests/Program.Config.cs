@@ -315,7 +315,7 @@ internal static partial class Program
 		Expect(snapshot.DisabledPlayerRuneIds.Contains(escapePlanId), "default snapshot should disable escape plan");
 		Expect(!snapshot.DisabledPlayerRuneIds.Contains(advanceToRetreatId), "default snapshot should enable Advance to Retreat");
 		Expect(!snapshot.DisabledPlayerRuneIds.Contains(happyAccidentId), "default snapshot should enable Happy Accident");
-		foreach (Type runeType in new[] { typeof(OmegaRune), typeof(OkBoomerangRune), typeof(FeyMagicRune), typeof(PorcupineRune), typeof(AstralBodyRune) })
+		foreach (Type runeType in new[] { typeof(OmegaRune), typeof(OkBoomerangRune), typeof(PorcupineRune), typeof(AstralBodyRune), typeof(ExposeUpgradeRune), typeof(FeelTheBurnRune) })
 		{
 			Expect(
 				snapshot.DisabledPlayerRuneIds.Contains(ModelDb.GetId(runeType).Entry),
