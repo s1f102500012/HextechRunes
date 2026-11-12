@@ -97,7 +97,8 @@ internal static partial class HextechChoiceCodec
 			payload,
 			snapshot.DisabledForgeIds
 				.Select(static entry => new ModelId(ModInfo.Id, entry))
-				.OrderBy(static id => id.Entry, StringComparer.Ordinal));
+				.OrderBy(static id => id.Entry, StringComparer.Ordinal),
+			MaxDisabledForgeIds);
 
 		// 未版本化的尾部可选 int,按追加顺序解码,避免改 snapshot 版本号/定长计数:
 		// 1) 模组总开关:旧 payload 没有时解码端回退到 fallback(默认开启);
@@ -176,7 +177,7 @@ internal static partial class HextechChoiceCodec
 			return false;
 		}
 
-		if (!HextechStableModelIdListCodec.TryDecode(payload, cursor, out List<ModelId> disabledForgeIds, out int forgeListNextCursor))
+		if (!HextechStableModelIdListCodec.TryDecode(payload, cursor, MaxDisabledForgeIds, out List<ModelId> disabledForgeIds, out int forgeListNextCursor))
 		{
 			return false;
 		}

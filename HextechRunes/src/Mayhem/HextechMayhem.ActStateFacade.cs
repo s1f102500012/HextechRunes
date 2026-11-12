@@ -38,7 +38,7 @@ internal sealed partial class HextechMayhemModifier
 
 	internal int ActivateExtraStage(string stageKey)
 	{
-		string scopedKey = $"{_runContext.ActSelectionIndexOffset}:{stageKey}";
+		string scopedKey = ScopeExtraStageKey(stageKey);
 		int minimumIndex = Math.Max(
 			GetSelectionIndexForAct(RunState.Acts.Count),
 			ActState.ActCount);
@@ -50,6 +50,24 @@ internal sealed partial class HextechMayhemModifier
 	internal void ClearActiveExtraStage()
 	{
 		_runContext.ActiveExtraStageIndex = null;
+	}
+
+	// 只读解析：额外阶段已有条目时返回其序号，查不到或没有额外阶段时返回当前幕的选择序号。
+	// 不创建阶段条目、不改 ActiveExtraStageIndex，供界面等时机不对称的调用方使用。
+	internal int PeekStageIndex(string? extraStageId)
+	{
+		if (!string.IsNullOrWhiteSpace(extraStageId)
+			&& ActState.TryGetExtraStageIndex(ScopeExtraStageKey(extraStageId), out int stageIndex))
+		{
+			return stageIndex;
+		}
+
+		return GetCurrentActSelectionIndex();
+	}
+
+	private string ScopeExtraStageKey(string stageKey)
+	{
+		return $"{_runContext.ActSelectionIndexOffset}:{stageKey}";
 	}
 
 	public bool TryRecoverResolvedActsFromPlayerRelics(string reason, int? currentStageIndex = null)

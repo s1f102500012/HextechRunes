@@ -169,7 +169,11 @@ internal static partial class HextechRuneSelectionCoordinator
 			modifier.HostUsesBetterMultiplayerScaling = hostUsesExternalScaling;
 			if (!modifier.HasPlayerRuneConfigDisabledIdsSnapshot)
 			{
-				modifier.SetPlayerRuneConfigDisabledIdsSnapshot(local.DisabledPlayerRuneIds, $"host act-roll act={actIndex}");
+				// 房主冻结点：本机补丁失败的海克斯并进本局禁用列表，下发的就是这份列表。
+				string reason = $"host act-roll act={actIndex}";
+				modifier.SetPlayerRuneConfigDisabledIdsSnapshot(
+					HextechRuntimeRuneCompatibility.MergeHookFailedIntoHostDisabledIds(local.DisabledPlayerRuneIds, reason),
+					reason);
 			}
 
 			HextechRunConfigurationSnapshot hostSnapshot = modifier.GetEffectiveRunConfigurationSnapshot();
@@ -244,6 +248,7 @@ internal static partial class HextechRuneSelectionCoordinator
 			DisabledPlayerRuneIds = syncedDisabledPlayerRuneIds
 		}, $"host act-roll act={actIndex}");
 		modifier.HostUsesBetterMultiplayerScaling = syncedHostUsesExternalScaling;
+		HextechRuntimeRuneCompatibility.WarnHookFailedRunesEnabledByHost(syncedDisabledPlayerRuneIds, $"client act-roll act={actIndex}");
 		HextechLog.Info("Mayhem", $"ResolveActRoll client sync: act={actIndex} choiceId={receivedChoiceId} authority={authorityPlayer.NetId} rarity={syncedRarity} monsterHex={syncedMonsterHex} playerCounts={string.Join(",", modifier.PlayerHexCountsByAct)} enemyCounts={string.Join(",", modifier.EnemyHexCountsByAct)} playerConfigDisabled={modifier.PlayerRuneConfigDisabledIds.Count} enemyConfigDisabled={modifier.DisabledMonsterHexIdsForPool.Count} forgeConfigDisabled={modifier.DisabledForgeIdsForPool.Count} betterMultiplayerScaling={syncedHostUsesExternalScaling} localRarity={local.Rarity} localMonsterHex={local.MonsterHex}");
 		return (syncedRarity, syncedMonsterHex, ResolvePlayerHexCount(syncedRunConfigSnapshot, modifier, actIndex));
 	}

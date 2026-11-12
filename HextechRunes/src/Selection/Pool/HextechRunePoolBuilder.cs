@@ -27,7 +27,7 @@ internal static class HextechRunePoolBuilder
 		HashSet<ModelId> blockedOwnedIds = ownedIds.ToHashSet();
 		blockedOwnedIds.UnionWith(HextechCatalog.GetMutuallyExclusivePlayerRuneIds(ownedIds));
 		List<RelicModel> pool = runeTypes
-			.Where(HextechRuntimeRuneCompatibility.IsPlayerRuneAvailableForCurrentRuntime)
+			.Where(HextechRuntimeRuneCompatibility.GetPlayerRunePoolRuntimeFilter())
 			.Where(type => HextechCatalog.IsPlayerRuneAllowedInAct(type, runState.CurrentActIndex))
 			.Select(static type => ModelDb.GetById<RelicModel>(ModelDb.GetId(type)))
 			.Where(relic => HextechCatalog.IsAvailableForPlayer(relic, player)
@@ -415,7 +415,7 @@ internal static class HextechRunePoolBuilder
 	private static bool HasEnabledConfigurablePlayerRuneForRarity(HextechRarityTier rarity, IReadOnlySet<string> disabledIds)
 	{
 		return HextechCatalog.GetConfigurablePlayerRuneTypesForRarity(rarity)
-			.Where(HextechRuntimeRuneCompatibility.IsPlayerRuneAvailableForCurrentRuntime)
+			.Where(HextechRuntimeRuneCompatibility.GetPlayerRunePoolRuntimeFilter())
 			.Any(type => !disabledIds.Contains(ModelDb.GetId(type).Entry));
 	}
 

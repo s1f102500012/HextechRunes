@@ -30,7 +30,11 @@ internal static partial class HextechChoiceCodec
 	private const int RunConfigurationSnapshotVersion = -9;
 	private const int PlayerRuneConfigBitsPerWord = 30;
 	private const int MaxPlayerRuneConfigBitsetWords = 64;
-	private const int MaxDisabledMonsterHexes = 128;
+	// 配置快照里两份禁用列表的健全性上限，只防畸形载荷，不是协议语义：原版按"完整 int 数量 + 每项完整 int"
+	// 写选择结果的整数列表，不限数量。取值覆盖注册表规模并留余量；两份都满额且锻造器 ID 都取最长 128 字符时
+	// 载荷约 270 KB，仍低于 Steam 单条消息上限 512 KiB。
+	internal const int MaxDisabledMonsterHexes = 1024;
+	internal const int MaxDisabledForgeIds = 512;
 	private const int MaxChoiceListCount = HextechStableModelIdListCodec.MaxCount;
 	private const uint Fnv1aOffsetBasis = 2166136261U;
 	private const uint Fnv1aPrime = 16777619U;

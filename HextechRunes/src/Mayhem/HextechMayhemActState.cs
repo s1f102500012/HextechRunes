@@ -318,6 +318,12 @@ internal sealed class HextechMayhemActState
 		return stageIndex;
 	}
 
+	// 只查已有条目，不创建、不扩容、不递增 Version。
+	public bool TryGetExtraStageIndex(string stageKey, out int stageIndex)
+	{
+		return _extraStageIndexes.TryGetValue(stageKey, out stageIndex);
+	}
+
 	public void Reset()
 	{
 		_rarityByAct = NewUnknownArray();
