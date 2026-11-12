@@ -8,6 +8,9 @@ namespace HextechRunes;
 internal sealed partial class HextechRuneSelectionScreen
 {
 	private const float NoiseFlickerMinAlpha = 0.55f;
+	private const string SilverNoiseIconPath = HextechAssets.ImageRoot + "ui/signalNoiseSilver.png";
+	private const string GoldNoiseIconPath = HextechAssets.ImageRoot + "ui/signalNoiseGold.png";
+	private const string PrismaticNoiseIconPath = HextechAssets.ImageRoot + "ui/signalNoisePrismatic.png";
 
 	private HextechSignalNoise.Noise? _signalNoise;
 	private static Font? _noiseFragmentFont;
@@ -121,12 +124,24 @@ internal sealed partial class HextechRuneSelectionScreen
 		content.AddThemeConstantOverride("separation", 14);
 		margin.AddChild(content);
 
-		// 图标位留空，保持与正常卡片相同的版面高度。
-		content.AddChild(new Control
+		// 图标位放“问号 + 符文环”，告诉玩家这是有意的谜题而不是贴图丢失；配色跟卡框一样取底下真实选项的品阶。
+		CenterContainer iconBox = new()
 		{
 			CustomMinimumSize = new Vector2(0f, 176f),
 			MouseFilter = MouseFilterEnum.Ignore
-		});
+		};
+		content.AddChild(iconBox);
+		if (HextechTextures.LoadUiTexture(GetNoiseIconPath(rarityKey)) is { } iconTexture)
+		{
+			iconBox.AddChild(new TextureRect
+			{
+				MouseFilter = MouseFilterEnum.Ignore,
+				Texture = iconTexture,
+				CustomMinimumSize = new Vector2(152f, 152f),
+				StretchMode = TextureRect.StretchModeEnum.KeepAspectCentered,
+				ExpandMode = TextureRect.ExpandModeEnum.IgnoreSize
+			});
+		}
 
 		MegaLabel title = new()
 		{
@@ -172,6 +187,16 @@ internal sealed partial class HextechRuneSelectionScreen
 		blink.TweenProperty(button, "modulate:a", 0.35f, 0.05);
 		blink.TweenProperty(button, "modulate:a", 1f, 0.12);
 		GetViewport()?.SetInputAsHandled();
+	}
+
+	internal static string GetNoiseIconPath(string rarityKey)
+	{
+		return rarityKey switch
+		{
+			"SILVER" => SilverNoiseIconPath,
+			"PRISMATIC" => PrismaticNoiseIconPath,
+			_ => GoldNoiseIconPath
+		};
 	}
 
 	private static void StartNoiseFlicker(Control content)
