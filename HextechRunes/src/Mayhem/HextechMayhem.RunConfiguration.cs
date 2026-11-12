@@ -83,9 +83,61 @@ internal sealed partial class HextechMayhemModifier
 
 	private static HextechRunConfigurationSnapshot CreateNewRunConfigurationSnapshot()
 	{
-		return HextechPlayerContextHelper.IsClientRun(fallbackWhenUnavailable: true)
-			? HextechRuneConfiguration.GetDefaultSnapshot()
-			: HextechGodslayerTrial.ApplyToNewRun(HextechRuneConfiguration.GetSnapshot());
+		if (HextechPlayerContextHelper.IsClientRun(fallbackWhenUnavailable: true))
+		{
+			return HextechRuneConfiguration.GetDefaultSnapshot();
+		}
+
+		HextechRunConfigurationSnapshot frozen = FreezeNewRunConfigurationSnapshot(
+			HextechGodslayerTrial.ApplyToNewRun(HextechRuneConfiguration.GetSnapshot()),
+			HextechModelDbState.IsContentRegistered,
+			HextechPlayerContextHelper.IsNetworkMultiplayerRun() ? HextechRuntimeRuneCompatibility.GetHookFailedPlayerRuneIds() : null,
+			out List<string> addedHookFailedIds,
+			out List<string> skippedHookFailedIds);
+		HextechRuntimeRuneCompatibility.LogHostHookFailedMerge("new run", addedHookFailedIds, skippedHookFailedIds);
+		return frozen;
+	}
+
+	/// <summary>
+	/// 房主或单机新开局时冻结本局快照（客户端不走这里，等房主幕掷骰下发）。
+	/// 锻造器禁用列表只保留注册表里存在的 ID，只改本局快照，不改本机配置文件；内容尚未登记完时原样保留，以免误删。
+	/// 联机房主传入本机补丁失败的海克斯 ID（单机传 null），其中可配置的并入本局禁用列表，之后随幕掷骰载荷下发、
+	/// 随存档保存，各端只按这份列表过滤。
+	/// </summary>
+	internal static HextechRunConfigurationSnapshot FreezeNewRunConfigurationSnapshot(
+		HextechRunConfigurationSnapshot snapshot,
+		bool isContentRegistered,
+		IReadOnlyCollection<string>? hostHookFailedRuneIds,
+		out List<string> addedHookFailedIds,
+		out List<string> skippedHookFailedIds)
+	{
+		HextechRunConfigurationSnapshot frozen = isContentRegistered
+			? snapshot with { DisabledForgeIds = FilterRegisteredForgeIds(snapshot.DisabledForgeIds) }
+			: snapshot;
+		if (hostHookFailedRuneIds == null)
+		{
+			addedHookFailedIds = [];
+			skippedHookFailedIds = [];
+			return frozen;
+		}
+
+		return frozen with
+		{
+			DisabledPlayerRuneIds = HextechRuntimeRuneCompatibility.MergeHookFailedIntoDisabledIds(
+				frozen.DisabledPlayerRuneIds,
+				hostHookFailedRuneIds,
+				HextechRuntimeRuneCompatibility.GetConfigurablePlayerRuneEntries(),
+				out addedHookFailedIds,
+				out skippedHookFailedIds)
+		};
+	}
+
+	private static HashSet<string> FilterRegisteredForgeIds(IEnumerable<string> disabledForgeIds)
+	{
+		HashSet<string> registeredIds = HextechCatalog.GetAllForgeTypes()
+			.Select(static type => ModelDb.GetId(type).Entry)
+			.ToHashSet(StringComparer.Ordinal);
+		return HextechRuneConfiguration.NormalizeStringIds(disabledForgeIds, registeredIds);
 	}
 
 	private string SerializeRunConfigurationSnapshot()
@@ -96,9 +148,17 @@ internal sealed partial class HextechMayhemModifier
 			return "";
 		}
 
+		// 每幕数量与玩家符文禁用表另有单独的存档属性，运行时真值在 _runContext；快照里的这三项写出当前真值，
+		// 两份在写出时恒等，读档时无论原版先还原哪一份结果都相同（原版按类型分组还原：int[] 先于 string）。
+		// 禁用表没有本局快照时保留快照自身的值，不让存档属性的 getter 读本机菜单配置。
 		// 该 JSON 存在 Modifier 上，不参与原版联机校验，两端一致靠本模组保证；集合字段用排序数组序列化，
 		// 不依赖 HashSet 未文档化的插入序枚举；属性名与原 record 一致，Restore 仍反序列化回原类型。
-		HextechRunConfigurationSnapshot normalized = HextechRuneConfiguration.NormalizeSnapshot(snapshot);
+		HextechRunConfigurationSnapshot normalized = HextechRuneConfiguration.NormalizeSnapshot(snapshot with
+		{
+			PlayerHexCountsByAct = _runContext.PlayerHexCounts.Snapshot,
+			EnemyHexCountsByAct = _runContext.EnemyHexCounts.Snapshot,
+			DisabledPlayerRuneIds = _runContext.PlayerRuneConfig.CopySnapshotOrNull() ?? snapshot.DisabledPlayerRuneIds
+		});
 		return JsonSerializer.Serialize(new RunConfigurationSnapshotJson(normalized), HextechTelemetry.JsonOptions);
 	}
 

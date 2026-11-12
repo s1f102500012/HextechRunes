@@ -18,7 +18,7 @@ internal static partial class HextechCombatHooks
 	}
 
 	[HarmonyPatch(typeof(Creature), nameof(Creature.LoseHpInternal), typeof(decimal), typeof(ValueProp))]
-	[HextechPatch("combat.near-death-feast.lose-hp", "濒死狂宴", Rune = typeof(NearDeathFeastRune))]
+	[HextechPatch("combat.near-death-feast.lose-hp", "濒死狂宴 / 敌方海克斯:濒死狂宴", Rune = typeof(NearDeathFeastRune), MonsterHexes = [MonsterHexKind.NearDeathFeast])]
 	private static class NearDeathFeastLoseHpPatch
 	{
 		[HarmonyPrefix]
@@ -42,7 +42,7 @@ internal static partial class HextechCombatHooks
 	}
 
 	[HarmonyPatch(typeof(Creature), nameof(Creature.CurrentHp), MethodType.Setter)]
-	[HextechPatch("combat.near-death-feast.current-hp", "濒死狂宴", Rune = typeof(NearDeathFeastRune))]
+	[HextechPatch("combat.near-death-feast.current-hp", "濒死狂宴 / 敌方海克斯:濒死狂宴", Rune = typeof(NearDeathFeastRune), MonsterHexes = [MonsterHexKind.NearDeathFeast])]
 	private static class NearDeathFeastCurrentHpPatch
 	{
 		[HarmonyPrefix]
@@ -79,7 +79,7 @@ internal static partial class HextechCombatHooks
 	}
 
 	[HarmonyPatch(typeof(Creature), nameof(Creature.IsAlive), MethodType.Getter)]
-	[HextechPatch("combat.near-death-feast.is-alive", "濒死狂宴", Rune = typeof(NearDeathFeastRune))]
+	[HextechPatch("combat.near-death-feast.is-alive", "濒死狂宴 / 敌方海克斯:濒死狂宴", Rune = typeof(NearDeathFeastRune), MonsterHexes = [MonsterHexKind.NearDeathFeast])]
 	private static class NearDeathFeastIsAlivePatch
 	{
 		[HarmonyPostfix]
@@ -93,7 +93,7 @@ internal static partial class HextechCombatHooks
 	}
 
 	[HarmonyPatch(typeof(Creature), nameof(Creature.IsDead), MethodType.Getter)]
-	[HextechPatch("combat.near-death-feast.is-dead", "濒死狂宴", Rune = typeof(NearDeathFeastRune))]
+	[HextechPatch("combat.near-death-feast.is-dead", "濒死狂宴 / 敌方海克斯:濒死狂宴", Rune = typeof(NearDeathFeastRune), MonsterHexes = [MonsterHexKind.NearDeathFeast])]
 	private static class NearDeathFeastIsDeadPatch
 	{
 		[HarmonyPostfix]
@@ -107,7 +107,7 @@ internal static partial class HextechCombatHooks
 	}
 
 	[HarmonyPatch(typeof(CreatureCmd), nameof(CreatureCmd.GainBlock), typeof(Creature), typeof(decimal), typeof(ValueProp), typeof(CardPlay), typeof(bool))]
-	[HextechPatch("combat.near-death-feast.gain-block", "濒死狂宴", Rune = typeof(NearDeathFeastRune))]
+	[HextechPatch("combat.near-death-feast.gain-block", "濒死狂宴 / 敌方海克斯:濒死狂宴", Rune = typeof(NearDeathFeastRune), MonsterHexes = [MonsterHexKind.NearDeathFeast])]
 	private static class NearDeathFeastGainBlockPatch
 	{
 		[HarmonyPrefix]
@@ -125,7 +125,7 @@ internal static partial class HextechCombatHooks
 	}
 
 	[HarmonyPatch(typeof(CreatureCmd), nameof(CreatureCmd.GainBlock), typeof(Creature), typeof(BlockVar), typeof(CardPlay), typeof(bool))]
-	[HextechPatch("combat.near-death-feast.gain-block-var", "濒死狂宴", Rune = typeof(NearDeathFeastRune))]
+	[HextechPatch("combat.near-death-feast.gain-block-var", "濒死狂宴 / 敌方海克斯:濒死狂宴", Rune = typeof(NearDeathFeastRune), MonsterHexes = [MonsterHexKind.NearDeathFeast])]
 	private static class NearDeathFeastGainBlockVarPatch
 	{
 		[HarmonyPrefix]
@@ -137,7 +137,7 @@ internal static partial class HextechCombatHooks
 	}
 
 	[HarmonyPatch(typeof(CreatureCmd), nameof(CreatureCmd.Kill), typeof(Creature), typeof(bool))]
-	[HextechPatch("combat.near-death-feast.kill", "濒死狂宴", Rune = typeof(NearDeathFeastRune))]
+	[HextechPatch("combat.near-death-feast.kill", "濒死狂宴 / 敌方海克斯:濒死狂宴", Rune = typeof(NearDeathFeastRune), MonsterHexes = [MonsterHexKind.NearDeathFeast])]
 	private static class NearDeathFeastKillPatch
 	{
 		[HarmonyPrefix]
@@ -145,7 +145,7 @@ internal static partial class HextechCombatHooks
 	}
 
 	[HarmonyPatch(typeof(CreatureCmd), nameof(CreatureCmd.Kill), typeof(IReadOnlyCollection<Creature>), typeof(bool))]
-	[HextechPatch("combat.near-death-feast.kill-many", "濒死狂宴", Rune = typeof(NearDeathFeastRune))]
+	[HextechPatch("combat.near-death-feast.kill-many", "濒死狂宴 / 敌方海克斯:濒死狂宴", Rune = typeof(NearDeathFeastRune), MonsterHexes = [MonsterHexKind.NearDeathFeast])]
 	private static class NearDeathFeastKillManyPatch
 	{
 		[HarmonyPrefix]
@@ -159,7 +159,7 @@ internal static partial class HextechCombatHooks
 	}
 
 	[HarmonyPatch(typeof(CreatureCmd), "KillWithoutCheckingWinCondition", typeof(Creature), typeof(bool), typeof(int))]
-	[HextechPatch("combat.near-death-feast.kill-no-win-check", "濒死狂宴", Rune = typeof(NearDeathFeastRune))]
+	[HextechPatch("combat.near-death-feast.kill-no-win-check", "濒死狂宴 / 敌方海克斯:濒死狂宴", Rune = typeof(NearDeathFeastRune), MonsterHexes = [MonsterHexKind.NearDeathFeast])]
 	private static class NearDeathFeastKillWithoutWinCheckPatch
 	{
 		[HarmonyPrefix]
@@ -167,7 +167,7 @@ internal static partial class HextechCombatHooks
 	}
 
 	[HarmonyPatch(typeof(NHealthBar), "RefreshText")]
-	[HextechPatch("combat.near-death-feast.health-bar-text", "濒死狂宴", Rune = typeof(NearDeathFeastRune))]
+	[HextechPatch("combat.near-death-feast.health-bar-text", "濒死狂宴 / 敌方海克斯:濒死狂宴", Rune = typeof(NearDeathFeastRune), MonsterHexes = [MonsterHexKind.NearDeathFeast])]
 	private static class NearDeathFeastHealthBarTextPatch
 	{
 		[HarmonyPrepare]

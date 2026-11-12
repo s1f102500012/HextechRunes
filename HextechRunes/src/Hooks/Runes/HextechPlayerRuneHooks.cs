@@ -1,5 +1,3 @@
-using System.Diagnostics.CodeAnalysis;
-
 namespace HextechRunes;
 
 internal static partial class HextechPlayerRuneHooks
@@ -38,54 +36,6 @@ internal static partial class HextechPlayerRuneHooks
 			.WithHitFx("vfx/vfx_giant_horizontal_slash", null, "slash_attack.mp3");
 
 		await attack.Execute(choiceContext);
-	}
-
-	internal static List<CardModel>? TryApplyEnemyManipulateRealityStatusDoubling(IReadOnlyList<CardModel> cards, bool addedByPlayer)
-	{
-		if (addedByPlayer)
-		{
-			return null;
-		}
-
-		List<CardModel>? rewritten = null;
-		for (int i = 0; i < cards.Count; i++)
-		{
-			CardModel card = cards[i];
-			if (!ShouldDoubleEnemyGeneratedStatusCard(card))
-			{
-				rewritten?.Add(card);
-				continue;
-			}
-
-			rewritten ??= cards.Take(i).ToList();
-			rewritten.Add(card);
-			if (TryCreateManipulateRealityStatusCopy(card, out CardModel? copy))
-			{
-				rewritten.Add(copy);
-			}
-		}
-
-		return rewritten;
-	}
-
-	internal static bool ShouldDoubleEnemyGeneratedStatusCard(CardModel card)
-	{
-		return card.Type == CardType.Status
-			&& card.Owner?.Creature.Side == CombatSide.Player
-			&& card.Owner.Creature.CombatState?.RunState == card.Owner.RunState
-			&& HextechMayhemModifier.FindIn(card.Owner.RunState)?.HasActiveMonsterHex(MonsterHexKind.ManipulateReality) == true;
-	}
-
-	internal static bool TryCreateManipulateRealityStatusCopy(CardModel card, [NotNullWhen(true)] out CardModel? copy)
-	{
-		copy = null;
-		if (card.Owner?.Creature.CombatState is not HextechCombatState combatState)
-		{
-			return false;
-		}
-
-		copy = combatState.CloneCard(card);
-		return true;
 	}
 
 	// 卡牌标签 getter 是热路径，图鉴/第三方会在规范模型上读它；规范模型的 Owner 会抛 CanonicalModelException，先判 IsCanonical。

@@ -11,7 +11,7 @@ internal static class HextechForgeShopPriceHelper
 			return price;
 		}
 
-		return HextechRuneConfiguration.GetSnapshot().RandomForgeShopPrice;
+		return HextechForgeGrantHelper.GetForgeConfigurationWithoutRun().RandomForgeShopPrice;
 	}
 
 	public static int GetRandomForgeShopPriceFor(RunState? runState)

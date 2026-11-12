@@ -305,7 +305,7 @@ internal static class HextechForgeGrantHelper
 			return modifier.ForgeRarityWeights;
 		}
 
-		return HextechRuneConfiguration.GetSnapshot().ForgeRarityWeights;
+		return GetForgeConfigurationWithoutRun().ForgeRarityWeights;
 	}
 
 	internal static bool IsForgeDisabledForPlayer(Player player, RelicModel forge)
@@ -322,7 +322,16 @@ internal static class HextechForgeGrantHelper
 			return modifier.DisabledForgeIdsForPool;
 		}
 
-		return HextechRuneConfiguration.GetDisabledForgeIds();
+		return GetForgeConfigurationWithoutRun().DisabledForgeIds;
+	}
+
+	// 找不到本局 Modifier 时锻造器配置（品质权重、禁用表、随机锻造器售价）的来源：单机读本机菜单配置；
+	// 联机读默认配置，各端本地菜单值不能决定共享结果（与 HextechMayhemModifier.IsEnabledForRun 同口径）。
+	internal static HextechRunConfigurationSnapshot GetForgeConfigurationWithoutRun()
+	{
+		return HextechPlayerContextHelper.IsNetworkMultiplayerRun()
+			? HextechRuneConfiguration.GetDefaultSnapshot()
+			: HextechRuneConfiguration.GetSnapshot();
 	}
 
 	private static HextechForgeRarityWeights NormalizeForgeRarityWeights(HextechForgeRarityWeights weights)

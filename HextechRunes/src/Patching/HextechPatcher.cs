@@ -12,7 +12,20 @@ internal static class HextechPatcher
 {
 	private const string DumpEnvVar = "HEXTECH_DUMP_PATCHES";
 
-	private sealed record PatchResult(string Id, string Feature, Type PatchType, bool Applied, string? Error);
+	/// <summary>补丁类的应用结果。</summary>
+	internal enum PatchOutcome
+	{
+		/// <summary>至少打上了一个目标方法，或动态 <c>Apply(Harmony)</c> 正常返回。</summary>
+		Applied,
+
+		/// <summary>主动跳过：带 <c>[HarmonyPrepare]</c> 且一个方法都没打上，或 <c>Optional</c> 且没有目标。不算失败，不标记符文。</summary>
+		Skipped,
+
+		/// <summary>安装异常、声明了元数据却没有目标，或非可选、无 Prepare 的类处理器一个方法都没打上。</summary>
+		Failed
+	}
+
+	internal sealed record PatchResult(string Id, string Feature, Type PatchType, PatchOutcome Outcome, string? Error);
 
 	private static readonly List<PatchResult> Results = [];
 
@@ -41,7 +54,7 @@ internal static class HextechPatcher
 				if (meta != null)
 				{
 					// 声明了元数据却没有任何目标:属性挂错了类。这类错误静默跳过等于补丁凭空消失,必须显形。
-					Results.Add(new PatchResult(meta.Id, meta.Feature, type, Applied: false, Error: "no [HarmonyPatch] target and no Apply(Harmony)"));
+					Results.Add(new PatchResult(meta.Id, meta.Feature, type, PatchOutcome.Failed, Error: "no [HarmonyPatch] target and no Apply(Harmony)"));
 					HextechLog.Warn("Patch", $"Patch declared but has no target: {meta.Id} ({meta.Feature}) on {type.FullName}");
 				}
 
@@ -52,6 +65,7 @@ internal static class HextechPatcher
 			string feature = meta?.Feature ?? "unspecified";
 			try
 			{
+				PatchOutcome outcome = PatchOutcome.Applied;
 				if (dynamicApply != null)
 				{
 					dynamicApply.Invoke(null, [harmony]);
@@ -61,13 +75,14 @@ internal static class HextechPatcher
 					List<MethodInfo>? patched = harmony.CreateClassProcessor(type).Patch();
 					bool gated = type.GetMethods(BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic)
 						.Any(static method => method.GetCustomAttribute<HarmonyPrepare>() != null);
-					if ((patched == null || patched.Count == 0) && !gated && meta?.Optional != true)
+					outcome = ClassifyClassProcessorResult(patched?.Count ?? 0, gated, meta?.Optional == true);
+					if (outcome == PatchOutcome.Failed)
 					{
 						throw new InvalidOperationException("class processor patched no methods");
 					}
 				}
 
-				Results.Add(new PatchResult(id, feature, type, Applied: true, Error: null));
+				Results.Add(new PatchResult(id, feature, type, outcome, Error: null));
 			}
 			catch (Exception ex)
 			{
@@ -77,25 +92,45 @@ internal static class HextechPatcher
 					TargetInvocationException { InnerException: not null } invocation => invocation.InnerException!,
 					_ => ex
 				};
-				Results.Add(new PatchResult(id, feature, type, Applied: false, Error: $"{root.GetType().Name}: {root.Message}"));
+				Results.Add(new PatchResult(id, feature, type, PatchOutcome.Failed, Error: $"{root.GetType().Name}: {root.Message}"));
 				ReportFailure(meta, id, feature, root);
 			}
 		}
 	}
 
 	/// <summary>
-	/// 关联符文的补丁失败时把符文标为本运行时不可用；未关联符文时，可选目标缺失记 Info，其余记 Warn。
+	/// 类处理器的结果分类：打上任何方法即已应用；一个都没打上时，带 <c>[HarmonyPrepare]</c>（Prepare 返回 false）
+	/// 或声明 <c>Optional</c> 记为主动跳过，否则为失败。动态 <c>Apply(Harmony)</c> 不经过这里，正常返回即已应用。
+	/// </summary>
+	internal static PatchOutcome ClassifyClassProcessorResult(int patchedMethodCount, bool hasPrepare, bool optional)
+	{
+		if (patchedMethodCount > 0)
+		{
+			return PatchOutcome.Applied;
+		}
+
+		return hasPrepare || optional ? PatchOutcome.Skipped : PatchOutcome.Failed;
+	}
+
+	/// <summary>
+	/// 关联符文的补丁失败时把符文标为本运行时不可用；关联敌方海克斯时逐个 Warn 点名（不标记、不过滤敌方池）。
+	/// 未关联符文时，可选目标缺失记 Info，其余记 Warn。
 	/// 动态 <c>Apply(Harmony)</c> 与属性式补丁走同一条归因路径，所以动态安装失败必须抛异常而不是自行吞掉。
 	/// </summary>
 	private static void ReportFailure(HextechPatchAttribute? meta, string id, string feature, Exception root)
 	{
+		foreach (MonsterHexKind monsterHex in meta?.MonsterHexes ?? [])
+		{
+			HextechLog.Warn("Patch", $"Patch failed: {id} ({feature}): enemy hex {monsterHex} effect is inactive on this client; in multiplayer its results will differ from other clients. {root.GetType().Name}: {root.Message}");
+		}
+
 		Type[] runes = meta?.AffectedRunes.ToArray() ?? [];
 		foreach (Type rune in runes)
 		{
 			HextechRuntimeRuneCompatibility.MarkPlayerRuneHookFailed(rune, id, root);
 		}
 
-		if (runes.Length > 0)
+		if (runes.Length > 0 || meta?.MonsterHexes is { Length: > 0 })
 		{
 			return;
 		}
@@ -115,17 +150,40 @@ internal static class HextechPatcher
 		return patch.PatchMethod.ReturnType == typeof(bool);
 	}
 
-	/// <summary>启动汇总:应用/失败计数。失败项已由 <see cref="ReportFailure"/> 逐条记录。</summary>
+	/// <summary>启动汇总:应用/跳过/失败计数与跳过清单。失败项已由 <see cref="ReportFailure"/> 逐条记录。</summary>
 	internal static void LogSummary()
 	{
-		int failed = Results.Count(result => !result.Applied);
-		HextechLog.Info("Patch", $"Applied {Results.Count - failed}/{Results.Count} patch classes.");
+		foreach (string line in BuildSummaryLines(Results))
+		{
+			HextechLog.Info("Patch", line);
+		}
 
 		IReadOnlyList<string> missingMembers = HextechHookReflection.MissingMembers;
 		if (missingMembers.Count > 0)
 		{
 			HextechLog.Warn("Patch", $"{missingMembers.Count} vanilla private member(s) missing in this game build (dependent features degraded):\n  {string.Join("\n  ", missingMembers)}");
 		}
+	}
+
+	/// <summary>
+	/// 摘要文本（纯函数，不写日志）：首行保持以 <c>Applied </c> 开头，供按关键字看日志；有跳过项时第二行列出跳过的补丁 ID。
+	/// </summary>
+	internal static IReadOnlyList<string> BuildSummaryLines(IReadOnlyCollection<PatchResult> results)
+	{
+		int applied = results.Count(static result => result.Outcome == PatchOutcome.Applied);
+		int failed = results.Count(static result => result.Outcome == PatchOutcome.Failed);
+		string[] skipped = results
+			.Where(static result => result.Outcome == PatchOutcome.Skipped)
+			.Select(static result => result.Id)
+			.OrderBy(static id => id, StringComparer.Ordinal)
+			.ToArray();
+		List<string> lines = [$"Applied {applied}/{results.Count} patch classes, skipped {skipped.Length}, failed {failed}."];
+		if (skipped.Length > 0)
+		{
+			lines.Add($"Skipped patch classes (Prepare returned false or optional target absent): {string.Join(", ", skipped)}");
+		}
+
+		return lines;
 	}
 
 	/// <summary>

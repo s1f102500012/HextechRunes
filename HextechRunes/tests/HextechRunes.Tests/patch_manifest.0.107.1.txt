@@ -75,6 +75,7 @@ compat.saved-property-net-id | MegaCrit.Sts2.Core.Helpers.OneTimeInitialization.
 console.signal-noise.hide | MegaCrit.Sts2.Core.DevConsole.DevConsole.(Boolean) [Constructor] | postfix(400)
 enemy-hex.cutting-edge-alchemist | MegaCrit.Sts2.Core.Odds.PotionRewardOdds.Roll(Player,AscensionManager,RoomType) | postfix(400) prefix(400)
 enemy-hex.tezcataras-mercy | MegaCrit.Sts2.Core.Commands.RelicCmd.Obtain(RelicModel,Player,Int32) | prefix(400)
+enemy.manipulate-reality.generated-cards | MegaCrit.Sts2.Core.Commands.CardPileCmd.AddGeneratedCardsToCombat(IEnumerable`1,PileType,Player,CardPilePosition) | prefix(399)
 event.architect.godslayer-complete | MegaCrit.Sts2.Core.Models.Events.TheArchitect.WinRun(*) | prefix(400)
 event.architect.godslayer-dialogue | MegaCrit.Sts2.Core.Models.Events.TheArchitect.LoadDialogue(*) | postfix(400)
 event.architect.godslayer-finale | MegaCrit.Sts2.Core.Runs.RunManager.WinRun(*) | prefix?(200)

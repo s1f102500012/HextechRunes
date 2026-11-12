@@ -15,6 +15,12 @@ internal sealed class HextechPlayerRuneConfigSnapshotState
 		_disabledIds = Normalize(disabledIds);
 	}
 
+	// 没有本局快照时返回 null，不回落本机配置。
+	public HashSet<string>? CopySnapshotOrNull()
+	{
+		return _disabledIds?.ToHashSet(StringComparer.Ordinal);
+	}
+
 	public HashSet<string> GetDisabledIdsForPool(bool isClient, IEnumerable<string> localDisabledIds)
 	{
 		if (_disabledIds != null)

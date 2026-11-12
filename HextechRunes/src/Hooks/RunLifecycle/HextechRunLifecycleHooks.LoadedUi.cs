@@ -15,6 +15,11 @@ internal static partial class HextechRunLifecycleHooks
 		// mod 延续体异常不能把原版 LoadRun 任务链打成 faulted。
 		try
 		{
+			if (IsCurrentRun(runState))
+			{
+				RestoreStageState(runState, "LoadRun");
+			}
+
 			await RefreshEnemyUiWhenReady(() => runState, "LoadRun");
 			// 不能 await：原版读档入口（主菜单继续/各联机读档界面）在 LoadRun 返回后才 FadeIn，
 			// 恢复中的锻造器/海克斯选择要等玩家操作，等它会让画面一直停在淡出状态。
@@ -25,6 +30,28 @@ internal static partial class HextechRunLifecycleHooks
 		{
 			HextechLog.Error("Mayhem", $"LoadRun continuation failed: {ex}");
 		}
+	}
+
+	// 按当前额外阶段 ID 激活/清除额外阶段，本阶段未结算时从玩家遗物恢复已结算阶段；返回是否恢复了状态。
+	// 只在各端相同的同步流程位置调用，不碰界面节点：
+	// - TopBar.Initialize 后缀：NRun._Ready 内同步执行，读档时早于 GenerateMap 和房间进入，预先结束的战斗房间生成奖励前已完成；
+	// - LoadRunAfterOriginal：原版读档 Task 完成后再做一次，结果与进房钩子写入的相同（幂等兜底）。
+	// 找不到本局 Modifier 时什么都不做（新开局的 Modifier 在 StartRun 之后才建，由开局流程和进房钩子负责）。
+	// 额外阶段 ID 由其他模组提供，TopBar.Initialize 时可能还取不到（IntegratedStrategyEvents 在生成地图时才还原终局会话），
+	// 取不到时按当前幕处理，额外阶段由之后的进房钩子激活。
+	internal static bool RestoreStageState(RunState runState, string reason)
+	{
+		return HextechMayhemModifier.FindIn(runState) is HextechMayhemModifier modifier
+			&& RestoreStageState(runState, modifier, HextechRunesInterop.GetCurrentExtraActId(runState), reason);
+	}
+
+	internal static bool RestoreStageState(RunState runState, HextechMayhemModifier modifier, string? extraStageId, string reason)
+	{
+		int stageIndex = ApplyStageIndex(modifier, extraStageId);
+		bool recovered = !modifier.IsStageResolved(stageIndex)
+			&& modifier.TryRecoverResolvedActsFromPlayerRelics(reason, stageIndex);
+		HextechLog.Info("Mayhem", $"Stage state restored: reason={reason} recovered={recovered} actIndex={runState.CurrentActIndex} stage={stageIndex} {modifier.DescribeActState()}");
+		return recovered;
 	}
 
 	private static async Task ResumePendingSelectionTransactionsAfterLoad(RunState runState)
@@ -122,7 +149,9 @@ internal static partial class HextechRunLifecycleHooks
 			HextechMayhemModifier? modifier = HextechMayhemModifier.FindIn(runState);
 			if (modifier != null)
 			{
-				int stageIndex = ResolveCurrentStageIndex(runState, modifier, out _);
+				// 轮询按界面就绪和玩家操作推进，各端执行时刻不同，所以只读：额外阶段已由
+				// RestoreStageState 和进房钩子激活，这里只查序号。
+				int stageIndex = PeekCurrentStageIndex(runState, modifier);
 				if (stageIndex < 0 || modifier.IsStageResolved(stageIndex))
 				{
 					return;
@@ -150,8 +179,8 @@ internal static partial class HextechRunLifecycleHooks
 		HextechLog.Warn("Mayhem", $"ResumePendingActSelectionAfterLoad timed out: currentRun={IsCurrentRun(runState)} act={runState.CurrentActIndex} room={runState.CurrentRoom?.GetType().Name ?? "null"}");
 	}
 
-	// 顶栏初始化是同步回调，只能启动不能等待。刷新会经 ResolveCurrentStageIndex 激活额外阶段、并从遗物恢复
-	// 已结算幕次（写本局状态），触发时机取决于各端界面何时就绪。
+	// 顶栏初始化是同步回调，只能启动不能等待。刷新时机取决于各端界面何时就绪，所以整条路径只读本局状态：
+	// 额外阶段激活和已结算阶段恢复由进房钩子与 RestoreStageState 负责。
 	private static void ScheduleEnemyUiRefresh(Func<RunState?> resolveRun, string reason)
 	{
 		TaskHelper.RunSafely(RefreshEnemyUiWhenReady(resolveRun, reason));
@@ -192,12 +221,9 @@ internal static partial class HextechRunLifecycleHooks
 			return false;
 		}
 
-		SubscribeRoomEnteredIfNeeded();
-		int stageIndex = ResolveCurrentStageIndex(runState, modifier, out _);
-		bool recovered = !modifier.IsStageResolved(stageIndex)
-			&& modifier.TryRecoverResolvedActsFromPlayerRelics(reason, stageIndex);
+		int stageIndex = PeekCurrentStageIndex(runState, modifier);
 		HextechEnemyUi.Refresh(modifier);
-		HextechLog.Info("Mayhem", $"EnemyUi delayed refresh: reason={reason} frame={frame} recovered={recovered} actIndex={runState.CurrentActIndex} {modifier.DescribeActState()}");
+		HextechLog.Info("Mayhem", $"EnemyUi delayed refresh: reason={reason} frame={frame} actIndex={runState.CurrentActIndex} stage={stageIndex} {modifier.DescribeActState()}");
 		return true;
 	}
 
@@ -210,6 +236,8 @@ internal static partial class HextechRunLifecycleHooks
 		{
 			HextechSavedPropertyAuditCompat.RunAuditOnRunStartOnce();
 			ResetRunScopedState(runState);
+			// 读档重新进入当前房间时由 OnRoomEntered 激活阶段，订阅不能等界面就绪。
+			SubscribeRoomEnteredIfNeeded();
 			__result = LoadRunAfterOriginal(__result, runState);
 		}
 	}
@@ -221,8 +249,20 @@ internal static partial class HextechRunLifecycleHooks
 		[HarmonyPostfix]
 		private static void Postfix(IRunState runState)
 		{
+			// 顶栏初始化在 NRun._Ready 里同步执行，早于读档/开局的房间进入；订阅和阶段状态还原都在这里同步做，
+			// 不依赖顶栏节点是否就绪，也不放进按帧轮询的界面刷新里。
+			SubscribeRoomEnteredIfNeeded();
 			if (runState is RunState concreteRunState)
 			{
+				try
+				{
+					RestoreStageState(concreteRunState, "NTopBar.Initialize");
+				}
+				catch (Exception ex)
+				{
+					HextechLog.Error("Mayhem", $"NTopBar.Initialize stage state restore failed: {ex}");
+				}
+
 				ScheduleEnemyUiRefresh(() => concreteRunState, "NTopBar.Initialize");
 				return;
 			}

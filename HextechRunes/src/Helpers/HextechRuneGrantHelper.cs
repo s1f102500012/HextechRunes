@@ -202,6 +202,7 @@ internal static class HextechRuneGrantHelper
 
 		return candidateTypes
 			.Where(HextechCatalog.IsPlayerRuneTypeConfigurable)
+			.Where(HextechRuntimeRuneCompatibility.GetPlayerRunePoolRuntimeFilter())
 			.Where(type => !disabledIds.Contains(ModelDb.GetId(type).Entry))
 			.Where(type => !IsDestructiveRandomRewardRuneType(type))
 			.Where(type => !unavailableIds.Contains(ModelDb.GetId(type)))

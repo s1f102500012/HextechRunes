@@ -20,9 +20,13 @@ internal static partial class HextechRunLifecycleHooks
 
 	private readonly record struct EventRoomProceedState(RunState RunState, int ActIndex, string EventId);
 
-	/// <summary>跑局开始与读档共用：清空日志预算、战斗与敌方海克斯的跑局临时状态，并按新跑局重置夺金同步。</summary>
+	/// <summary>
+	/// 跑局开始与读档共用：清空日志预算、战斗与敌方海克斯的跑局临时状态，并按新跑局重置夺金同步。
+	/// 开始新局的前缀在本方法之后才登记 <see cref="RunsInsideStartRunOrig"/>；这里清掉的只有原版 StartRun 同步抛异常时没能移除的旧跑局。
+	/// </summary>
 	private static void ResetRunScopedState(RunState runState)
 	{
+		RunsInsideStartRunOrig.Clear();
 		HextechRunLogBudget.Reset();
 		ResetTransientRunState();
 		HextechGoldrendSync.ResetForRun(runState);
@@ -79,6 +83,12 @@ internal static partial class HextechRunLifecycleHooks
 		out string? extraStageId)
 	{
 		extraStageId = HextechRunesInterop.GetCurrentExtraActId(runState);
+		return ApplyStageIndex(modifier, extraStageId);
+	}
+
+	// 有额外阶段 ID 时激活（必要时创建）该阶段，否则清除激活的额外阶段；返回当前阶段序号。
+	private static int ApplyStageIndex(HextechMayhemModifier modifier, string? extraStageId)
+	{
 		if (!string.IsNullOrWhiteSpace(extraStageId))
 		{
 			return modifier.ActivateExtraStage(extraStageId);
@@ -86,6 +96,12 @@ internal static partial class HextechRunLifecycleHooks
 
 		modifier.ClearActiveExtraStage();
 		return modifier.GetCurrentActSelectionIndex();
+	}
+
+	// ResolveCurrentStageIndex 的只读版本：不激活/清除额外阶段，额外阶段尚无条目时退回当前幕的选择序号。
+	private static int PeekCurrentStageIndex(RunState runState, HextechMayhemModifier modifier)
+	{
+		return modifier.PeekStageIndex(HextechRunesInterop.GetCurrentExtraActId(runState));
 	}
 
 	private static string DescribeCurrentEventState(RunState runState)
