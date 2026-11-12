@@ -100,19 +100,18 @@
 
 ### 2026-11-10 复核
 
-仍未处理（位置按复核时的代码）：
-
-- A6：运行时过滤仍进入候选池，`Selection/Pool/HextechRunePoolBuilder.cs:30,418`（`IsPlayerRuneAvailableForCurrentRuntime`）。
-- A7：顶栏延迟刷新仍会调 `TryRecoverResolvedActsFromPlayerRelics`，`Hooks/RunLifecycle/HextechRunLifecycleHooks.LoadedUi.cs:153-201`。
-- A12：大号匕首 `AddGeneratedCardsToCombat` 前缀仍整段吞异常并捎带敌方操纵现实，`Runes/BigKnifeRune.cs:126-178`。
-- A13：缺 Modifier 时仍读本地配置的只剩 `Forges/HextechForgeGrantHelper.cs`（稀有度权重、禁用列表）与 `Forges/HextechForgeShopPriceHelper.cs`（售价）；锻造选择协调器已改为联机不读本地值。
-- 运行配置双份存储：`Mayhem/HextechMayhem.SavedState.cs` 的配置快照 JSON 与玩家符文禁用列表 JSON 仍各存一份。
-- 补丁器仍把 `[HarmonyPrepare]` 返回 false 的补丁记为已应用：`Patching/HextechPatcher.cs:61-70`。
-- 补丁元数据张冠李戴：濒死狂宴补丁仍承载敌方濒死，`reward.card-select` 仍挂“复视奖励事务”却含禁忌魔典逻辑。
-- 静态状态快照测试仍跳过 `static readonly` 字段（`StaticStateManifestTests.cs` 的 `IsInitOnly` 判断），readonly 可变集合不在清单内。
+本节列出的未处理项已全部处理（2026-11-12）。仍留在第三至六节的重复实现、结构调整等低优先级条目不在本次范围。
 
 已解决：
 
+- A6：候选池只在单机按本机补丁失败表过滤；联机由房主在冻结本局配置时把本机失败项并入本局禁用列表并随现有通道下发，各端只按这份列表过滤（`HextechRuntimeRuneCompatibility.GetPlayerRunePoolRuntimeFilter`、`HextechMayhemModifier.FreezeNewRunConfigurationSnapshot`）。客户端本机失败而房主未禁用的只告警。
+- A7：额外阶段激活与已结算阶段恢复收进 `RestoreStageState`，只在 `NTopBar.Initialize` 后缀（同步）、进房钩子和读档 Task 完成后执行；按帧的界面刷新与读档后续跑选择只读（`PeekStageIndex`）。
+- A13：没有本局 Modifier 时，锻造器权重、禁用表与售价统一经 `HextechForgeGrantHelper.GetForgeConfigurationWithoutRun()`，联机用默认配置。
+- 运行配置双份存储：配置快照 JSON 写出时以 `_runContext` 的当前值覆盖每幕数量与玩家符文禁用表，与三个单独属性恒等，读档结果不再取决于还原顺序。旧存档里快照存在而禁用表为空串的组合仍有顺序依赖。
+- A12：敌方操控现实拆为独立补丁 `enemy.manipulate-reality.generated-cards`（`Hooks/EnemyHexes/HextechEnemyManipulateRealityHooks.cs`），优先级排在大号匕首替换前缀之后；两个前缀各自只兜底外部序列枚举与本补丁改写，日志带补丁 ID 与完整异常。
+- 补丁器 Prepare：`HextechPatcher` 区分已应用 / 主动跳过 / 失败，启动摘要分别计数并列出跳过的补丁 ID。
+- 补丁元数据张冠李戴：`HextechPatch` 新增 `MonsterHexes`，濒死狂宴 10 个补丁与 `reward.card-select` 已标出所承载的敌方海克斯，失败时点名告警。
+- 静态状态快照：`static readonly` 的可变集合（含 `ConditionalWeakTable` 与并发集合）纳入清单，行末标 `[readonly]`。
 - A8：读档补发锻造器走选择协议同步，按 `SavedInitialForgeGrantCompletedCount` 只发剩余数量，幂等。
 - A14：`ShouldRefillMerchantEntry` 跳过前缀已删除，改为条目级 `ClearAfterPurchase` 前缀；`ModifyMerchantPrice` 非跳过前缀已裁决保留并登记在架构说明。
 - A16：游戏结算兜底只接 `NScoreLine.Create` 自身的 `InvalidCastException`，UI 安全补丁只在节点失效时跳过原版。

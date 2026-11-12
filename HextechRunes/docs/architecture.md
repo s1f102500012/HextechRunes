@@ -19,14 +19,14 @@ Platform/Hooks/Config/Localization/Telemetry
 
 所有 Harmony 补丁都是自描述的嵌套静态类，入口 `ModEntry.Initialize` 只做编排，不再有安装顺序契约：
 
-- 声明：`[HarmonyPatch(...)]` + `[HextechPatch(id, feature, Rune=/Runes=/Optional=/CopiesVanillaLogic=)]`，由 `src/Patching/HextechPatcher.ApplyAll` 统一应用，逐条成败可见；`Optional=true` 的目标缺失只记 Info。只带 `[HarmonyPatch]` 却缺 `[HextechPatch]` 的类照常应用但启动时 Warn。目标需要运行时枚举时，类只带 `[HextechPatch]` 并声明 `static void Apply(Harmony)`；找不到目标或安装失败必须抛异常交给 Patcher 归因，不能自己吞掉后返回（否则启动摘要误报成功）。
+- 声明：`[HarmonyPatch(...)]` + `[HextechPatch(id, feature, Rune=/Runes=/MonsterHexes=/Optional=/CopiesVanillaLogic=)]`，由 `src/Patching/HextechPatcher.ApplyAll` 统一应用，逐条成败可见；`Optional=true` 的目标缺失只记 Info。同一补丁承载敌方海克斯效果时用 `MonsterHexes` 列出（`feature` 同时写出两个功能名），补丁失败时逐个 Warn 点名该敌方海克斯在本机失效、联机与其他端不一致；不把它标为不可用、不从敌方池过滤（各端敌方池必须一致），列出的值由测试 `PatchMonsterHexMetadataReferencesRegisteredEnemyHexes` 校验在注册表内。启动摘要 `Applied X/Y patch classes, skipped S, failed F.` 区分三种结果：带 `[HarmonyPrepare]` 却一个方法都没打上、或 `Optional` 且没有目标的记为主动跳过（另起一行列出 ID），不算失败、不标记符文。只带 `[HarmonyPatch]` 却缺 `[HextechPatch]` 的类照常应用但启动时 Warn。目标需要运行时枚举时，类只带 `[HextechPatch]` 并声明 `static void Apply(Harmony)`；找不到目标或安装失败必须抛异常交给 Patcher 归因，不能自己吞掉后返回（否则启动摘要误报成功）。
 - 同一目标的执行序只由 `[HarmonyPriority]` / `[HarmonyAfter]` 决定，禁止依赖安装顺序。
 - 符文专属补丁内嵌在符文自己的文件里（如 `SurvivorUpgradeRune` 里的 `SurvivorPatch`）；`src/Hooks/**` 只放跨符文的横切补丁（战斗、UI、资源、商店、运行生命周期）与共享辅助。
 - 版本差异写成整文件 `#if` 的分部文件（`HextechSavedPropertyBootstrap.Legacy.cs` / `.Official.cs`；只有新版本才需要的 API 单独成一份，如 `HextechCreatureVisualsCompat.V111.cs`），共享代码里不写 `#if`；剩余的行内 `#if` 只允许出现在原版虚方法签名随版本变化的覆写处，以及 `[HarmonyPatch]` 目标签名随版本变化的特性声明。预处理指令顶格写。
 - AsyncLocal 作用域补丁（Prefix 入栈）必须同时有 Postfix 与 Finalizer：Postfix 同步出栈并把 `ref __state` 清零，Finalizer 只在异常且 `__state` 仍持有作用域时出栈，异步续体只清账。
 - 私有成员访问集中经 `HextechHookReflection`，缺失成员会在启动摘要里列出。
 
-三道护栏（`tests/HextechRunes.Tests/`，两个编译目标各一份，用 `HEXTECH_WRITE_PATCH_MANIFEST=1` 重生成）：`patch_manifest.<target>.txt` 冻结补丁目标与优先级；`static_state_manifest.<target>.txt` 冻结可变静态字段清单；`tests/vanilla_copy_guard.<target>.txt` 冻结所有可跳过原方法的 bool 前缀目标、以及声明 `CopiesVanillaLogic` 的补丁目标的 IL 哈希（token 先解析成成员描述，Windows/macOS 各自编译的同版本程序集共用一张表），异步目标连同编译器生成的 `MoveNext` 一起冻结（入口只是启动状态机的桩，原版改动几乎都落在 `MoveNext`）。目标清单来自 0.111.0 的 `HEXTECH_DUMP_PATCHES` 导出，各版本的行由测试 `VanillaCopyGuardFreezesEntriesAndAsyncBodies` 在对应 sts2.dll 上补齐；该测试只追加缺失行，漂移行只报告不刷新。游戏更新后 headless 日志出现 `[VanillaCopyGuard] DRIFT` 或测试报漂移即需对照原版复核替换逻辑。
+三道护栏（`tests/HextechRunes.Tests/`，两个编译目标各一份，用 `HEXTECH_WRITE_PATCH_MANIFEST=1` 重生成）：`patch_manifest.<target>.txt` 冻结补丁目标与优先级；`static_state_manifest.<target>.txt` 冻结可变静态字段清单（非 readonly 的静态字段，加上类型为可变集合的 `static readonly` 字段，行末标 `[readonly]`；数组、`IReadOnly*`、不可变与 Frozen 集合不算，判断规则见测试里的 `IsMutableCollectionType`），新增一行要说明它是进程级缓存还是对局状态、对局状态在哪重置；`tests/vanilla_copy_guard.<target>.txt` 冻结所有可跳过原方法的 bool 前缀目标、以及声明 `CopiesVanillaLogic` 的补丁目标的 IL 哈希（token 先解析成成员描述，Windows/macOS 各自编译的同版本程序集共用一张表），异步目标连同编译器生成的 `MoveNext` 一起冻结（入口只是启动状态机的桩，原版改动几乎都落在 `MoveNext`）。目标清单来自 0.111.0 的 `HEXTECH_DUMP_PATCHES` 导出，各版本的行由测试 `VanillaCopyGuardFreezesEntriesAndAsyncBodies` 在对应 sts2.dll 上补齐；该测试只追加缺失行，漂移行只报告不刷新。游戏更新后 headless 日志出现 `[VanillaCopyGuard] DRIFT` 或测试报漂移即需对照原版复核替换逻辑。
 
 另有三份不分编译目标的清单（同在 `tests/HextechRunes.Tests/`），都不由 `HEXTECH_WRITE_PATCH_MANIFEST=1` 生成，漂移时人工核对后手改：
 
@@ -52,7 +52,7 @@ Platform/Hooks/Config/Localization/Telemetry
 - `RunManager.OnEnded` 前缀 + 后缀：前缀必须在 `ToSave` 之前补战斗历史（原版败北存档缺房间记录），`OnMetricsUpload` 只在 `ShouldSave` 且首次上报时触发，替不了。
 - `NGame.StartRun` / `LoadRun`：需要包住原版 UI 任务链再做延续，`RunManager.RunStarted` 只在模型层触发。
 - 剩余的资源图标补丁组：理论上可整组删除，但纹理加载多轮返工过，headless 验证不了视觉，必须真机看过遗物栏/图鉴/检视/悬浮四处再删。
-- 复视奖励事务补丁组（`Compat/HextechRewardSafetyHooks.cs` 中 feature 为“复视奖励事务”的全部 `reward.*`）：改用 `AfterRewardTaken` 需要重新设计"同一事务只复制一次"的幂等键，属于重做而非迁移。
+- 复视奖励事务补丁组（`Compat/HextechRewardSafetyHooks.cs` 中 feature 以“复视奖励事务”开头的全部 `reward.*`；其中 `reward.card-select` 同时承载敌方禁忌魔典的补发）：改用 `AfterRewardTaken` 需要重新设计"同一事务只复制一次"的幂等键，属于重做而非迁移。
 - 濒死狂宴的 `GainBlock` 跳过 **不**改成 `ModifyBlock=0`：原版对 0 格挡仍播音效/特效并触发 Before/AfterBlockGained。同理治疗管线的"禁止回血"也必须继续跳过原方法（`CreatureCmd.Heal` 的 amount 为 0 也会播演出），只给封顶前缀补 `[HarmonyAfter]` RitsuLib / BaseLib。
 - 星尘的 `SpendResources` 跳过 **不**改成 `ModifyStarCost=0`：那会让牌在没有星星时也能打出，是语义变化。
 - 遗忘 / 腐蚀波 / 主宰等升级符文的 Power 前缀：只对"持有符文的玩家自己的 Power 实例"生效，官方 Hook 无法表达"按实例替换回调"。
