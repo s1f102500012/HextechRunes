@@ -22,11 +22,17 @@ Platform/Hooks/Config/Localization/Telemetry
 - 声明：`[HarmonyPatch(...)]` + `[HextechPatch(id, feature, Rune=/Runes=/Optional=/CopiesVanillaLogic=)]`，由 `src/Patching/HextechPatcher.ApplyAll` 统一应用，逐条成败可见；`Optional=true` 的目标缺失只记 Info。只带 `[HarmonyPatch]` 却缺 `[HextechPatch]` 的类照常应用但启动时 Warn。目标需要运行时枚举时，类只带 `[HextechPatch]` 并声明 `static void Apply(Harmony)`；找不到目标或安装失败必须抛异常交给 Patcher 归因，不能自己吞掉后返回（否则启动摘要误报成功）。
 - 同一目标的执行序只由 `[HarmonyPriority]` / `[HarmonyAfter]` 决定，禁止依赖安装顺序。
 - 符文专属补丁内嵌在符文自己的文件里（如 `SurvivorUpgradeRune` 里的 `SurvivorPatch`）；`src/Hooks/**` 只放跨符文的横切补丁（战斗、UI、资源、商店、运行生命周期）与共享辅助。
-- 版本差异写成整文件 `#if` 的分部文件（`HextechSavedPropertyBootstrap.Legacy.cs` / `.Official.cs`、`HextechCreatureVisualsCompat.V110.cs` / `.V111.cs`），共享代码里不写 `#if`；剩余的行内 `#if` 只允许出现在原版虚方法签名随版本变化的覆写处，以及 `[HarmonyPatch]` 目标签名随版本变化的特性声明。预处理指令顶格写。
+- 版本差异写成整文件 `#if` 的分部文件（`HextechSavedPropertyBootstrap.Legacy.cs` / `.Official.cs`；只有新版本才需要的 API 单独成一份，如 `HextechCreatureVisualsCompat.V111.cs`），共享代码里不写 `#if`；剩余的行内 `#if` 只允许出现在原版虚方法签名随版本变化的覆写处，以及 `[HarmonyPatch]` 目标签名随版本变化的特性声明。预处理指令顶格写。
 - AsyncLocal 作用域补丁（Prefix 入栈）必须同时有 Postfix 与 Finalizer：Postfix 同步出栈并把 `ref __state` 清零，Finalizer 只在异常且 `__state` 仍持有作用域时出栈，异步续体只清账。
 - 私有成员访问集中经 `HextechHookReflection`，缺失成员会在启动摘要里列出。
 
-三道护栏（`tests/HextechRunes.Tests/`，三编译目标各一份，用 `HEXTECH_WRITE_PATCH_MANIFEST=1` 重生成）：`patch_manifest.<target>.txt` 冻结补丁目标与优先级；`static_state_manifest.<target>.txt` 冻结可变静态字段清单；`tests/vanilla_copy_guard.<target>.txt` 冻结所有可跳过原方法的 bool 前缀目标、以及声明 `CopiesVanillaLogic` 的补丁目标的 IL 哈希（token 先解析成成员描述，Windows/macOS 各自编译的同版本程序集共用一张表），异步目标连同编译器生成的 `MoveNext` 一起冻结（入口只是启动状态机的桩，原版改动几乎都落在 `MoveNext`）。目标清单来自 0.111.0 的 `HEXTECH_DUMP_PATCHES` 导出，各版本的行由测试 `VanillaCopyGuardFreezesEntriesAndAsyncBodies` 在对应 sts2.dll 上补齐；该测试只追加缺失行，漂移行只报告不刷新。游戏更新后 headless 日志出现 `[VanillaCopyGuard] DRIFT` 或测试报漂移即需对照原版复核替换逻辑。
+三道护栏（`tests/HextechRunes.Tests/`，两个编译目标各一份，用 `HEXTECH_WRITE_PATCH_MANIFEST=1` 重生成）：`patch_manifest.<target>.txt` 冻结补丁目标与优先级；`static_state_manifest.<target>.txt` 冻结可变静态字段清单；`tests/vanilla_copy_guard.<target>.txt` 冻结所有可跳过原方法的 bool 前缀目标、以及声明 `CopiesVanillaLogic` 的补丁目标的 IL 哈希（token 先解析成成员描述，Windows/macOS 各自编译的同版本程序集共用一张表），异步目标连同编译器生成的 `MoveNext` 一起冻结（入口只是启动状态机的桩，原版改动几乎都落在 `MoveNext`）。目标清单来自 0.111.0 的 `HEXTECH_DUMP_PATCHES` 导出，各版本的行由测试 `VanillaCopyGuardFreezesEntriesAndAsyncBodies` 在对应 sts2.dll 上补齐；该测试只追加缺失行，漂移行只报告不刷新。游戏更新后 headless 日志出现 `[VanillaCopyGuard] DRIFT` 或测试报漂移即需对照原版复核替换逻辑。
+
+另有三份不分编译目标的清单（同在 `tests/HextechRunes.Tests/`），都不由 `HEXTECH_WRITE_PATCH_MANIFEST=1` 生成，漂移时人工核对后手改：
+
+- `random_generation_audit.txt`：冻结 `src/` 下命中生成入口（`CardFactory`/`RelicFactory`/`PotionFactory` 与本模组的稳定生成、随机发放符文/锻造器等辅助）的文件及其中全部类，由 `DeterminismAuditGuardTests.RandomGenerationClassesMatchReviewedManifest` 比对；新增或移除的行要先人工复核池过滤、固定候选与同步来源再写入。
+- `saved_property_manifest.txt`：冻结本体程序集全部 `[SavedProperty]` 属性名（含继承自原版基类的），这个集合决定联机 net-id 布局，由 `SavedPropertyManifestMatchesCheckedInList`（`Program.Metadata.cs`）比对；有意增删改名后按 `tools/run_tests.sh` 失败输出里的实际列表更新。
+- `sponsor_saved_property_manifest.txt`：同上，只收拓展包程序集自己声明的属性（继承自本体基类的归本体清单），由 `SponsorSavedPropertyManifestMatchesCheckedInList`（`Program.ReviewSponsorTools.cs`）比对，更新方式相同。
 
 ## 当前 Selection 分层
 
@@ -37,7 +43,6 @@ Platform/Hooks/Config/Localization/Telemetry
 - `Reroll/`：玩家海克斯重随机制。所有重随逻辑必须保持本地 UI 随机不推进共享 run RNG，联机路径要保持可重放或同步最终选项。
 - `Sync/`：多人选择 payload、远端等待、选择确认、ack 等同步边界。只负责“传什么、如何还原”，不负责具体 UI。
 - `EnemyAdjust/`：选择界面里的敌方海克斯重随/移除同步。
-- `AI/`：AI 队友或主机代选逻辑。
 - `UI/`：`HextechRuneSelectionScreen` 的渲染、交互、hover、音效、布局。
 
 ## 已裁决保留的补丁
@@ -47,7 +52,7 @@ Platform/Hooks/Config/Localization/Telemetry
 - `RunManager.OnEnded` 前缀 + 后缀：前缀必须在 `ToSave` 之前补战斗历史（原版败北存档缺房间记录），`OnMetricsUpload` 只在 `ShouldSave` 且首次上报时触发，替不了。
 - `NGame.StartRun` / `LoadRun`：需要包住原版 UI 任务链再做延续，`RunManager.RunStarted` 只在模型层触发。
 - 剩余的资源图标补丁组：理论上可整组删除，但纹理加载多轮返工过，headless 验证不了视觉，必须真机看过遗物栏/图鉴/检视/悬浮四处再删。
-- 复视奖励事务 8 个补丁：改用 `AfterRewardTaken` 需要重新设计"同一事务只复制一次"的幂等键，属于重做而非迁移。
+- 复视奖励事务补丁组（`Compat/HextechRewardSafetyHooks.cs` 中 feature 为“复视奖励事务”的全部 `reward.*`）：改用 `AfterRewardTaken` 需要重新设计"同一事务只复制一次"的幂等键，属于重做而非迁移。
 - 濒死狂宴的 `GainBlock` 跳过 **不**改成 `ModifyBlock=0`：原版对 0 格挡仍播音效/特效并触发 Before/AfterBlockGained。同理治疗管线的"禁止回血"也必须继续跳过原方法（`CreatureCmd.Heal` 的 amount 为 0 也会播演出），只给封顶前缀补 `[HarmonyAfter]` RitsuLib / BaseLib。
 - 星尘的 `SpendResources` 跳过 **不**改成 `ModifyStarCost=0`：那会让牌在没有星星时也能打出，是语义变化。
 - 遗忘 / 腐蚀波 / 主宰等升级符文的 Power 前缀：只对"持有符文的玩家自己的 Power 实例"生效，官方 Hook 无法表达"按实例替换回调"。
@@ -72,7 +77,8 @@ Platform/Hooks/Config/Localization/Telemetry
 - 敌方能力联机缩放 `GetScaledAmountForMultiplayer` 跳过前缀（`combat.enemy-power-scaling`）**保留 `Priority.First`**：只在本模组 `HextechEnemyPowerScalingHooks.Apply/ApplyExact` 的 AsyncLocal 窗口内、目标为敌人时生效，窗口外恒 `return true` 对其他模组透明；窗口内层数已按最终口径算好，排在第三方缩放前缀之后会被重复缩放或被其跳过。亮出你的剑的 `OrbModel.Evoke` 跳过前缀（`Runes/DrawYourSwordRune.cs`）已改为 `Priority.Low`：本模组没有其他 Evoke 前缀，别的模组若已跳过原方法就让给对方。
 
 - 符文专属跳过前缀（均只对持有者生效、`Priority.Low`、进原版拷贝守卫）：科学狂人 `OrbCmd.AddSlots`（上限 10 写死，没有 Hook）；升级循环 `LoopPower.AfterPlayerTurnStart`（原版只触发 `Orbs[0]`；替换体未保留原版每次触发后的 0.25 秒等待，已在注释写明）；升级狂怒/升级遗忘 `RagePower/OblivionPower.AfterSideTurnEnd`（`PowerCmd.Remove` 不经过任何 Hook）；升级倒映 `ReflectPower.AfterSideTurnStart`（`Decrement` 虽经过 `ModifyPowerAmountReceived`，但区分不出衰减来源且会写历史）。
-- UI 跳过型前缀（均 `Priority.Low`，三个版本原方法一致）：`NRelicBasicHolder.OnFocus/OnUnfocus`——原版固定展示图标遗物自身提示，没有 Hook 能换成敌方海克斯提示，只对本模组 `EnemyHex-` 图标节点生效；`NInspectRelicScreen.UpdateRelicDisplay`——原版按已解锁/已见硬分三支，海克斯隐藏遗物会落进“未解锁”，只对海克斯遗物复刻“正常”分支；`NRelicInventoryHolder.PlayNewlyAcquiredAnimation`——持有者离开场景树时原版空引用且无取消入口，只对海克斯遗物跳过或吞异常；`NMultiplayerPlayerIntentHandler.BeforeActionReadyToResumeAfterPlayerChoice` / `NCardPlayQueue.BeforeRemoteCardPlayResumedAfterPlayerChoice`——卡牌节点脱树时原版 Reparent 抛异常打断联机恢复，只在节点失效时跳过；`NRelicInventoryHolder.DoFlash`——闪光挂在顶栏特效层，隐藏持有者挡不住，只在玩家勾选隐藏遗物时跳过；`NHealthBar.RefreshForeground`——原版只认中毒/灾厄两段前景，有灼烧预测时整段替换。
+- UI 跳过型前缀（均 `Priority.Low`，两个版本原方法一致）：`NRelicBasicHolder.OnFocus/OnUnfocus`——原版固定展示图标遗物自身提示，没有 Hook 能换成敌方海克斯提示，只对本模组 `EnemyHex-` 图标节点生效；`NRelicInventoryHolder.PlayNewlyAcquiredAnimation`——持有者离开场景树时原版空引用且无取消入口，只对海克斯遗物跳过或吞异常；`NMultiplayerPlayerIntentHandler.BeforeActionReadyToResumeAfterPlayerChoice` / `NCardPlayQueue.BeforeRemoteCardPlayResumedAfterPlayerChoice`——卡牌节点脱树时原版 Reparent 抛异常打断联机恢复，只在节点失效时跳过；`NRelicInventoryHolder.DoFlash`——闪光挂在顶栏特效层，隐藏持有者挡不住，只在玩家勾选隐藏遗物时跳过；`NHealthBar.RefreshForeground`——原版只认中毒/灾厄两段前景，有灼烧预测时整段替换。检视界面 `NInspectRelicScreen.UpdateRelicDisplay`（`ui.inspect.update-display`）不跳过原版：原版按已解锁/已见硬分三支，海克斯隐藏遗物会落进“未解锁”，由声明 `CopiesVanillaLogic` 的后缀在原版渲染后只对海克斯遗物按“正常”分支逐项重写。
+- 战斗与流程跳过型前缀（均 `Priority.Low`）：最大生命增减 `CreatureCmd.GainMaxHp/LoseMaxHp`（`combat.gain-max-hp` / `combat.lose-max-hp`，`Combat/HextechCombatHooks.MaxHp.cs`）——持有最大生命系数海克斯时先改基础值再按系数换算实际增减量，换算后实际值不变才跳过原方法（返回已完成的 Task），其余情况改参数后放行；跳过的保留理由未记录。邪咒 `Hexed.AfterCardEnteredCombat`（`combat.hexed-keep-for-hextech-hex`，`Combat/HextechCombatHooks.HexPower.cs`）——原版在持有者没有原版恶咒时把邪咒清掉，玩家侧恶咒（`HextechHexPower`）还在时跳过以留住它；目标未进原版拷贝守卫表。弑神终局 `RunManager.WinRun`（`event.architect.godslayer-finale`，`RunLifecycle/HextechArchitectGodslayerHooks.cs`）——只在本机弑神试炼局有待播终局演出时跳过，改为先播演出、关闭试炼再反射调用原方法，结算与记录本身不动；保留理由未记录，目标未进原版拷贝守卫表。选择界面返回 `NMapRoom.ReopenMap`（`ui.selection-capstone-return`，`UI/HextechSelectionCapstoneHooks.cs`）——原版开局地图房间在任何全屏界面关闭后都重开地图、盖住未选完的海克斯选择界面，选择待定且地图本来没开时跳过这次重开。蛋白粉奶昔 `CreatureCmd.GainBlock` decimal 重载（`combat.protein-shake.gain-block`，`Combat/HextechCombatHooks.ProteinShake.cs`）——敌人有该海克斯且未满血时跳过，替换体照原版算出最终格挡量、先回复生命，剩余部分照搬原版后半段获得格挡；濒死敌人交给濒死狂宴前缀；跳过而不用 Hook 的理由未记录。
 - 纯表现补丁（飞踢尸体击飞、夺金音效）不设 `Rune =`：补丁失败时不把玩法符文标为不可用。
 
 ### SavedProperty net-id 规范化（仅 0.107.1）
@@ -102,4 +108,4 @@ Platform/Hooks/Config/Localization/Telemetry
 - 不改变模型注册顺序，除非明确重打版本并接受联机 hash 改变。
 - 不改变 `PlayerChoiceResult` 的既有语义；如需扩展 payload，必须兼容旧 payload 或提供明确 fallback。
 - 多人池过滤不能只同步 index；只要各客户端候选池可能不同，就必须同步最终选项 ID。
-- 按工作区设计哲学第 8 节选择与改动相关的验证；目录搬移核对引用，补丁重构核对目标与优先级。构建、部署、加载和实机是不同交付层级，不要求每次重构都部署或启动游戏。
+- 按仓库根设计哲学第 8 节选择与改动相关的验证；目录搬移核对引用，补丁重构核对目标与优先级。构建、部署、加载和实机是不同交付层级，不要求每次重构都部署或启动游戏。

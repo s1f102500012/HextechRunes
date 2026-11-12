@@ -8,7 +8,6 @@ public sealed class BigHandsRune : HextechRelicBase
 
 	protected override IEnumerable<DynamicVar> CanonicalVars =>
 	[
-		new DynamicVar("Multiplier", SummonMultiplier),
 		new DynamicVar("SummonBonusPercent", SummonBonusPercentValue)
 	];
 

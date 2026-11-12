@@ -15,7 +15,7 @@ namespace HextechRunes;
 internal static class HextechTreasureRuneHooks
 {
 	// TreasureRoomRelicSynchronizer._currentRelics（List<RelicModel>）与 _playerCollection（IPlayerCollection），
-	// 0.107.1/0.110.0/0.111.0 原版私有字段；缺失时宝箱保持原版遗物，缺失成员进启动摘要。
+	// 0.107.1/0.111.0 原版私有字段；缺失时宝箱保持原版遗物，缺失成员进启动摘要。
 	private static readonly FieldInfo? CurrentRelicsField = TryGetField(typeof(TreasureRoomRelicSynchronizer), "_currentRelics");
 	private static readonly FieldInfo? PlayerCollectionField = TryGetField(typeof(TreasureRoomRelicSynchronizer), "_playerCollection");
 

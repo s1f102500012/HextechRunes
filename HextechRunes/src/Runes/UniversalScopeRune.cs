@@ -4,6 +4,18 @@ public abstract class UniversalScopeRuneBase : HextechRelicBase
 {
 	private int _refundRollsThisCombat;
 
+	// 稳定随机的本地序号（见 ConsumeCombatProcOrdinal）。单机不在战斗开始清零，按现状保留；
+	// 联机每场清零，各端都从同一场的 0 开始，不受谁读过档影响。
+	public override Task BeforeCombatStart()
+	{
+		if (IsNetworkMultiplayer())
+		{
+			_refundRollsThisCombat = 0;
+		}
+
+		return base.BeforeCombatStart();
+	}
+
 	protected abstract int ChancePercent { get; }
 
 	protected override IEnumerable<DynamicVar> CanonicalVars =>
@@ -44,7 +56,7 @@ public abstract class UniversalScopeRuneBase : HextechRelicBase
 
 		int combinedChancePercent = CombineChancePercent(
 			activeScopes.Select(static scope => scope.DynamicVars["ChancePercent"].IntValue));
-		int rollOrdinal = ConsumeCombatProcOrdinal(nameof(UniversalScopeRuneBase), ref _refundRollsThisCombat);
+		int rollOrdinal = ConsumeCombatProcOrdinal(ref _refundRollsThisCombat);
 		if (!RollTrigger(cardPlay, rollOrdinal, combinedChancePercent))
 		{
 			return;

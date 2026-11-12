@@ -62,7 +62,7 @@ internal sealed class PorcupineEnemyHex : HextechEnemyHexEffect
 		}
 
 		List<(uint CombatId, int Thorns)> result = new();
-		foreach ((uint combatId, int thorns) in tracking.EnemyPorcupineTemporaryThornsThisTurn)
+		foreach ((uint combatId, int thorns) in tracking.EnemyPorcupineTemporaryThornsThisTurn.OrderBy(static entry => entry.Key))
 		{
 			if (thorns <= 0)
 			{

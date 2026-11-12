@@ -35,7 +35,7 @@ public sealed class TwinFlamesRune : HextechRelicBase
 			return Task.CompletedTask;
 		}
 
-		int targetOrdinal = ConsumeCombatProcOrdinal(nameof(TwinFlamesRune), ref _targetRollsThisCombat);
+		int targetOrdinal = ConsumeCombatProcOrdinal(ref _targetRollsThisCombat);
 		string cardKey = HextechStableRandom.CardKey(cardPlay.Card);
 		Creature? target = HextechRuneTargeting.PickRandomHittableEnemy(
 			Owner,

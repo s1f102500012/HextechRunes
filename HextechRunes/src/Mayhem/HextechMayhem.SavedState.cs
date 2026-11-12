@@ -70,6 +70,7 @@ internal sealed partial class HextechMayhemModifier
 		set => ActState.SavedResolvedActs = value;
 	}
 
+	// 地图缩短已不再生效，只为旧存档兼容保留名称与类型。
 	[SavedProperty(SerializationCondition.SaveIfNotTypeDefault)]
 	public int[] SavedMapLengthReducedActs
 	{

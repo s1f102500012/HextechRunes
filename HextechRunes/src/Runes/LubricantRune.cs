@@ -10,7 +10,7 @@ public sealed class LubricantRune : TurnScopedRelicBase
 		get
 		{
 			EnsureTurnScopedStateCurrent();
-			return HasTurnProcTriggered(nameof(LubricantRune), _usedThisTurn);
+			return HasTurnProcTriggered(_usedThisTurn);
 		}
 		set
 		{
@@ -22,7 +22,7 @@ public sealed class LubricantRune : TurnScopedRelicBase
 
 	public override bool ShowCounter => IsInLiveCombat;
 
-	public override int DisplayAmount => !IsCanonical && !HasTurnProcTriggered(nameof(LubricantRune), _usedThisTurn) ? 1 : 0;
+	public override int DisplayAmount => !IsCanonical && !HasTurnProcTriggered(_usedThisTurn) ? 1 : 0;
 
 	public override bool IsAvailableForPlayer(Player player)
 	{
@@ -51,7 +51,7 @@ public sealed class LubricantRune : TurnScopedRelicBase
 			|| !cardPlay.IsFirstInSeries
 			|| cardPlay.Card.Owner != Owner
 			|| cardPlay.Card.Type != CardType.Power
-			|| !TryConsumeTurnProc(nameof(LubricantRune), ref _usedThisTurn))
+			|| !TryConsumeTurnProc(ref _usedThisTurn))
 		{
 			return Task.CompletedTask;
 		}
@@ -63,7 +63,7 @@ public sealed class LubricantRune : TurnScopedRelicBase
 	private bool ShouldPowerCardBeFree(CardModel card)
 	{
 		EnsureTurnScopedStateCurrent();
-		return !HasTurnProcTriggered(nameof(LubricantRune), _usedThisTurn)
+		return !HasTurnProcTriggered(_usedThisTurn)
 			&& card.Owner == Owner
 			&& card.Type == CardType.Power
 			&& card.Pile?.Type is PileType.Hand or PileType.Play;

@@ -74,8 +74,8 @@ internal sealed class HextechMayhemChoiceHistoryState
 	}
 
 	/// <summary>
-	/// 存档里只记条目名;还原时必须用遗物的真实分类(RELIC)。ModelId 是 record,分类不同就永远不相等——
-	/// 早期版本用模组名当分类,导致"已见"排除从未匹配上任何候选。
+	/// 存档里只记条目名;还原时必须用遗物的真实分类(RELIC)。ModelId 是 record,分类不同就永远不相等,
+	/// "已见"排除会匹配不上任何候选。
 	/// </summary>
 	internal static ModelId ToSeenRelicId(string entry)
 	{

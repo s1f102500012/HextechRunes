@@ -1,5 +1,4 @@
 using MegaCrit.Sts2.Core.Nodes.CommonUi;
-using MegaCrit.Sts2.Core.Random;
 
 namespace HextechRunes;
 

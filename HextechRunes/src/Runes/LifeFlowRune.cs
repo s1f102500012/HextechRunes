@@ -3,7 +3,6 @@ namespace HextechRunes;
 public sealed class LifeFlowRune : TurnScopedRelicBase
 {
 	private const decimal HealPercentValue = 0.05m;
-	private const decimal HealDisplayPercentValue = HealPercentValue * 100m;
 
 	private int _procsThisTurn;
 
@@ -13,7 +12,7 @@ public sealed class LifeFlowRune : TurnScopedRelicBase
 		get
 		{
 			EnsureTurnScopedStateCurrent();
-			return GetTurnProcCount(nameof(LifeFlowRune), _procsThisTurn);
+			return _procsThisTurn;
 		}
 		set
 		{
@@ -25,13 +24,12 @@ public sealed class LifeFlowRune : TurnScopedRelicBase
 
 	public override bool ShowCounter => IsInLiveCombat;
 
-	public override int DisplayAmount => !IsCanonical ? Math.Max(0, DynamicVars["MaxProcsPerTurn"].IntValue - GetTurnProcCount(nameof(LifeFlowRune), _procsThisTurn)) : 0;
+	public override int DisplayAmount => !IsCanonical ? Math.Max(0, DynamicVars["MaxProcsPerTurn"].IntValue - _procsThisTurn) : 0;
 
 	protected override IEnumerable<DynamicVar> CanonicalVars =>
 	[
 		new DynamicVar("HealPercent", HealPercentValue),
-		new DynamicVar("MaxProcsPerTurn", 3m),
-		new DynamicVar("HealDisplayPercent", HealDisplayPercentValue)
+		new DynamicVar("MaxProcsPerTurn", 3m)
 	];
 
 	public override bool IsAvailableForPlayer(Player player)
@@ -44,7 +42,7 @@ public sealed class LifeFlowRune : TurnScopedRelicBase
 		EnsureTurnScopedStateCurrent();
 		if (!IsOwnedCard(card)
 			|| Owner.Creature.IsDead
-			|| !TryConsumeTurnProc(nameof(LifeFlowRune), ref _procsThisTurn, DynamicVars["MaxProcsPerTurn"].IntValue))
+			|| !TryConsumeTurnProc(ref _procsThisTurn, DynamicVars["MaxProcsPerTurn"].IntValue))
 		{
 			return Task.CompletedTask;
 		}

@@ -9,12 +9,6 @@ public sealed class RedEnvelopeRune : HextechSharedCombatVictoryRuneBase
 	private const int MinGold = 20;
 	private const int MaxGold = 50;
 
-	protected override IEnumerable<DynamicVar> CanonicalVars =>
-	[
-		new DynamicVar("BaseForgeChance", BaseForgeChance),
-		new DynamicVar("ForgeChanceStep", ForgeChanceStep)
-	];
-
 	// 锻造器那一侧走药水掉落式动态掉率:掉一次降 5%,没掉一次升 5%;剩余概率给金币。只存相对 25% 的偏移。
 	private int _forgeChanceOffset;
 

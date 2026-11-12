@@ -10,11 +10,16 @@ internal sealed partial class HextechMayhemModifier
 		}
 
 		HextechEnemyHexContext context = new(this);
-		return HextechEnemyCoefficientHelper.CombineMultipliersByHex(
-			HextechEnemyHexEffects.GetActive(this)
-				.Select(effect => (
-					effect.Kind,
-					effect.ModifyDamageMultiplicative(context, target, amount, props, dealer, cardSource))));
+		decimal product = 1m;
+		HextechActiveEnemyHexCursor cursor = new(this);
+		while (cursor.MoveNext(out HextechEnemyHexEffect? effect))
+		{
+			product = HextechEnemyCoefficientHelper.MultiplyDistinctHexMultiplier(
+				product,
+				effect.ModifyDamageMultiplicative(context, target, amount, props, dealer, cardSource));
+		}
+
+		return product;
 	}
 
 	public override decimal ModifyBlockMultiplicative(Creature target, decimal block, ValueProp props, CardModel? cardSource, CardPlay? cardPlay)
@@ -25,11 +30,16 @@ internal sealed partial class HextechMayhemModifier
 		}
 
 		HextechEnemyHexContext context = new(this);
-		return HextechEnemyCoefficientHelper.CombineMultipliersByHex(
-			HextechEnemyHexEffects.GetActive(this)
-				.Select(effect => (
-					effect.Kind,
-					effect.ModifyBlockMultiplicative(context, target, block, props, cardSource, cardPlay))));
+		decimal product = 1m;
+		HextechActiveEnemyHexCursor cursor = new(this);
+		while (cursor.MoveNext(out HextechEnemyHexEffect? effect))
+		{
+			product = HextechEnemyCoefficientHelper.MultiplyDistinctHexMultiplier(
+				product,
+				effect.ModifyBlockMultiplicative(context, target, block, props, cardSource, cardPlay));
+		}
+
+		return product;
 	}
 
 	public override decimal ModifyHpLostAfterOsty(Creature target, decimal amount, ValueProp props, Creature? dealer, CardModel? cardSource)
@@ -39,10 +49,14 @@ internal sealed partial class HextechMayhemModifier
 			return amount;
 		}
 
-		return HextechEnemyHexDispatcher.Transform(
-			this,
-			amount,
-			(effect, context, current) => effect.ModifyHpLostAfterOsty(context, target, current, props, dealer, cardSource));
+		HextechEnemyHexContext context = new(this);
+		HextechActiveEnemyHexCursor cursor = new(this);
+		while (cursor.MoveNext(out HextechEnemyHexEffect? effect))
+		{
+			amount = effect.ModifyHpLostAfterOsty(context, target, amount, props, dealer, cardSource);
+		}
+
+		return amount;
 	}
 
 	// 原版 CreatureCmd.Damage 在 ModifyHpLost 改动了数值后才调这里，模拟/预览只问查询钩子不会走到这里。
@@ -50,7 +64,8 @@ internal sealed partial class HextechMayhemModifier
 	public override Task AfterModifyingHpLostAfterOsty()
 	{
 		HextechEnemyHexContext context = new(this);
-		foreach (HextechEnemyHexEffect effect in HextechEnemyHexEffects.GetActive(this))
+		HextechActiveEnemyHexCursor cursor = new(this);
+		while (cursor.MoveNext(out HextechEnemyHexEffect? effect))
 		{
 			effect.AfterModifyingHpLostAfterOsty(context);
 		}
@@ -103,7 +118,8 @@ internal sealed partial class HextechMayhemModifier
 
 		_lastPreventedDraw = null;
 		HextechEnemyHexContext context = new(this);
-		foreach (HextechEnemyHexEffect effect in HextechEnemyHexEffects.GetActive(this).ToList())
+		// 开始前取定当时的生效效果：缓存数组只读，状态变化时换新数组，不影响本轮。
+		foreach (HextechEnemyHexEffect effect in GetActiveEnemyHexEffects(out _))
 		{
 			if (await effect.AfterPreventingDraw(context, player, fromHandDraw, requestedCount))
 			{
@@ -141,9 +157,17 @@ internal sealed partial class HextechMayhemModifier
 			return true;
 		}
 
-		return HextechEnemyHexDispatcher.All(
-			this,
-			(effect, context) => effect.ShouldPlay(context, card, autoPlayType));
+		HextechEnemyHexContext context = new(this);
+		HextechActiveEnemyHexCursor cursor = new(this);
+		while (cursor.MoveNext(out HextechEnemyHexEffect? effect))
+		{
+			if (!effect.ShouldPlay(context, card, autoPlayType))
+			{
+				return false;
+			}
+		}
+
+		return true;
 	}
 
 	public override bool ShouldFlush(Player player)
@@ -164,20 +188,27 @@ internal sealed partial class HextechMayhemModifier
 		}
 
 		// 基础费用增量先加:它已按临时定费折算,所以免费打出类的本回合 0 费不会被加回来。
-		int baseIncrease = HextechEnemyHexDispatcher.Transform(
-			this,
-			0,
-			(effect, context, current) => current + effect.GetBaseEnergyCostIncrease(context, card));
+		HextechEnemyHexContext context = new(this);
+		int baseIncrease = 0;
+		HextechActiveEnemyHexCursor increaseCursor = new(this);
+		while (increaseCursor.MoveNext(out HextechEnemyHexEffect? effect))
+		{
+			baseIncrease = baseIncrease + effect.GetBaseEnergyCostIncrease(context, card);
+		}
+
 		decimal cost = originalCost + baseIncrease;
 
 		if (card.Type == CardType.Attack
 			&& card.Pile?.Type == PileType.Hand
 			&& originalCost > 0m)
 		{
-			decimal multiplier = HextechEnemyHexDispatcher.Transform(
-				this,
-				1m,
-				(effect, context, current) => current * effect.ModifyPlayerAttackEnergyCostMultiplier(context, card, originalCost));
+			decimal multiplier = 1m;
+			HextechActiveEnemyHexCursor multiplierCursor = new(this);
+			while (multiplierCursor.MoveNext(out HextechEnemyHexEffect? effect))
+			{
+				multiplier = multiplier * effect.ModifyPlayerAttackEnergyCostMultiplier(context, card, originalCost);
+			}
+
 			cost *= multiplier;
 		}
 
@@ -187,10 +218,15 @@ internal sealed partial class HextechMayhemModifier
 
 	public override bool TryModifyEnergyCostInCombatLate(CardModel card, decimal originalCost, out decimal modifiedCost)
 	{
-		modifiedCost = HextechEnemyHexDispatcher.Transform(
-			this,
-			originalCost,
-			(effect, context, current) => effect.ModifyEnergyCostInCombatLate(context, card, current));
+		decimal cost = originalCost;
+		HextechEnemyHexContext context = new(this);
+		HextechActiveEnemyHexCursor cursor = new(this);
+		while (cursor.MoveNext(out HextechEnemyHexEffect? effect))
+		{
+			cost = effect.ModifyEnergyCostInCombatLate(context, card, cost);
+		}
+
+		modifiedCost = cost;
 		return modifiedCost != originalCost;
 	}
 

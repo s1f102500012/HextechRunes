@@ -106,7 +106,7 @@ public sealed class CorruptedBranchRune : HextechRelicBase
 			return null;
 		}
 
-		int procOrdinal = ConsumeCombatProcOrdinal(nameof(CorruptedBranchRune), ref _generatedCardsThisCombat);
+		int procOrdinal = ConsumeCombatProcOrdinal(ref _generatedCardsThisCombat);
 		string?[] saltParts =
 		[
 			"corrupted-branch-exhaust",

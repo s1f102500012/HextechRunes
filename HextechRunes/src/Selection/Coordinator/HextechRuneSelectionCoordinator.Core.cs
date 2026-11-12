@@ -136,7 +136,7 @@ internal static partial class HextechRuneSelectionCoordinator
 		{
 			// 记录异常，避免它继续打断开局/进幕的调用链。这里不回滚已经完成的状态写入；
 			// 只有尚未 SetStageResolved 的阶段才会在后续进入或读档时重新尝试选择。
-			// 捕获异常本身不保证两端恢复一致，联机状态仍由原版校验。
+			// 捕获异常本身不保证两端恢复一致；Modifier 上的状态不参与原版联机校验。
 			HextechLog.Error("Mayhem", $"HandleHextechActSelection failed act={actIndex} networkMp={HextechRelicBase.IsNetworkMultiplayerRun()}: {ex}");
 		}
 		finally
@@ -308,7 +308,7 @@ internal static partial class HextechRuneSelectionCoordinator
 		HextechLog.Info("Mayhem", $"HandleHextechActSelection options: player={player.NetId} ordinal={choiceOrdinal} count={options.Count} ids={string.Join(",", options.Select(o => o.CanonicalId().Entry))}");
 		// choiceOrdinal>0(!allowEnemyHexAdjustment):敌方 hex 已在第一次选择时定妥,后续玩家符文选择只读展示
 		// 【本幕新增】的敌方 hex(New 在首次选择后已更新为调整后的结果),不给控件。
-		// 不能用 Final:它含前几幕累积集,会把历史敌方海克斯一起显示(玩家实报)。
+		// 不能用 Final:它含前几幕累积集,会把历史敌方海克斯一起显示。
 		HextechEnemyHexAdjustmentOptions? enemyHexOptions = stageHexes.Final.Count > 0
 			? CreateEnemyHexAdjustmentOptions(
 				modifier,
@@ -404,7 +404,7 @@ internal static partial class HextechRuneSelectionCoordinator
 		await game.ToSignal(game.GetTree(), SceneTree.SignalName.ProcessFrame);
 	}
 
-	/// <summary>本幕结算完成:写入敌方海克斯、标记已结算、应用地图修正、刷新敌方 UI 并作用到当前敌人,最后存档。</summary>
+	/// <summary>本幕结算完成:写入敌方海克斯、标记已结算、刷新敌方 UI 并作用到当前敌人,最后存档。</summary>
 	private static async Task CompleteStageAsync(RunState runState, HextechMayhemModifier modifier, int actIndex, IReadOnlyList<MonsterHexKind> finalMonsterHexes)
 	{
 		// 敌方质变在本幕海克斯落定时才展开：选择界面里展示和调整的仍是质变本身，与玩家质变"获得时移除自身"一致。
@@ -412,7 +412,6 @@ internal static partial class HextechRuneSelectionCoordinator
 		finalMonsterHexes = HextechEnemyTransmute.ExpandForRun(runState, modifier, $"act-{actIndex}", finalMonsterHexes);
 		modifier.SetMonsterHexesForAct(actIndex, finalMonsterHexes);
 		modifier.SetStageResolved(actIndex, true);
-		modifier.ApplyMapModifiersToCurrentAct(nameof(HandleStageSelection), actIndex);
 		HextechEnemyUi.Refresh(modifier);
 		await modifier.ApplyToCurrentEnemiesIfNeeded();
 		await PersistActSelection(runState, actIndex);

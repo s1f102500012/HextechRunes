@@ -9,6 +9,7 @@ internal sealed partial class HextechMayhemCombatTrackingState
 
 	public void Restore(string? json)
 	{
+		WarnIfCombatInProgress("restore");
 		HextechMayhemCombatTrackingSerializer.Clear(this);
 		if (string.IsNullOrWhiteSpace(json))
 		{

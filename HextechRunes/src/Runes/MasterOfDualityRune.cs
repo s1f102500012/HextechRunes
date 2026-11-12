@@ -47,7 +47,7 @@ public sealed class MasterOfDualityRune : HextechRelicBase
 			: 0m;
 	}
 
-	// 敌方物法皆修用的临时力量/敏捷增减（我方新版不再使用）。施加前先扣减对向的隐藏临时能力，不让两份并存。
+	// 敌方物法皆修用的临时力量/敏捷增减（我方不使用）。施加前先扣减对向的隐藏临时能力，不让两份并存。
 	// 并存时任一份被净化、转移或提前移除，另一份回合末的回收就会变成永久的力量/敏捷变化。
 	// 施加减益一侧遇到人工制品时仍走原施加路径，由人工制品整体抵挡，不去扣减增益。
 	internal static async Task ApplyTemporaryStat<TGain, TLoss>(

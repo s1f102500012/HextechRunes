@@ -42,7 +42,7 @@ public sealed class MakeItMineRune : HextechSharedCombatVictoryRuneBase
 	}
 
 	// "战斗第 1 轮召唤"按设计裁决保留 RoundNumber 口径(持有者第 1 轮的额外回合不算新的一轮)。
-	// 额外回合(佩尔之眼等)不推进 RoundNumber 且回合开始 hook 会重入,同一轮只召唤一次(玩家实报叠层召唤双倍)。
+	// 额外回合(佩尔之眼等)不推进 RoundNumber 且回合开始 hook 会重入,同一轮只召唤一次,避免叠层召唤双倍。
 	private int _lastProcRound = -1;
 
 	public override Task BeforeCombatStart()

@@ -14,7 +14,7 @@ public sealed class PowerShieldRune : TurnScopedRelicBase
 		EnsureTurnScopedStateCurrent();
 		if (creature != Owner.Creature
 			|| amount <= 0m
-			|| !TryConsumeTurnProc(nameof(PowerShieldRune), ref _triggeredThisTurn))
+			|| !TryConsumeTurnProc(ref _triggeredThisTurn))
 		{
 			return;
 		}

@@ -10,7 +10,7 @@ internal static partial class HextechCatalog
 
 	private readonly record struct CharacterRunePool(string LocalizationKey, IReadOnlyList<Type> RuneTypes);
 
-	// 注册表查询统一经 HextechContentRegistry(文件头 using static),本类不再包一层同名私有属性。
+	// 注册表查询统一经 HextechContentRegistry(文件头 using static),本类不另包同名私有属性。
 	private static IReadOnlyList<CharacterRunePool> CharacterRunePools =>
 	[
 		new("IRONCLAD", PlayerRuneMetadata.TypesByCharacter[PlayerRuneCharacterPool.Ironclad]),
@@ -345,7 +345,7 @@ internal static partial class HextechCatalog
 
 	/// <summary>
 	/// 无尽模式(EndlessMode)是否已加载。使用原版公开 API <see cref="ModManager.GetLoadedMods"/>
-	/// 与 <c>Mod.manifest.id</c>(0.107.1–0.111.0 均为 public),不再反射私有成员。
+	/// 与 <c>Mod.manifest.id</c>(0.107.1–0.111.0 均为 public),无需反射私有成员。
 	/// 第 3 幕构建候选池时会对每个候选调用,结果在模组初始化完成后缓存。
 	/// </summary>
 	internal static bool IsEndlessModeLoaded()

@@ -24,7 +24,7 @@ public sealed class ScapegoatRune : HextechRelicBase
 			return;
 		}
 
-		int ordinal = ConsumeCombatProcOrdinal(nameof(ScapegoatRune), ref _transferCount);
+		int ordinal = ConsumeCombatProcOrdinal(ref _transferCount);
 		Creature? target = HextechRuneTargeting.PickRandomHittableEnemy(Owner,
 			Owner.Creature.CombatState, "scapegoat-target", ordinal.ToString());
 		if (target == null)

@@ -10,7 +10,7 @@ internal static partial class HextechCollectionHooks
 {
 	private const float GenericToCharacterPoolSpacing = 96f;
 
-	// 以下均为原版 NRelicCollectionCategory / NRelicCollection 的私有成员(0.107.1 / 0.110.0 / 0.111.0 同名同签名)。
+	// 以下均为原版 NRelicCollectionCategory / NRelicCollection 的私有成员(0.107.1 / 0.111.0 同名同签名)。
 	// 缺失时不逐项告警,由 CollectionHooksAvailable 按"整体停用/退化为平铺"汇总一次。
 	private static readonly FieldInfo? HeaderLabelField = TryGetField(
 		typeof(NRelicCollectionCategory),

@@ -21,9 +21,4 @@ internal sealed class FrostWraithEnemyHex : HextechEnemyHexEffect
 			await PowerCmd.Apply<HextechTemporarySlowPower>(players, TemporarySlowAmount, null, null);
 		}
 	}
-
-	internal static bool ShouldTriggerForRound(int roundNumber)
-	{
-		return HextechRoundInterval.IsDue(roundNumber, TurnsNeeded);
-	}
 }

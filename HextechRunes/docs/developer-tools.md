@@ -1,6 +1,6 @@
 # 开发工具与共享代码
 
-先读 [开发规范](development.md)。下方 Python 命令从仓库根目录执行；也可以将脚本路径改为自己克隆目录下的绝对路径。表格中的 `tools/`、`src/` 路径相对于本体目录 `HextechRunes/`。工具从脚本自身位置找项目，不依赖旧合集工作区。
+先读 [开发规范](development.md)。下方 Python 命令从仓库根目录执行；也可以将脚本路径改为自己克隆目录下的绝对路径。表格中的 `tools/`、`src/` 路径相对于本体目录 `HextechRunes/`。工具从脚本自身位置找项目。
 
 ## 构建环境与外部工具
 
@@ -10,7 +10,7 @@
 - 游戏安装位置默认是维护者本机路径，可用环境变量 `STS2_GAME_APP` 覆盖（两个构建脚本与 mplab 一致）。两个 `build_and_deploy.sh` 是面向 macOS 的 Zsh 脚本，共用步骤在 `tools/lib_build.sh`；其它系统应使用适合本机的构建、资源导入与部署方式，不直接照搬 macOS 路径。
 - 本体用 `HEXTECH_DEPLOY=0` 关闭部署，拓展包用 `HEXTECH_SPONSOR_DEPLOY=0`。只设置其中一个不会改变另一个脚本的行为。`HEXTECH_UPDATE_LATEST` 默认 0，本地构建不改写已跟踪的 `server/hextech-telemetry/public/latest-version.json`；发布时显式设 1。
 - 两个包的加载器只有一份源码 `HextechRunes/loader/`：拓展包 loader 工程以链接方式编译它，身份常量在各自的 `LoaderBootstrap.Identity.cs`。拓展包没有自己的 `multi_version` 脚本，直接调用本体的。
-- 原工作区的 `tools/sts2-inspect` 未包含在此仓库。需要原版 API 证据时，使用本机另行配置的反编译工具读取对应版本的 `sts2.dll` 与同目录依赖；不把旧工具路径当作本仓库提供的命令。
+- 本仓库不提供反编译工具。需要原版 API 证据时，使用本机另行配置的反编译工具读取对应版本的 `sts2.dll` 与同目录依赖。
 
 ## 内容定位
 
@@ -76,9 +76,9 @@ python3 HextechRunes/tools/hextech_dev.py tests --target 0.111.0 --name HopperEs
 | `tools/build_and_deploy.sh` | Zsh 脚本，重建 `.build` 和 `dist`、导入、构建、打包；默认替换本机模组目录，设 `HEXTECH_DEPLOY=0` 才不部署；`HEXTECH_UPDATE_LATEST=1` 才改写 latest-version |
 | `tools/package_release.py [输出绝对路径] --dist <目录>` | 只打包现有 dist，不构建、不部署；校验 bundle，再按变体清单打 ZIP；包含 loader、PCK、manifest、各变体 DLL 和必要 `compat-target.txt`，不含更新日志 TXT；成功后才替换原 ZIP |
 | `tools/extract_near_death_feast_glow.gd -- <原版PCK> <输出PNG>` | 用 Godot `--headless --path tools -s <脚本绝对路径>` 运行，提取 SOUL_NEXUS 红光并写入指定 PNG；区域与来源见 [设计裁决 · 视觉](design-decisions.md#视觉) |
-| `tools/kiwi_vfx/export_selection_vfx.py --wad <英雄联盟 Game/DATA/FINAL/UI.wad.client> [--write]` | 重新导出海克斯选择界面的原版特效（`assets/images/effects/kiwi_selection/` 的数据文件与贴图）和 `tools/kiwi_vfx/reference/` 下的原版界面数据转储（`uibase.json`：KiwiAugmentSelection/UIBase 全部节点、Layer、状态列表与场景进出场；`particle_systems.json`：全部 25 个粒子系统的挂接节点、时长估算与发射器概要，未导出系统附完整数据）。默认只比对并报告差异（有差异退出 1），`--write` 才写入，像素未变的贴图不重写；需要 `pip install xxhash zstandard pillow`。接入的系统清单与 `space` 规则写在脚本里，要和 `HextechRuneSelectionScreen.Vfx` 与测试同步；出处见该目录 `SOURCE.md` |
+| `tools/kiwi_vfx/export_selection_vfx.py --wad <英雄联盟 Game/DATA/FINAL/UI.wad.client> [--write]` | 重新导出海克斯选择界面的原版特效（`assets/images/effects/kiwi_selection/` 的数据文件与贴图）和 `tools/kiwi_vfx/reference/` 下的原版界面数据转储（`uibase.json`：KiwiAugmentSelection/UIBase 全部节点、Layer、状态列表与场景进出场；`particle_systems.json`：全部 25 个粒子系统的挂接节点、时长估算与发射器概要，未导出系统附完整数据）。默认只比对并报告差异（有差异退出 1），`--write` 才写入，像素未变的贴图不重写；需要 `pip install xxhash zstandard pillow`。接入的系统清单与 `space` 规则写在脚本里，要和 `HextechRuneSelectionScreen.Vfx` 与测试同步；出处见 `assets/images/effects/kiwi_selection/SOURCE.md` |
 | `tools/mplab/run_mplab.sh` | 本机双客户端联机确定性实验：构建 `HextechMpLab` 驱动并临时放进游戏 mods 目录，主机与客户端自动跑同一局，结束后比对两边日志里的校验和分叉并移除驱动；排查联机分叉时按需使用 |
-| `tools/update_latest_version.py` / 工坊上传器 | 涉及版本发布或外部写入；按用户指定范围使用，不是代码修改后的自动步骤。源码直接提交到当前仓库，不再做镜像同步 |
+| `tools/update_latest_version.py` / 工坊上传器 | 涉及版本发布或外部写入；按用户指定范围使用，不是代码修改后的自动步骤 |
 
 ## 运行时共享能力
 
@@ -117,6 +117,7 @@ python3 HextechRunes/tools/hextech_dev.py tests --target 0.111.0 --name HopperEs
 
 ```bash
 python3 HextechRunes/tools/tests/test_developer_tools.py
+python3 HextechRunes/tools/tests/test_localization_validation.py
 ```
 
-这些测试只覆盖开发工具的文件写入边界和发行包遗漏问题，不启动游戏或执行全部 C# 回归。修改只读查询时也可直接使用上面的查询示例核对。新增命令保持默认只读；有写入/构建动作需在帮助中明确，并更新本手册。
+这些测试只覆盖开发工具的文件写入边界、发行包遗漏问题和本地化校验边界（拓展包纳入键/格式检查、与 eng 相同的疑似漏译及白名单），不启动游戏或执行全部 C# 回归。修改只读查询时也可直接使用上面的查询示例核对。新增命令保持默认只读；有写入/构建动作需在帮助中明确，并更新本手册。

@@ -1,4 +1,3 @@
-using System.Diagnostics.CodeAnalysis;
 using Godot;
 
 namespace HextechRunes;
@@ -48,7 +47,7 @@ public abstract partial class HextechRelicBase
 	private int _turnScopedTurnNumber = -1;
 
 	// "每回合 N 次"按持有者自己的回合计：原版 TurnNumber 在该玩家开始新回合（含额外回合）时递增，
-	// 队友的额外回合不变。联机计数（Modifier 记账）按同一口径只在参与回合的玩家开始回合时清零。
+	// 队友的额外回合不变。单机联机都按这个口径在遗物实例上计数。
 	protected void EnsureTurnScopedStateCurrent(Action resetState)
 	{
 		HextechCombatState? combatState = Owner?.Creature.CombatState;
@@ -87,84 +86,22 @@ public abstract partial class HextechRelicBase
 			&& Owner != null;
 	}
 
-	protected string GetStableTurnProcKey()
+	// 每回合/每场计数一律记在持有这件遗物的实例上，单机联机同一套逻辑。
+	// 不记在 Mayhem Modifier 上：Modifier 上的状态不参与原版联机校验，也不跟遗物实例绑定，两端漏记会悄悄分叉。
+	// 遗物自己的字段由各端同一组钩子推进，清零时机由调用方在战斗/回合边界决定。
+	protected bool HasTurnProcReachedLimit(int localCount, int maxPerTurn)
 	{
-		return GetStableTurnProcKey(GetType());
-	}
-
-	internal static string GetStableTurnProcKey(Type runtimeType)
-	{
-		if (runtimeType.Assembly == typeof(HextechRelicBase).Assembly)
-		{
-			return runtimeType.Name;
-		}
-
-		string assemblyName = runtimeType.Assembly.GetName().Name ?? "<unknown>";
-		return $"{assemblyName}:{runtimeType.FullName ?? runtimeType.Name}";
-	}
-
-	// 联机战斗中改用 Mayhem 的共享计数（两端一致）；单机或拿不到 Modifier 时走本地计数。
-	private bool TryGetNetworkProcTracker([NotNullWhen(true)] out HextechMayhemModifier? modifier)
-	{
-		modifier = ShouldUseNetworkCombatHistory() ? HextechMayhemModifier.FindIn(Owner.RunState) : null;
-		return modifier != null;
-	}
-
-	protected bool TryGetNetworkTurnProcCount(string procKey, out int count)
-	{
-		if (!TryGetNetworkProcTracker(out HextechMayhemModifier? modifier))
-		{
-			count = 0;
-			return false;
-		}
-
-		count = modifier.GetPlayerRuneProcsThisTurn(Owner, procKey);
-		return true;
-	}
-
-	protected bool HasTurnProcReachedLimit(string procKey, int localCount, int maxPerTurn)
-	{
-		if (TryGetNetworkTurnProcCount(procKey, out int networkCount))
-		{
-			return networkCount >= maxPerTurn;
-		}
-
 		return localCount >= maxPerTurn;
 	}
 
-	protected int GetTurnProcCount(string procKey, int localCount)
+	protected bool HasTurnProcTriggered(bool localTriggered)
 	{
-		return TryGetNetworkTurnProcCount(procKey, out int networkCount)
-			? networkCount
-			: localCount;
+		return HasTurnProcReachedLimit(localTriggered ? 1 : 0, 1);
 	}
 
-	protected bool HasTurnProcTriggered(string procKey, bool localTriggered)
+	protected bool TryConsumeTurnProc(ref int localCount, int maxPerTurn)
 	{
-		return HasTurnProcReachedLimit(procKey, localTriggered ? 1 : 0, 1);
-	}
-
-	protected bool TryConsumeTurnProc(string procKey, ref int localCount, int maxPerTurn)
-	{
-		if (maxPerTurn <= 0)
-		{
-			return false;
-		}
-
-		if (TryGetNetworkProcTracker(out HextechMayhemModifier? modifier))
-		{
-			if (!modifier.TryConsumePlayerRuneProcThisTurn(Owner, procKey, maxPerTurn))
-			{
-				return false;
-			}
-
-			localCount = modifier.GetPlayerRuneProcsThisTurn(Owner, procKey);
-			UpdateTurnScopedStateIdentity();
-			InvokeDisplayAmountChanged();
-			return true;
-		}
-
-		if (localCount >= maxPerTurn)
+		if (maxPerTurn <= 0 || localCount >= maxPerTurn)
 		{
 			return false;
 		}
@@ -175,10 +112,10 @@ public abstract partial class HextechRelicBase
 		return true;
 	}
 
-	protected bool TryConsumeTurnProc(string procKey, ref bool localTriggered)
+	protected bool TryConsumeTurnProc(ref bool localTriggered)
 	{
 		int localCount = localTriggered ? 1 : 0;
-		if (!TryConsumeTurnProc(procKey, ref localCount, 1))
+		if (!TryConsumeTurnProc(ref localCount, 1))
 		{
 			return false;
 		}
@@ -187,32 +124,12 @@ public abstract partial class HextechRelicBase
 		return true;
 	}
 
-	// 只读、不消费。ModifyCardPlayCount 等引擎可能针对同一次出牌重复调用的钩子只应在这里取序号;
-	// 真正的消费(推进共享计数)必须放在每次真实出牌只触发一次的钩子里调用 ConsumeCombatProcOrdinal,
-	// 否则联机各端序号推进次数不一致会导致稳定随机结果分叉。
-	protected int PeekCombatProcOrdinal(string procKey, int localCount)
+	// 取当前序号并推进。ModifyCardPlayCount 等引擎可能针对同一次出牌重复调用的钩子只读计数字段、不消费;
+	// 消费必须放在每次真实出牌只触发一次的钩子里调用本方法,
+	// 否则各端序号推进次数不一致会导致稳定随机结果分叉。
+	protected int ConsumeCombatProcOrdinal(ref int localCount)
 	{
-		if (TryGetNetworkProcTracker(out HextechMayhemModifier? modifier))
-		{
-			return modifier.GetPlayerRuneProcsInCombat(Owner, procKey);
-		}
-
-		return localCount;
-	}
-
-	// 联机读写 Mayhem 的每场计数（战斗结束清零）；单机用调用方的 localCount，它的清零时机由调用方决定。
-	protected int ConsumeCombatProcOrdinal(string procKey, ref int localCount)
-	{
-		if (TryGetNetworkProcTracker(out HextechMayhemModifier? modifier))
-		{
-			int ordinal = modifier.ConsumePlayerRuneProcInCombat(Owner, procKey);
-			localCount = ordinal + 1;
-			return ordinal;
-		}
-
-		int localOrdinal = localCount;
-		localCount++;
-		return localOrdinal;
+		return localCount++;
 	}
 
 	protected void FlashDeferred(IEnumerable<Creature>? targets = null)

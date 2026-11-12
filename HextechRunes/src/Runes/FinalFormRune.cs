@@ -36,7 +36,7 @@ public sealed class FinalFormRune : TurnScopedRelicBase
 	{
 		EnsureTurnScopedStateCurrent();
 		if (!IsOwnedCardWithEffectiveCostAtLeast(cardPlay.Card, DynamicVars["MinCost"].BaseValue)
-			|| !TryConsumeTurnProc(nameof(FinalFormRune), ref _triggeredThisTurn))
+			|| !TryConsumeTurnProc(ref _triggeredThisTurn))
 		{
 			return;
 		}

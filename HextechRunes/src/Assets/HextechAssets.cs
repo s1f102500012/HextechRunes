@@ -79,13 +79,13 @@ internal static class HextechAssets
 
 	public const string HandOfBaronAuraRunePath = EffectImages + "jungle_buff_baron.png";
 
-	/// <summary>通用柔光圆环:男爵之手光环与米凯尔的祝福净化特效共用。</summary>
 	/// <summary>原版海克斯大乱斗“珠光护手”的彩虹镜片光环（来源见 kiwi_selection/SOURCE.md）。</summary>
 	public const string JeweledGauntletLensPath = EffectImages + "kiwi_selection/augment_jeweledgauntlet_lens-rainbow.png";
 
 	/// <summary>四芒星闪光（来源见 kiwi_selection/SOURCE.md）。</summary>
 	public const string StarSparkPath = EffectImages + "kiwi_selection/ashe_skin84_prestige_speark.png";
 
+	/// <summary>通用柔光圆环:男爵之手光环与米凯尔的祝福净化特效共用。</summary>
 	public const string SoftRingEffectPath = EffectImages + "ring_soft_02.png";
 
 	/// <summary>通用柔光圆盘:男爵之手光环(含烟雾裁剪圆)与米凯尔的祝福净化特效共用。</summary>

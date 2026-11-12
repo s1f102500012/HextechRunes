@@ -69,7 +69,7 @@ internal static class HextechMonsterHexRegistry
 		Monster<GoldrendRune>(MonsterHexKind.Goldrend, HextechRarityTier.Prismatic),
 		Monster<BackToBasicsRune>(MonsterHexKind.BackToBasics, HextechRarityTier.Prismatic),
 		Monster<EntomancerHex>(MonsterHexKind.MadScientist, HextechRarityTier.Prismatic),
-		Monster<FeyMagicRune>(MonsterHexKind.FeyMagic, HextechRarityTier.Prismatic),
+		Monster<FeyMagicHex>(MonsterHexKind.FeyMagic, HextechRarityTier.Prismatic),
 		Monster<FinalFormRune>(MonsterHexKind.FinalForm, HextechRarityTier.Prismatic),
 		Monster<UnmovableMountainRune>(MonsterHexKind.UnmovableMountain, HextechRarityTier.Prismatic),
 		Monster<MikaelsBlessingRune>(MonsterHexKind.MikaelsBlessing, HextechRarityTier.Prismatic),
@@ -162,9 +162,8 @@ internal static class HextechMonsterHexRegistry
 
 	private static MonsterHexRegistration Monster<TRelic>(
 		MonsterHexKind kind,
-		HextechRarityTier rarity,
-		bool disabled = false)
+		HextechRarityTier rarity)
 	{
-		return new MonsterHexRegistration(kind, rarity, typeof(TRelic), disabled);
+		return new MonsterHexRegistration(kind, rarity, typeof(TRelic));
 	}
 }

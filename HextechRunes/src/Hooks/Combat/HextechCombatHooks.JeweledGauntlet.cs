@@ -18,7 +18,7 @@ internal static partial class HextechCombatHooks
 	private const string TheInsatiableOpeningMoveId = "LIQUIFY_GROUND_MOVE";
 
 	// MonsterModel._isPerformingMove（bool）与 KnowledgeDemon._curseOfKnowledgeCounter（int），
-	// 0.107.1/0.110.0/0.111.0 原版私有字段；MoveState.Intents 后备字段见 HextechCombatHooks.Core。
+	// 0.107.1/0.111.0 原版私有字段；MoveState.Intents 后备字段见 HextechCombatHooks.Core。
 	// 任一缺失时两个补丁的 Prepare 都返回 false，珠光护手整组停用，补丁体内不再判空。
 	private static readonly FieldInfo MonsterIsPerformingMoveField =
 		TryGetField(typeof(MonsterModel), "_isPerformingMove")!;
@@ -30,7 +30,7 @@ internal static partial class HextechCombatHooks
 		&& MonsterIsPerformingMoveField != null
 		&& KnowledgeDemonCurseCounterField != null;
 
-	// 在原版 MonsterModel.PerformMove（0.107.1/0.110.0/0.111.0）完成后按同一顺序再执行一次行动：
+	// 在原版 MonsterModel.PerformMove（0.107.1/0.111.0）完成后按同一顺序再执行一次行动：
 	// 等待 → 置 _isPerformingMove → MoveState.PerformMove → 记战斗历史 → 清标志 → 死亡移除 → 等待。
 	// 原版没有"重复执行本回合行动"的 Hook；刻意省略 MoveStateMachine.OnMovePerformed，状态机只前进一次。
 	// 这段复制写在 Postfix 里而非跳过型前缀，因此由 HextechPatch.CopiesVanillaLogic 把 PerformMove 纳入原版拷贝守卫。

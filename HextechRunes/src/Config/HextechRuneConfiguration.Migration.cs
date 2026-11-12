@@ -15,7 +15,7 @@ internal static partial class HextechRuneConfiguration
 	[
 		// 腐化树枝生成分布加权(攻击40/技能20/能力40)后无限风险可控,转为默认启用。
 		new(16, [ typeof(CorruptedBranchRune) ], []),
-		// 感受燃烧/回力OK镖重做为"获得时给卡"(0.8.4 数据驱动重做),转为默认启用。
+		// 感受燃烧/回力OK镖重做为"获得时给卡",转为默认启用。
 		new(17, [ typeof(FeelTheBurnRune), typeof(OkBoomerangRune) ], []),
 		// 星界躯体改为百分比生命加成(50%)后强度自洽,转为默认启用。
 		new(18, [ typeof(AstralBodyRune) ], []),
@@ -35,7 +35,7 @@ internal static partial class HextechRuneConfiguration
 		// 安东尼的偏见转为默认启用(0.8.6)。
 		new(25, [ typeof(AnthonyBiasRune) ], []),
 		// 高风险或流程偏慢的通用海克斯转为默认禁用;豪猪已在 v23 禁用,不重复覆盖玩家后续选择。
-		new(27, [], [ typeof(OmegaRune), typeof(OkBoomerangRune), typeof(FeyMagicRune), typeof(AstralBodyRune) ]),
+		new(27, [], [ typeof(OmegaRune), typeof(OkBoomerangRune), typeof(AstralBodyRune) ]),
 		// 以进为退转为默认启用。
 		new(30, [ typeof(AdvanceToRetreatRune) ], []),
 		// 歪打正着重做为回合开始时按消耗牌堆状态牌生成充能球，转为默认启用。
@@ -54,7 +54,9 @@ internal static partial class HextechRuneConfiguration
 		// 0.9.9：俯冲轰炸、量子计算与升级势不可当/火焰屏障/狱火/抉择，抉择（只我方）转为默认禁用。
 		new(44, [], [ typeof(DiveBomberRune), typeof(QuantumComputingRune), typeof(JuggernautUpgradeRune), typeof(FlameBarrierUpgradeRune), typeof(InfernoUpgradeRune), typeof(DecisionsDecisionsUpgradeRune) ]),
 		// 物法皆修（只我方）重做为“力量与敏捷同时作用于伤害和格挡，开局各 +1”，转为默认启用。
-		new(45, [ typeof(MasterOfDualityRune) ], [])
+		new(45, [ typeof(MasterOfDualityRune) ], []),
+		// 升级：暴露、感受燃烧转为默认禁用。
+		new(47, [], [ typeof(ExposeUpgradeRune), typeof(FeelTheBurnRune) ])
 	];
 
 	/// <summary>敌方海克斯默认禁用迁移:只迁移一次,之后尊重玩家手动开启。</summary>

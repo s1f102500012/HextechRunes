@@ -341,7 +341,7 @@ internal static class HextechRunePoolBuilder
 			.ToList();
 	}
 
-	// 以首个候选的登记稀有度为准;不是可配置玩家符文(或列表为空)时按 Gold 处理,与原先逐个比对可配置列表的结果相同。
+	// 以首个候选的登记稀有度为准;不是可配置玩家符文(或列表为空)时按 Gold 处理。
 	public static HextechRarityTier GetRarityForOptions(IReadOnlyList<RelicModel> relics)
 	{
 		if (relics.Count == 0)
@@ -421,7 +421,7 @@ internal static class HextechRunePoolBuilder
 
 	/// <summary>
 	/// 按标签/角色权重从 pool 里不放回地抽 count 个候选(同一次选择里最多一个升级类符文)。
-	/// 单机与联机只差 roll 的来源;两者的抽取次数与顺序与拆分前一致。pool 会被消耗。
+	/// 单机与联机只差 roll 的来源,抽取次数与顺序相同。pool 会被消耗。
 	/// </summary>
 	private static HextechWeightedRuneOptions PickWeightedDistinct(
 		Player player,

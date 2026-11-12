@@ -1,5 +1,3 @@
-using MegaCrit.Sts2.Core.Map;
-
 namespace HextechRunes;
 
 internal abstract class HextechEnemyHexEffect
@@ -155,11 +153,6 @@ internal abstract class HextechEnemyHexEffect
 		return Task.CompletedTask;
 	}
 
-	internal virtual ActMap ModifyGeneratedMapLate(HextechEnemyHexContext context, IRunState runState, ActMap map, int actIndex)
-	{
-		return map;
-	}
-
 	internal virtual Task BeforeSideTurnStart(HextechEnemyHexContext context, PlayerChoiceContext choiceContext, CombatSide side, HextechCombatState combatState)
 	{
 		return Task.CompletedTask;
@@ -220,11 +213,6 @@ internal abstract class HextechEnemyHexEffect
 		return Task.CompletedTask;
 	}
 
-	internal virtual Task AfterAutoPrePlayPhaseEnteredLate(HextechEnemyHexContext context, PlayerChoiceContext choiceContext, Player player)
-	{
-		return Task.CompletedTask;
-	}
-
 	internal virtual Task BeforeTurnEnd(HextechEnemyHexContext context, PlayerChoiceContext choiceContext, CombatSide side, CombatRoom? combatRoom)
 	{
 		return Task.CompletedTask;
@@ -281,11 +269,6 @@ internal abstract class HextechEnemyHexEffect
 	}
 
 	internal virtual Task AfterCombatVictory(HextechEnemyHexContext context, CombatRoom room)
-	{
-		return Task.CompletedTask;
-	}
-
-	internal virtual Task AfterCombatEnd(HextechEnemyHexContext context, CombatRoom room)
 	{
 		return Task.CompletedTask;
 	}

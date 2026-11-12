@@ -83,7 +83,7 @@ public sealed class BlankCheckRune : HextechRelicBase
 	{
 		// 只改写常规去向(弃牌堆):去向为 None 的是复制品/能力牌等"打出后移出战斗"的卡,
 		// 抢改成消耗堆会把复制品变成滞留的幽灵实体,再被召之即来拉回手牌就是
-		// "空白手牌位"(玩家实报,复制打出君王之剑时触发)。
+		// "空白手牌位"(例如复制打出君王之剑时)。
 		return pileType is PileType.Discard && ShouldAffectColorlessCard(card)
 			? (PileType.Exhaust, position)
 			: (pileType, position);

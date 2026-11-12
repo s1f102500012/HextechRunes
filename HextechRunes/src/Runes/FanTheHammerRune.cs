@@ -47,7 +47,7 @@ public sealed class FanTheHammerRune : TurnScopedRelicBase
 		}
 
 		EnsureTurnScopedStateCurrent();
-		if (HasTurnProcTriggered(nameof(FanTheHammerRune), _triggeredThisTurn) || !IsOwnedAttack(card))
+		if (HasTurnProcTriggered(_triggeredThisTurn) || !IsOwnedAttack(card))
 		{
 			return playCount;
 		}
@@ -63,7 +63,7 @@ public sealed class FanTheHammerRune : TurnScopedRelicBase
 		}
 
 		EnsureTurnScopedStateCurrent();
-		if (IsOwnedAttack(card) && TryConsumeTurnProc(nameof(FanTheHammerRune), ref _triggeredThisTurn))
+		if (IsOwnedAttack(card) && TryConsumeTurnProc(ref _triggeredThisTurn))
 		{
 			TrackDamageReducedCard(card);
 			Flash();

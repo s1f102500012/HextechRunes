@@ -12,7 +12,7 @@ internal static class HextechShopForgeHooks
 {
 	private const float CardRemovalRandomForgeOffsetY = 60f;
 
-	// MerchantInventory._relicEntries（List<MerchantRelicEntry>，0.107.1/0.110.0/0.111.0 原版私有字段）：
+	// MerchantInventory._relicEntries（List<MerchantRelicEntry>，0.107.1/0.111.0 原版私有字段）：
 	// 假商店（NFakeMerchantInventory）里移除随机锻造器条目用；缺失时条目保留，只影响假商店展示。
 	private static readonly FieldInfo? MerchantInventoryRelicEntriesField = TryGetField(typeof(MerchantInventory), "_relicEntries");
 
@@ -259,7 +259,7 @@ internal static class HextechShopForgeHooks
 
 	// 跳过型前缀（已裁决保留，见 architecture.md）：原版 MerchantRelicEntry.OnTryPurchase 直接 RelicCmd.Obtain 条目模型，
 	// 没有"购买时改发别的遗物"的 Hook；只对本模组的随机锻造器条目替换为"选锻造器 → 扣款 → 发放"，其余条目走原版。
-	// 替换体对照原版 OnTryPurchase 的扣款/历史/同步步骤逐步复制（0.107.1/0.110.0/0.111.0），IL 由原版拷贝守卫冻结。
+	// 替换体对照原版 OnTryPurchase 的扣款/历史/同步步骤逐步复制（0.107.1/0.111.0），IL 由原版拷贝守卫冻结。
 	[HarmonyPatch(typeof(MerchantRelicEntry), "OnTryPurchase", typeof(MerchantInventory), typeof(bool))]
 	[HextechPatch("shop.random-forge.purchase", "商店随机锻造器")]
 	private static class PurchasePatch
@@ -322,8 +322,8 @@ internal static class HextechShopForgeHooks
 	}
 
 	// 购买后保留条目：原版 OnTryPurchaseWrapper 在 Hook.ShouldRefillMerchantEntry 为假时调用 ClearAfterPurchase 清空槽位。
-	// 以前在 Hook.ShouldRefillMerchantEntry 分发上挂跳过型前缀强制返回真（会吞掉其他监听器），现改为只在本模组条目
-	// 自己的 ClearAfterPurchase 上跳过：分发结果为真走 RestockAfterPurchase（上面已对本条目跳过），为假走这里，
+	// 只在本模组条目自己的 ClearAfterPurchase 上跳过，不在 ShouldRefillMerchantEntry 分发上强制返回真（会吞掉其他监听器）：
+	// 分发结果为真走 RestockAfterPurchase（上面已对本条目跳过），为假走这里，
 	// 两条路都保持条目不变，其他监听器照常被询问。补丁 ID 沿用 shop.random-forge.refill。
 	[HarmonyPatch(typeof(MerchantRelicEntry), "ClearAfterPurchase")]
 	[HextechPatch("shop.random-forge.refill", "商店随机锻造器")]

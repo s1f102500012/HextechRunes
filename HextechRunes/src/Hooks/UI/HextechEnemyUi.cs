@@ -17,7 +17,7 @@ internal static class HextechEnemyUi
 	private const int EnemyHexSeparation = 2;
 	private const float EnemyHexScale = 0.72f;
 
-	// 原版 NTopBar._modifiersContainer(0.107.1 / 0.110.0 / 0.111.0);缺失时由 TryGetField 进启动摘要,顶栏海克斯整体停用。
+	// 原版 NTopBar._modifiersContainer(0.107.1 / 0.111.0);缺失时由 TryGetField 进启动摘要,顶栏海克斯整体停用。
 	private static readonly FieldInfo? ModifiersContainerField = TryGetField(
 		typeof(NTopBar),
 		"_modifiersContainer",
@@ -331,7 +331,7 @@ internal static class HextechEnemyUi
 	/// 跳过型前缀:原版 <c>NRelicBasicHolder.OnFocus</c> 固定展示 <c>_relic.Model.HoverTips</c>(图标遗物自己的提示),
 	/// 没有 Hook 或虚成员能换成敌方海克斯的提示;被跳过的原版步骤只有图标放大 tween 与提示展示。
 	/// 激活条件:仅本模组的敌方海克斯图标节点,其它遗物持有者完全交给原版。
-	/// 版本:0.107.1 / 0.110.0 / 0.111.0 原方法一致,已进原版拷贝守卫;<see cref="Priority.Low"/> 让他人前缀先跑。
+	/// 版本:0.107.1 / 0.111.0 原方法一致,已进原版拷贝守卫;<see cref="Priority.Low"/> 让他人前缀先跑。
 	/// </remarks>
 	[HarmonyPatch(typeof(NRelicBasicHolder), "OnFocus", new Type[0])]
 	[HextechPatch("ui.enemy-hex.holder-focus", "敌方海克斯顶栏悬浮")]

@@ -9,6 +9,7 @@ using MegaCrit.Sts2.Core.Commands;
 using MegaCrit.Sts2.Core.Entities.Cards;
 using MegaCrit.Sts2.Core.Entities.Creatures;
 using MegaCrit.Sts2.Core.Entities.Players;
+using MegaCrit.Sts2.Core.Entities.Relics;
 using MegaCrit.Sts2.Core.Factories;
 using MegaCrit.Sts2.Core.GameActions;
 using MegaCrit.Sts2.Core.GameActions.Multiplayer;
@@ -17,6 +18,7 @@ using MegaCrit.Sts2.Core.Models.Cards;
 using MegaCrit.Sts2.Core.Models.Orbs;
 using MegaCrit.Sts2.Core.Models.Powers;
 using MegaCrit.Sts2.Core.Models.Relics;
+using MegaCrit.Sts2.Core.Rooms;
 using MegaCrit.Sts2.Core.Runs;
 using MegaCrit.Sts2.Core.Saves.Runs;
 using MegaCrit.Sts2.Core.ValueProps;
@@ -359,10 +361,10 @@ internal static partial class Program
 	[HextechTest]
 	private static void WatchOutGrapefruitFoodPoolHonorsCharacterAndUniqueRelics()
 	{
-		IReadOnlyList<Type> commonPool = WatchOutGrapefruitRune.BuildFoodRelicCandidates(
+		IReadOnlyList<Type> commonPool = FoodTypes(WatchOutGrapefruitRune.BuildFoodRelicCandidates(
 			isRegent: false,
 			hasIceCream: false,
-			hasNutritiousSoup: false);
+			hasNutritiousSoup: false));
 		Type[] requestedCommonRelics =
 		[
 			typeof(ChosenCheese),
@@ -378,29 +380,113 @@ internal static partial class Program
 		Expect(!commonPool.Contains(typeof(LunarPastry)), "non-Regent food pool should exclude Lunar Pastry");
 		Equal(commonPool.Count, commonPool.Distinct().Count(), "common food pool should not contain duplicate relic types");
 
-		IReadOnlyList<Type> regentPool = WatchOutGrapefruitRune.BuildFoodRelicCandidates(
+		IReadOnlyList<Type> regentPool = FoodTypes(WatchOutGrapefruitRune.BuildFoodRelicCandidates(
 			isRegent: true,
 			hasIceCream: false,
-			hasNutritiousSoup: false);
+			hasNutritiousSoup: false));
 		Expect(regentPool.Contains(typeof(LunarPastry)), "Regent food pool should contain Lunar Pastry");
 		Equal(commonPool.Count + 1, regentPool.Count, "Regent food pool should add only Lunar Pastry");
 
-		IReadOnlyList<Type> iceCreamOwnedPool = WatchOutGrapefruitRune.BuildFoodRelicCandidates(
+		IReadOnlyList<Type> iceCreamOwnedPool = FoodTypes(WatchOutGrapefruitRune.BuildFoodRelicCandidates(
 			isRegent: true,
 			hasIceCream: true,
-			hasNutritiousSoup: false);
+			hasNutritiousSoup: false));
 		Expect(!iceCreamOwnedPool.Contains(typeof(IceCream)), "owned Ice Cream should stay excluded");
 		Expect(iceCreamOwnedPool.Contains(typeof(LunarPastry)), "Ice Cream exclusion should keep Regent Lunar Pastry");
 		Equal(regentPool.Count - 1, iceCreamOwnedPool.Count, "owning Ice Cream should remove exactly one candidate");
 
-		IReadOnlyList<Type> nutritiousSoupOwnedPool = WatchOutGrapefruitRune.BuildFoodRelicCandidates(
+		IReadOnlyList<Type> nutritiousSoupOwnedPool = FoodTypes(WatchOutGrapefruitRune.BuildFoodRelicCandidates(
 			isRegent: true,
 			hasIceCream: false,
-			hasNutritiousSoup: true);
+			hasNutritiousSoup: true));
 		Expect(!nutritiousSoupOwnedPool.Contains(typeof(NutritiousSoup)), "owned Nutritious Soup should stay excluded");
 		Expect(nutritiousSoupOwnedPool.Contains(typeof(IceCream)), "Nutritious Soup exclusion should keep Ice Cream");
 		Expect(nutritiousSoupOwnedPool.Contains(typeof(LunarPastry)), "Nutritious Soup exclusion should keep Regent Lunar Pastry");
 		Equal(regentPool.Count - 1, nutritiousSoupOwnedPool.Count, "owning Nutritious Soup should remove exactly one candidate");
+	}
+
+	private static IReadOnlyList<Type> FoodTypes(IReadOnlyList<(Type Type, RelicRarity Tier)> foods)
+	{
+		return foods.Select(static food => food.Type).ToArray();
+	}
+
+	[HextechTest]
+	private static void WatchOutGrapefruitFoodTiersCountAncientAsRare()
+	{
+		IReadOnlyList<(Type Type, RelicRarity Tier)> foods = WatchOutGrapefruitRune.BuildFoodRelicCandidates(
+			isRegent: true,
+			hasIceCream: false,
+			hasNutritiousSoup: false);
+		RelicRarity TierOf(Type type) => foods.Single(food => food.Type == type).Tier;
+
+		Equal(RelicRarity.Rare, TierOf(typeof(LoomingFruit)), "ancient Looming Fruit tier");
+		Equal(RelicRarity.Rare, TierOf(typeof(NutritiousSoup)), "ancient Nutritious Soup tier");
+		Equal(RelicRarity.Rare, TierOf(typeof(LunarPastry)), "Regent Lunar Pastry tier");
+		Equal(RelicRarity.Uncommon, TierOf(typeof(DragonFruit)), "shop Dragon Fruit tier");
+		Equal(RelicRarity.Common, TierOf(typeof(ChosenCheese)), "event Chosen Cheese tier");
+		Equal(RelicRarity.Common, TierOf(typeof(Strawberry)), "common Strawberry tier");
+		foreach (RelicRarity tier in new[] { RelicRarity.Common, RelicRarity.Uncommon, RelicRarity.Rare })
+		{
+			Expect(foods.Count(food => food.Tier == tier) >= 3, $"food tier {tier} should keep at least 3 candidates");
+		}
+	}
+
+	[HextechTest]
+	private static void RewardRelicRollWeightsFollowCombatType()
+	{
+		Equal((60, 30, 10), HextechRewardRelicRoll.GetTierWeights(RoomType.Monster), "monster weights");
+		Equal((35, 40, 25), HextechRewardRelicRoll.GetTierWeights(RoomType.Elite), "elite weights");
+		Equal((10, 40, 50), HextechRewardRelicRoll.GetTierWeights(RoomType.Boss), "boss weights");
+		Equal((60, 30, 10), HextechRewardRelicRoll.GetTierWeights(RoomType.Event), "event combat uses monster weights");
+
+		foreach (RoomType roomType in new[] { RoomType.Monster, RoomType.Elite, RoomType.Boss })
+		{
+			(int common, int uncommon, int rare) = HextechRewardRelicRoll.GetTierWeights(roomType);
+			Equal(100, common + uncommon + rare, $"{roomType} weights total");
+			Dictionary<RelicRarity, int> counts = Enumerable.Range(0, 100)
+				.GroupBy(roll => HextechRewardRelicRoll.TierFromRoll(roomType, roll))
+				.ToDictionary(static group => group.Key, static group => group.Count());
+			Equal(common, counts.GetValueOrDefault(RelicRarity.Common), $"{roomType} common rolls");
+			Equal(uncommon, counts.GetValueOrDefault(RelicRarity.Uncommon), $"{roomType} uncommon rolls");
+			Equal(rare, counts.GetValueOrDefault(RelicRarity.Rare), $"{roomType} rare rolls");
+		}
+
+		Equal(RelicRarity.Rare, HextechRewardRelicRoll.ToTier(RelicRarity.Ancient), "ancient counts as rare");
+		Equal(RelicRarity.Uncommon, HextechRewardRelicRoll.ToTier(RelicRarity.Shop), "shop counts as uncommon");
+		Equal(RelicRarity.Common, HextechRewardRelicRoll.ToTier(RelicRarity.Event), "event counts as common");
+	}
+
+	[HextechTest]
+	private static void RewardRelicRollAvoidsRecentDrops()
+	{
+		(string Key, RelicRarity Tier)[] pool =
+		[
+			("C1", RelicRarity.Common),
+			("C2", RelicRarity.Common),
+			("U1", RelicRarity.Uncommon),
+			("R1", RelicRarity.Rare)
+		];
+		List<string> Select(RelicRarity tier, params string[] recent) => HextechRewardRelicRoll.SelectCandidates(
+				pool,
+				static item => item.Tier,
+				tier,
+				recent.ToHashSet(StringComparer.Ordinal),
+				static item => item.Key)
+			.Select(static item => item.Key)
+			.ToList();
+
+		SequenceEqual(["C1", "C2"], Select(RelicRarity.Common), "no recent drops keeps the rolled tier");
+		SequenceEqual(["C2"], Select(RelicRarity.Common, "C1"), "recent drop is excluded");
+		SequenceEqual(["U1"], Select(RelicRarity.Common, "C1", "C2"), "exhausted common tier falls back to uncommon first");
+		SequenceEqual(["U1"], Select(RelicRarity.Rare, "R1"), "exhausted rare tier falls back to uncommon first");
+		SequenceEqual(["C1", "C2"], Select(RelicRarity.Uncommon, "U1"), "exhausted uncommon tier falls back to common first");
+		SequenceEqual(["R1"], Select(RelicRarity.Rare, "C1", "C2", "U1", "R1"), "fully recent pool allows a repeat in the rolled tier");
+
+		Equal("A", HextechRewardRelicRoll.PushRecent(null, "A"), "push into empty history");
+		Equal("A|B", HextechRewardRelicRoll.PushRecent("A", "B"), "push keeps two drops");
+		Equal("B|C", HextechRewardRelicRoll.PushRecent("A|B", "C"), "push drops the oldest");
+		SequenceEqual(["B", "C"], HextechRewardRelicRoll.ParseRecent("B|C"), "parse recent drops");
+		Equal(0, HextechRewardRelicRoll.ParseRecent("").Count, "parse empty history");
 	}
 
 	[HextechTest]

@@ -9,8 +9,8 @@ namespace HextechRunes;
 /// 常驻附件经 <see cref="TryAttach{TVisual}"/> 按"附件类型 + 生物节点"去重;一次性特效直接 <see cref="Launch"/>。
 /// </summary>
 /// <remarks>
-/// 驱动方式沿用各附件原先实机验证过的做法:在 <see cref="FrameNode"/> 上逐帧等待 <c>ProcessFrame</c>,
-/// 首帧在挂载调用中同步执行。异常只记日志,绝不外抛(附件由战斗构建与召唤同步链触发)。
+/// 驱动方式:在 <see cref="FrameNode"/> 上逐帧等待 <c>ProcessFrame</c>,首帧在挂载调用中同步执行。
+/// 异常只记日志,绝不外抛(附件由战斗构建与召唤同步链触发)。
 /// </remarks>
 internal abstract class HextechCreatureAttachedVisual
 {
@@ -43,7 +43,7 @@ internal abstract class HextechCreatureAttachedVisual
 	/// <summary>释放附件挂出的节点;循环结束(含异常)时调用一次。</summary>
 	protected abstract void Release();
 
-	/// <summary>与各附件原先一致的逐帧步长:按 120fps ~ 20fps 夹取,避免卡顿后动画跳变。</summary>
+	/// <summary>各附件共用的逐帧步长:按 120fps ~ 20fps 夹取,避免卡顿后动画跳变。</summary>
 	protected static float ClampedFrameDelta(Node node)
 	{
 		return Mathf.Clamp((float)node.GetProcessDeltaTime(), 1f / 120f, 0.05f);
@@ -131,7 +131,7 @@ internal abstract class HextechCreatureAttachedVisual
 }
 
 /// <summary>
-/// 画在生物身后的附件:根节点挂进父容器里共用的身后层 <c>HextechRunes_BehindCreatures</c>(与原先各附件同一父节点与坐标系),
+/// 画在生物身后的附件:根节点挂进生物父容器里共用的身后层 <c>HextechRunes_BehindCreatures</c>(与生物同一父节点与坐标系),
 /// 每帧维持该层在最底,结束时释放根节点。
 /// </summary>
 internal abstract class HextechBehindCreatureVisual : HextechCreatureAttachedVisual

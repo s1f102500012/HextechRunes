@@ -41,7 +41,7 @@ internal static partial class HextechRuneConfigMenuHooks
 	/// <summary>
 	/// 在 NMainMenu._Ready 之前把按钮插进 %MainMenuTextButtons:原版随后自己的
 	/// ConnectMainMenuTextButtonFocusLogic 会把焦点光标动画连到它身上,文案走公开的
-	/// SetLocalization(main_menu_ui 表由本模组的 loc 文件合并),不再触碰任何私有成员。
+	/// SetLocalization(main_menu_ui 表由本模组的 loc 文件合并),不触碰任何私有成员。
 	/// </summary>
 	private static void TryAttachButton(NMainMenu host)
 	{

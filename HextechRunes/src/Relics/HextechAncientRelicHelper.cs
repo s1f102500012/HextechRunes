@@ -65,47 +65,49 @@ internal static class HextechAncientRelicHelper
 		return ModelDb.GetById<RelicModel>(ModelDb.GetId(relicType)).ToMutable();
 	}
 
-	public static RelicModel CreateRepeatableWaxRelic(Player player, string source, int ordinal)
+	// 稀有度按战斗类型加权（HextechRewardRelicRoll），不走原版 RelicFactory.RollRarity，
+	// 免得消耗 PlayerRng.Rewards 改变原版后续奖励序列；最近掉过的蜡制遗物在候选够用时排除。
+	public static RelicModel CreateRepeatableWaxRelic(
+		Player player,
+		string source,
+		RoomType roomType,
+		int dropOrdinal,
+		IReadOnlyCollection<string> recentRelicIds)
 	{
 		RunState runState = (RunState)player.RunState;
-		RelicRarity rarity = RelicFactory.RollRarity(player);
-		List<RelicModel> candidates = BuildRepeatableRewardRelicPool(player, rarity);
-		if (candidates.Count == 0)
-		{
-			candidates = BuildRepeatableRewardRelicPool(player, null);
-		}
+		string playerKey = HextechStableRandom.PlayerKey(player);
+		RelicRarity tier = HextechRewardRelicRoll.RollTier(runState, roomType, source, playerKey, dropOrdinal.ToString());
+		List<RelicModel> candidates = HextechRewardRelicRoll.SelectCandidates(
+			BuildRepeatableRewardRelicPool(player),
+			static relic => HextechRewardRelicRoll.ToTier(relic.Rarity),
+			tier,
+			recentRelicIds,
+			static relic => relic.Id.Entry);
 
 		RelicModel relic = HextechStableRandom.Pick(
 			candidates,
 			runState,
 			static relic => relic.Id.Entry,
 			source,
-			HextechStableRandom.PlayerKey(player),
-			runState.TotalFloor.ToString(),
-			ordinal.ToString(),
-			rarity.ToString()).ToMutable();
+			playerKey,
+			dropOrdinal.ToString(),
+			tier.ToString()).ToMutable();
 		relic.IsWax = true;
 		return relic;
 	}
 
-	private static List<RelicModel> BuildRepeatableRewardRelicPool(Player player, RelicRarity? rarity)
+	private static List<RelicModel> BuildRepeatableRewardRelicPool(Player player)
 	{
 		IEnumerable<RelicModel> rewardRelics = ModelDb.RelicPool<SharedRelicPool>()
 			.GetUnlockedRelics(player.UnlockState)
 			.Concat(player.Character.RelicPool.GetUnlockedRelics(player.UnlockState));
 
 		return rewardRelics
-			.Where(relic => IsRepeatableRewardRelicCandidate(relic, rarity))
+			.Where(static relic => relic.Rarity is RelicRarity.Common or RelicRarity.Uncommon or RelicRarity.Rare)
 			.GroupBy(static relic => relic.Id)
 			.Select(static group => group.First())
 			.OrderBy(static relic => relic.Id.Entry, StringComparer.Ordinal)
 			.ToList();
-	}
-
-	private static bool IsRepeatableRewardRelicCandidate(RelicModel relic, RelicRarity? rarity)
-	{
-		return (rarity == null || relic.Rarity == rarity)
-			&& relic.Rarity is RelicRarity.Common or RelicRarity.Uncommon or RelicRarity.Rare;
 	}
 
 	private static bool HasRelic(Player player, Type relicType)

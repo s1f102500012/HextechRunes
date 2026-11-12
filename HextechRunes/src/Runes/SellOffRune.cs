@@ -6,6 +6,18 @@ public sealed class SellOffRune : HextechRelicBase
 	private int _autoPlayTargetsThisCombat;
 	private readonly Queue<CardModel> _pendingDiscardedCards = new();
 
+	// 稳定随机的本地序号（见 ConsumeCombatProcOrdinal）。单机不在战斗开始清零，按现状保留；
+	// 联机每场清零，各端都从同一场的 0 开始，不受谁读过档影响。
+	public override Task BeforeCombatStart()
+	{
+		if (IsNetworkMultiplayer())
+		{
+			_autoPlayTargetsThisCombat = 0;
+		}
+
+		return base.BeforeCombatStart();
+	}
+
 	protected override IEnumerable<IHoverTip> ExtraHoverTips =>
 	[
 		HoverTipFactory.FromKeyword(CardKeyword.Sly),
@@ -86,7 +98,7 @@ public sealed class SellOffRune : HextechRelicBase
 		}
 
 		HextechCombatState combatState = Owner.Creature.CombatState!;
-		int targetOrdinal = ConsumeCombatProcOrdinal(nameof(SellOffRune), ref _autoPlayTargetsThisCombat);
+		int targetOrdinal = ConsumeCombatProcOrdinal(ref _autoPlayTargetsThisCombat);
 		Creature? target = RequiresEnemyTarget(card)
 			? HextechRuneTargeting.PickRandomHittableEnemy(
 				Owner,

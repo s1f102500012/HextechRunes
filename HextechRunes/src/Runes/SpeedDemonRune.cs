@@ -21,7 +21,7 @@ public sealed class SpeedDemonRune : TurnScopedRelicBase
 		if (target.Side != CombatSide.Enemy
 			|| result.UnblockedDamage <= 0
 			|| (!IsOwnerOrPet(dealer) && cardSource?.Owner != Owner)
-			|| !TryConsumeTurnProc(nameof(SpeedDemonRune), ref _triggeredThisTurn))
+			|| !TryConsumeTurnProc(ref _triggeredThisTurn))
 		{
 			return;
 		}

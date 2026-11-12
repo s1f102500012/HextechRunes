@@ -74,7 +74,7 @@ internal static class HextechUiPreferences
 	{
 		return JsonConfigFile.Load(ConfigFileName, LogTag, CreateCurrentUiConfig, static config =>
 		{
-			// 0.8.4 一次性强制回默认(与 rune_config 的 v15 重置同批):旧 UI 偏好整体丢弃。
+			// 版本低于 CurrentUiConfigVersion 的旧 UI 偏好整体丢弃、回到默认(与 rune_config 的 v15 重置同批)。
 			if (config.ConfigVersion < CurrentUiConfigVersion)
 			{
 				HextechLog.Info(LogTag, $"UI config version {config.ConfigVersion} < {CurrentUiConfigVersion}; forcing reset to defaults (0.8.4).");

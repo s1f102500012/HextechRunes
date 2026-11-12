@@ -547,7 +547,7 @@ internal static class MpLabDriver
 		string forms = string.Join(",", combat.AllCards
 			.Where(card => card.GetType() == formType)
 			.Select(card => (card.Pile?.Type.ToString() ?? "none") + (card.IsUpgraded ? "+" : "")));
-		return $"cards={combat.AllCards.Count()} stars={combat.Stars} forms=[{forms}]";
+		return $"cards={combat.AllCards.Count()} hand={combat.Hand.Cards.Count}/{CardPile.MaxCardsInHand} draw={combat.DrawPile.Cards.Count} discard={combat.DiscardPile.Cards.Count} stars={combat.Stars} forms=[{forms}]";
 	}
 
 	// 逐个获得,避免同一玩家的多个 Obtain 并发交错。
@@ -854,6 +854,7 @@ internal static class FormScenario
 		"reaper" => ModelDb.Character<Necrobinder>(),
 		"miserable" => ModelDb.Character<Necrobinder>(),
 		"serpent" => ModelDb.Character<Silent>(),
+		"scribble" => ModelDb.Character<Ironclad>(),
 		"void" or "regentloop" => ModelDb.Character<Regent>(),
 		_ => ModelDb.Character<Ironclad>()
 	};
@@ -865,13 +866,15 @@ internal static class FormScenario
 		"miserable" => ModelDb.Card<Deathbringer>(),
 		"serpent" => ModelDb.Card<SerpentForm>(),
 		"void" => ModelDb.Card<VoidForm>(),
+		"scribble" => ModelDb.Card<Offering>(),
 		_ => ModelDb.Card<DemonForm>()
 	};
 
 	internal static bool PokeStarsInCombat => Key == "regentloop";
 
 	// miserable:每回合出牌阶段打出一张死亡使者,观察悲惨命运的格挡时点与灾厄统计。
-	internal static bool PlayFormCardEachRound => Key == "miserable";
+	// scribble:配合敌方潦草急就，回合开始抽满手牌后再打祭品抽 3，制造“满手再抽”。
+	internal static bool PlayFormCardEachRound => Key is "miserable" or "scribble";
 
 	internal static string[] RuneTypeNames => Key switch
 	{
@@ -881,6 +884,7 @@ internal static class FormScenario
 		"void" => ["HextechRunes.VoidFormUpgradeRune"],
 		"regentloop" => ["HextechRunes.KingdomArmyRune", "HextechRunes.CondensedRadianceRune", "HextechRunes.RoyalCommandRune"],
 		"miserable" => ["HextechRunes.MiserableFateRune"],
+		"scribble" => ["HextechRunes.HastyScribbleRune"],
 		"mawbank" => ["HextechRunes.DoubleVisionRune", "MegaCrit.Sts2.Core.Models.Relics.MawBank"],
 		_ => ["HextechRunes.DemonFormUpgradeRune"]
 	};

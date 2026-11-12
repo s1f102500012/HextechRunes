@@ -15,7 +15,7 @@ internal static partial class HextechPlayerRuneHooks
 	private const float OrbLayoutMaxRadius = 300f;
 	private const float OrbLayoutTweenSpeed = 0.45f;
 
-	// NOrbManager._orbs（List<NOrb>）、_creatureNode（NCreature）、_curTween（Tween），0.107.1/0.110.0/0.111.0 原版私有字段。
+	// NOrbManager._orbs（List<NOrb>）、_creatureNode（NCreature）、_curTween（Tween），0.107.1/0.111.0 原版私有字段。
 	// 任一缺失时软上限布局不安装（Prepare 返回 false）、走原版。
 	private static readonly FieldInfo OrbManagerOrbsField = TryGetField(typeof(NOrbManager), "_orbs")!;
 	private static readonly FieldInfo OrbManagerCreatureField = TryGetField(typeof(NOrbManager), "_creatureNode")!;

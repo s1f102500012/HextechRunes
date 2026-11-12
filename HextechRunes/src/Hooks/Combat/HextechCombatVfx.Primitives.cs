@@ -1,13 +1,12 @@
 using Godot;
 using MegaCrit.Sts2.Core.Helpers;
 using MegaCrit.Sts2.Core.Nodes.Combat;
-using MegaCrit.Sts2.Core.Nodes.Vfx;
 
 namespace HextechRunes;
 
 internal static partial class HextechCombatVfx
 {
-	/// <summary>飞弹的一套配色：魔法飞弹是红黑、双生火焰是蓝黄；数值与拆分前逐项一致。</summary>
+	/// <summary>飞弹的一套配色：魔法飞弹是红黑、双生火焰是蓝黄。</summary>
 	private sealed record MissilePalette(
 		string EffectName,
 		Color Shadow,

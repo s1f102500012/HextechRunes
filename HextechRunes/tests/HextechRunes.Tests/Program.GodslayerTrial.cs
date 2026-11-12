@@ -31,6 +31,31 @@ internal static partial class Program
 		Expect(!HextechConfigShareCodec.TryParse(HextechConfigShareCodec.Export(trial))!.Snapshot.GodslayerTrial, "share codes never carry the trial");
 	}
 
+	// 走 Modifier 存档属性的生产序列化与还原：试炼局读档后仍是试炼，普通局 JSON 不出现该键。
+	[HextechTest]
+	private static void GodslayerTrialSurvivesSavedRunConfigurationRoundTrip()
+	{
+		// 有效配置会读本机玩家符文禁用表：让配置读取走内存，不碰 Godot 文件接口。
+		using ModEnabledOverride loadedConfig = new();
+		HextechMayhemModifier trialSource = CreateMutableTestModel<HextechMayhemModifier>();
+		trialSource.SetRunConfigurationSnapshot(HextechGodslayerTrial.CreateTrialSnapshot(), "godslayer trial save test");
+		string trialJson = trialSource.SavedHextechRunConfigurationSnapshotJson;
+		Expect(trialJson.Contains(nameof(HextechRunConfigurationSnapshot.GodslayerTrial), StringComparison.OrdinalIgnoreCase), "trial save JSON carries the trial flag");
+		HextechMayhemModifier trialRestored = CreateMutableTestModel<HextechMayhemModifier>();
+		trialRestored.SavedHextechRunConfigurationSnapshotJson = trialJson;
+		Expect(trialRestored.GetEffectiveRunConfigurationSnapshot().GodslayerTrial, "trial run stays a trial after loading");
+		Equal(trialJson, trialRestored.SavedHextechRunConfigurationSnapshotJson, "trial save JSON is stable across a reload");
+
+		HextechMayhemModifier ordinarySource = CreateMutableTestModel<HextechMayhemModifier>();
+		ordinarySource.SetRunConfigurationSnapshot(HextechRuneConfiguration.GetDefaultSnapshot(), "ordinary save test");
+		string ordinaryJson = ordinarySource.SavedHextechRunConfigurationSnapshotJson;
+		Expect(!ordinaryJson.Contains(nameof(HextechRunConfigurationSnapshot.GodslayerTrial), StringComparison.OrdinalIgnoreCase), "ordinary save JSON omits the trial key");
+		HextechMayhemModifier ordinaryRestored = CreateMutableTestModel<HextechMayhemModifier>();
+		ordinaryRestored.SavedHextechRunConfigurationSnapshotJson = ordinaryJson;
+		Expect(!ordinaryRestored.GetEffectiveRunConfigurationSnapshot().GodslayerTrial, "ordinary run stays ordinary after loading");
+		Equal(ordinaryJson, ordinaryRestored.SavedHextechRunConfigurationSnapshotJson, "ordinary save JSON is stable across a reload");
+	}
+
 	// 试炼局：敌方按默认配置照常获得海克斯，我方每幕 0 个；不读玩家自己的设置。
 	[HextechTest]
 	private static void GodslayerTrialSnapshotKeepsDefaultEnemyHexesAndNoPlayerHexes()

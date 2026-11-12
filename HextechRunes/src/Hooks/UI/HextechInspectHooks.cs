@@ -17,7 +17,7 @@ internal static class HextechInspectHooks
 
 	private readonly record struct InspectOpenState(RelicModel? RequestedRelic);
 
-	/// <summary>原版 <c>NInspectRelicScreen</c> 的私有成员(0.107.1 / 0.110.0 / 0.111.0 同名同签名)。</summary>
+	/// <summary>原版 <c>NInspectRelicScreen</c> 的私有成员(0.107.1 / 0.111.0 同名同签名)。</summary>
 	private sealed record InspectScreenMembers(
 		FieldInfo Relics,
 		FieldInfo Index,

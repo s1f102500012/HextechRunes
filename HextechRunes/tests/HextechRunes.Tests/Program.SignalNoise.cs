@@ -60,4 +60,18 @@ internal static partial class Program
 		Expect(!HextechSignalNoise.TryEcho(new string('a', 65)), "overlong text");
 		Expect(!HextechSignalNoise.TryEcho("HEXCFG?:Ⅶ:" + HextechSignalNoise.HanFragments[6]), "copied noise fragment");
 	}
+
+	// 噪声卡图标按品阶各一张，且都在 assets 里：缺图时图标位会空着，玩家又会以为贴图丢了。
+	[HextechTest]
+	private static void SignalNoiseIconExistsForEveryRarity()
+	{
+		string[] paths = new[] { "SILVER", "GOLD", "PRISMATIC" }.Select(HextechRuneSelectionScreen.GetNoiseIconPath).ToArray();
+		Equal(3, paths.Distinct(StringComparer.Ordinal).Count(), "one icon per rarity");
+		foreach (string path in paths)
+		{
+			Expect(path.StartsWith(HextechAssets.ImageRoot, StringComparison.Ordinal), $"{path} lives under the image root");
+			string file = Path.Combine(AuditRoot, "assets", "images", path[HextechAssets.ImageRoot.Length..]);
+			Expect(File.Exists(file), $"{file} is checked in");
+		}
+	}
 }

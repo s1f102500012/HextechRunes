@@ -20,16 +20,12 @@ internal static class HextechSavedPropertyNetIdHooks
 	private const BindingFlags StaticNonPublic = BindingFlags.NonPublic | BindingFlags.Static;
 
 	private static bool _registrationFrozen;
-	private static bool _canonicalized;
 
 	/// <summary>
 	/// 冻结点(ExecuteEssential 后缀)是否已过。此后再注入 SavedProperty 载体会绕过规范排序
 	/// (见 HextechSavedPropertyBootstrap.InjectModelType 的告警)。与规范化成功与否无关。
 	/// </summary>
 	internal static bool IsRegistrationFrozen => _registrationFrozen;
-
-	/// <summary>规范化是否真正完成(两张表已按规范布局重建、位宽已写入)。失败时保持 false,只用于日志与诊断。</summary>
-	internal static bool IsCanonicalized => _canonicalized;
 
 	private static void CanonicalizeNetIdMapPostfix()
 	{
@@ -49,8 +45,8 @@ internal static class HextechSavedPropertyNetIdHooks
 				return;
 			}
 
-			// SavedPropertiesTypeCache._netIdToPropertyNameMap / _propertyNameToNetIdMap:0.107.1 与 0.108.0 原版私有静态字段
-			// (宿主为这两版时才会加载本变体)。缺失时经 HookReflection 进启动摘要,下面的空引用由外层 catch 记错误。
+			// SavedPropertiesTypeCache._netIdToPropertyNameMap / _propertyNameToNetIdMap:0.107.1 原版私有静态字段
+			// (本变体只在 0.107.1 目标编译)。缺失时经 HookReflection 进启动摘要,下面的空引用由外层 catch 记错误。
 			List<string> netIdToName = (List<string>)TryGetField(typeof(SavedPropertiesTypeCache), "_netIdToPropertyNameMap", StaticNonPublic)!.GetValue(null)!;
 			Dictionary<string, int> nameToNetId = (Dictionary<string, int>)TryGetField(typeof(SavedPropertiesTypeCache), "_propertyNameToNetIdMap", StaticNonPublic)!.GetValue(null)!;
 			List<string> canonical = HextechSavedPropertyNetIdCanonicalizer.Canonicalize(netIdToName, vanillaNames);
@@ -72,7 +68,6 @@ internal static class HextechSavedPropertyNetIdHooks
 				return;
 			}
 
-			_canonicalized = true;
 			HextechLog.Info("MultiplayerCompat", $"Canonicalized SavedProperty net-id map: vanilla={vanillaNames.Count} total={canonical.Count} bitSize={SavedPropertiesTypeCache.NetIdBitSize}.");
 		}
 		catch (Exception ex)
@@ -118,7 +113,7 @@ internal static class HextechSavedPropertyNetIdHooks
 	}
 
 	// 仅 0.107.1：原版在固定启动状态机里调用一次 OneTimeInitialization.ExecuteEssential（public static）。
-	// 以前靠 TypeByName 动态安装、找不到目标只告警，会让 Patcher 误报成功；现在由属性声明目标，缺失即安装失败。
+	// 由属性声明目标，缺失即安装失败，避免 Patcher 误报成功。
 	[HarmonyPatch(typeof(OneTimeInitialization), nameof(OneTimeInitialization.ExecuteEssential))]
 	[HextechPatch("compat.saved-property-net-id", "SavedProperty net-id 规范化")]
 	private static class CanonicalizePatch

@@ -169,7 +169,7 @@ internal static partial class HextechRuneSelectionCoordinator
 			_ = RequireCompletedSelection(
 				selectedRelic,
 				$"local {context} player={selection.Player.NetId} choiceId={sentChoiceId}");
-			// 存档里的"已见"参与双端比对:本机与远端 ResolveRemoteRuneChoice 都在确认后按同步的完整候选历史写入。
+			// "已见"存在 Modifier 上、不参与原版联机校验,两端一致靠本模组保证:本机与远端 ResolveRemoteRuneChoice 都在确认后按同步的完整候选历史写入。
 			CommitSeenRuneSelection(modifier, selection.Player, offeredOptionIds, screen.CurrentRelics);
 
 			if (afterLocalSelection != null)

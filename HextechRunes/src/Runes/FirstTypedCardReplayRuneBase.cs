@@ -14,7 +14,7 @@ public abstract class FirstTypedCardReplayRuneBase : TurnScopedRelicBase
 	public override int ModifyCardPlayCount(CardModel card, Creature? target, int playCount)
 	{
 		EnsureTurnScopedStateCurrent();
-		if (HasTurnProcTriggered(GetStableTurnProcKey(), _triggeredThisTurn) || !IsOwnedTargetType(card))
+		if (HasTurnProcTriggered(_triggeredThisTurn) || !IsOwnedTargetType(card))
 		{
 			return playCount;
 		}
@@ -25,7 +25,7 @@ public abstract class FirstTypedCardReplayRuneBase : TurnScopedRelicBase
 	public override Task AfterModifyingCardPlayCount(CardModel card)
 	{
 		EnsureTurnScopedStateCurrent();
-		if (IsOwnedTargetType(card) && TryConsumeTurnProc(GetStableTurnProcKey(), ref _triggeredThisTurn))
+		if (IsOwnedTargetType(card) && TryConsumeTurnProc(ref _triggeredThisTurn))
 		{
 			Flash();
 		}

@@ -62,9 +62,9 @@ internal sealed class HextechMayhemRunContext
 		ResetCombatTracking();
 	}
 
-	public void ResetCombatTracking()
+	public void ResetCombatTracking(bool atCombatStart = false)
 	{
-		CombatTracking.Reset();
+		CombatTracking.Reset(atCombatStart);
 	}
 
 	private void ResetProgressState(int hexCountRecoveryBaseline, int monsterHexStrengthTierFloor)

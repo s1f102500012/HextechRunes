@@ -4,7 +4,6 @@ public sealed class DecayRune : HextechRelicBase
 {
 	protected override IEnumerable<DynamicVar> CanonicalVars =>
 	[
-		new PowerVar<WeakPower>(1m),
 		new PowerVar<StrengthPower>(1m)
 	];
 

@@ -31,11 +31,6 @@ internal readonly struct HextechEnemyHexContext(HextechMayhemModifier modifier, 
 		return modifier.GetMonsterHexStrengthTier(kind);
 	}
 
-	internal int GetStrengthTierForAct(MonsterHexKind kind, int actIndex)
-	{
-		return modifier.GetMonsterHexStrengthTierForAct(kind, actIndex);
-	}
-
 	internal int TierValue(MonsterHexKind kind, int tier1, int tier2, int tier3)
 	{
 		return GetStrengthTier(kind) switch
@@ -67,16 +62,6 @@ internal readonly struct HextechEnemyHexContext(HextechMayhemModifier modifier, 
 	internal decimal TierValue(MonsterHexKind kind, decimal tier1, decimal tier2, decimal tier3)
 	{
 		return GetStrengthTier(kind) switch
-		{
-			<= 1 => tier1,
-			2 => tier2,
-			_ => tier3
-		};
-	}
-
-	internal int TierValueForAct(MonsterHexKind kind, int actIndex, int tier1, int tier2, int tier3)
-	{
-		return GetStrengthTierForAct(kind, actIndex) switch
 		{
 			<= 1 => tier1,
 			2 => tier2,

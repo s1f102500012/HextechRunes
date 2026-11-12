@@ -1,3 +1,5 @@
+using System.Diagnostics.CodeAnalysis;
+
 namespace HextechRunes;
 
 internal static class HextechEnemyHexEffects
@@ -154,20 +156,47 @@ internal static class HextechEnemyHexEffects
 		new OwlMagistrateEnemyHex()
 	]);
 
+	// 惰性枚举：每取一项都按当时的生效状态判断，语义见 HextechActiveEnemyHexCursor。
 	internal static IEnumerable<HextechEnemyHexEffect> GetActive(HextechMayhemModifier modifier)
 	{
-		foreach (HextechEnemyHexEffect effect in OrderedEffects)
+		HextechActiveEnemyHexCursor cursor = new(modifier);
+		while (cursor.MoveNext(out HextechEnemyHexEffect? effect))
 		{
-			if (modifier.HasActiveMonsterHex(effect.Kind))
-			{
-				yield return effect;
-			}
+			yield return effect;
 		}
 	}
 
 	internal static bool HasActiveAttackCostPreviewEffect(HextechMayhemModifier modifier)
 	{
-		return GetActive(modifier).Any(static effect => effect.AffectsPlayerAttackCostPreview);
+		HextechActiveEnemyHexCursor cursor = new(modifier);
+		while (cursor.MoveNext(out HextechEnemyHexEffect? effect))
+		{
+			if (effect.AffectsPlayerAttackCostPreview)
+			{
+				return true;
+			}
+		}
+
+		return false;
+	}
+
+	// 按注册顺序取出 active 中的效果；orderIndexes 与返回数组等长，记录各效果在注册顺序中的位置。
+	internal static HextechEnemyHexEffect[] CreateActiveEffects(IReadOnlySet<MonsterHexKind> active, out int[] orderIndexes)
+	{
+		List<HextechEnemyHexEffect> effects = new(active.Count);
+		List<int> orders = new(active.Count);
+		for (int i = 0; i < OrderedEffects.Count; i++)
+		{
+			HextechEnemyHexEffect effect = OrderedEffects[i];
+			if (active.Contains(effect.Kind))
+			{
+				effects.Add(effect);
+				orders.Add(i);
+			}
+		}
+
+		orderIndexes = orders.ToArray();
+		return effects.ToArray();
 	}
 
 	internal static void ResetAllRunScopedState()
@@ -209,5 +238,56 @@ internal static class HextechEnemyHexEffects
 		}
 
 		return effects;
+	}
+}
+
+// 按注册顺序逐个取当前生效的敌方海克斯效果，与"每取一项时从上一项之后按注册顺序逐个判断 HasActiveMonsterHex"等价：
+// 处理器在 await 期间增删敌方海克斯、进出战斗房间或切换阶段时，尚未经过的位置按新状态判断，已经过的位置不回头。
+// 状态未变时缓存返回同一数组，直接取下一项；数组被换掉时按注册位置找回续接点。
+internal struct HextechActiveEnemyHexCursor
+{
+	private readonly HextechMayhemModifier _modifier;
+	private HextechEnemyHexEffect[]? _effects;
+	private int _index;
+	private int _nextOrder;
+
+	internal HextechActiveEnemyHexCursor(HextechMayhemModifier modifier)
+	{
+		_modifier = modifier;
+		_effects = null;
+		_index = -1;
+		_nextOrder = 0;
+	}
+
+	internal bool MoveNext([NotNullWhen(true)] out HextechEnemyHexEffect? effect)
+	{
+		HextechEnemyHexEffect[] effects = _modifier.GetActiveEnemyHexEffects(out int[] orderIndexes);
+		int index;
+		if (ReferenceEquals(effects, _effects))
+		{
+			index = _index + 1;
+		}
+		else
+		{
+			index = 0;
+			while (index < orderIndexes.Length && orderIndexes[index] < _nextOrder)
+			{
+				index++;
+			}
+		}
+
+		_effects = effects;
+		if (index >= effects.Length)
+		{
+			_index = effects.Length;
+			_nextOrder = int.MaxValue;
+			effect = null;
+			return false;
+		}
+
+		_index = index;
+		_nextOrder = orderIndexes[index] + 1;
+		effect = effects[index];
+		return true;
 	}
 }

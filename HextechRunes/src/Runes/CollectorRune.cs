@@ -55,7 +55,7 @@ public sealed class CollectorRune : HextechRelicBase
 		}
 
 		// 真死亡判定要在 Kill 之前算:Kill 完成后怪物已从战斗移除、CombatState 置空,
-		// 事后再判会一律得到 false,处决就永远记不上金币(玩家反馈的"收集者不给钱")。
+		// 事后再判会一律得到 false,处决就永远记不上金币。
 		bool creditable = IsCreditableDeath(target);
 		_executing = true;
 		try

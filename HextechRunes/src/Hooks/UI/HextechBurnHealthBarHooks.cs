@@ -32,9 +32,9 @@ internal static class HextechBurnHealthBarHooks
 	private static readonly HealthBarMembers? Members = HealthBarMembers.TryResolve();
 
 	/// <summary>
-	/// 原版 <c>NHealthBar</c> 的私有成员(0.107.1 / 0.110.0 / 0.111.0 同名同签名):字段 <c>_creature</c>、
+	/// 原版 <c>NHealthBar</c> 的私有成员(0.107.1 / 0.111.0 同名同签名):字段 <c>_creature</c>、
 	/// <c>_hpForeground</c>、<c>_poisonForeground</c>、<c>_doomForeground</c>、<c>_hpLabel</c>;
-	/// 私有属性 <c>MaxFgWidth</c> 的 getter 与私有方法 <c>GetFgWidth(int)</c> 预先绑定成委托,每帧调用不走反射。
+	/// 私有属性 <c>MaxFgWidth</c> 的 getter 与私有方法 <c>GetFgWidth(int)</c> 预先绑定成委托,调用时不走反射。
 	/// </summary>
 	private sealed record HealthBarMembers(
 		FieldInfo Creature,
@@ -286,7 +286,7 @@ internal static class HextechBurnHealthBarHooks
 	/// 跳过型前缀:原版私有 <c>NHealthBar.RefreshForeground</c> 只认中毒/灾厄两段前景,没有 Hook 能插入第三段;
 	/// 替换体按原版的中毒/灾厄几何与斩杀判定逐段复刻,只额外排入灼烧段。
 	/// 激活条件:生物身上有灼烧且预测掉血大于 0;否则返回 true 交给原版。
-	/// 版本:0.107.1 / 0.110.0 / 0.111.0 原方法一致,已进原版拷贝守卫;<see cref="Priority.Low"/> 让他人前缀先跑。
+	/// 版本:0.107.1 / 0.111.0 原方法一致,已进原版拷贝守卫;<see cref="Priority.Low"/> 让他人前缀先跑。
 	/// </remarks>
 	[HarmonyPatch(typeof(NHealthBar), "RefreshForeground")]
 	[HextechPatch("ui.burn-health-bar.foreground", "灼烧血条预测")]

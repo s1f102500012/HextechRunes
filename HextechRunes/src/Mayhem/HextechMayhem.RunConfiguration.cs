@@ -1,4 +1,5 @@
 using System.Text.Json;
+using System.Text.Json.Serialization;
 
 namespace HextechRunes;
 
@@ -95,7 +96,7 @@ internal sealed partial class HextechMayhemModifier
 			return "";
 		}
 
-		// 该 JSON 进 SavedProperty 参与双端比对，集合字段用排序数组序列化，
+		// 该 JSON 存在 Modifier 上，不参与原版联机校验，两端一致靠本模组保证；集合字段用排序数组序列化，
 		// 不依赖 HashSet 未文档化的插入序枚举；属性名与原 record 一致，Restore 仍反序列化回原类型。
 		HextechRunConfigurationSnapshot normalized = HextechRuneConfiguration.NormalizeSnapshot(snapshot);
 		return JsonSerializer.Serialize(new RunConfigurationSnapshotJson(normalized), HextechTelemetry.JsonOptions);
@@ -116,7 +117,10 @@ internal sealed partial class HextechMayhemModifier
 		int RandomForgeShopPrice,
 		bool RandomForgeDirectGrant,
 		bool ModEnabled,
-		int ChaosRuneChancePercent)
+		int ChaosRuneChancePercent,
+		// 普通局为 false 不写出，存档 JSON 与不带该字段时逐字节一致。
+		[property: JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)]
+		bool GodslayerTrial)
 	{
 		public RunConfigurationSnapshotJson(HextechRunConfigurationSnapshot snapshot)
 			: this(
@@ -134,7 +138,8 @@ internal sealed partial class HextechMayhemModifier
 				snapshot.RandomForgeShopPrice,
 				snapshot.RandomForgeDirectGrant,
 				snapshot.ModEnabled,
-				snapshot.ChaosRuneChancePercent)
+				snapshot.ChaosRuneChancePercent,
+				snapshot.GodslayerTrial)
 		{
 		}
 

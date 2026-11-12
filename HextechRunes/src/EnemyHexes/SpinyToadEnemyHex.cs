@@ -62,7 +62,7 @@ internal sealed class SpinyToadEnemyHex : HextechEnemyHexEffect
 			return;
 		}
 
-		foreach ((uint combatId, int thorns) in context.Tracking.EnemySpinyToadTemporaryThorns.ToList())
+		foreach ((uint combatId, int thorns) in context.Tracking.EnemySpinyToadTemporaryThorns.OrderBy(static entry => entry.Key).ToList())
 		{
 			Creature? enemy = enemies.FirstOrDefault(creature => creature.CombatId == combatId);
 			if (enemy is { IsAlive: true })

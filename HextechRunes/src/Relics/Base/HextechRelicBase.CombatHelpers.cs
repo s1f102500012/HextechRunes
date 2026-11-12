@@ -17,8 +17,6 @@ public abstract partial class HextechRelicBase
 		return Math.Max(0, Math.Max(0, current) / step - Math.Max(0, previous) / step);
 	}
 
-	// 旧版本按"本场累计、战后发放"记金币，新触发已改为直接发放；SavedCountThisCombat 只剩旧存档里尚未领取的值。
-	// 战后把它补进奖励并清零，战斗开始时直接清零（传 null）。
 	protected bool IsOwnedCard(CardModel? card)
 	{
 		return card?.Owner == Owner;
@@ -56,9 +54,8 @@ public abstract partial class HextechRelicBase
 
 	protected bool IsOwnedCardWithEffectiveCostAtLeast(CardModel? card, decimal minimumCost)
 	{
-		// 含 X 费卡:X 费卡按本次实付的 X(GetEnergyCostForCurrentCardPlay 在打出期间返回实付能量)参与判定,
-		// 不再用 !CostsX 排除。本方法仅由 5 个"费用≥N"符文(终极刷新/终极不可阻挡/最终形态/妖精魔法/碰不到我)共用,
-		// 放开 X 费卡正是期望行为;其它 CostsX 排除逻辑都各自直接判 card.EnergyCost.CostsX,不经本方法。
+		// 含 X 费卡:X 费卡按本次实付的 X(GetEnergyCostForCurrentCardPlay 在打出期间返回实付能量)参与判定。
+		// 本方法只由"费用≥N"类符文共用,放开 X 费卡正是期望行为;其它 CostsX 排除逻辑都各自直接判 card.EnergyCost.CostsX,不经本方法。
 		// 实付 X 由同步的打出动作决定,故各端判定一致,不引入联机分叉。
 		return card != null
 			&& card.Owner == Owner

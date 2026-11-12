@@ -5,7 +5,7 @@ using MegaCrit.Sts2.Core.Models.Relics;
 
 namespace HextechRunesSponsorPack;
 
-// 深渊契约的两张静态表。选择界面、未签约提示、契约识别、事件遗物注册与依赖声明都从这里取,不再各写一份。
+// 深渊契约的两张静态表。选择界面、未签约提示、契约识别、事件遗物注册与依赖声明都从这里取,不各写一份。
 internal static class AbyssalContractCatalog
 {
 	// 顺序即选择界面顺序、未签约时的提示顺序,也是 SponsorCatalog 事件遗物表里的注册顺序(append-only,不要重排)。

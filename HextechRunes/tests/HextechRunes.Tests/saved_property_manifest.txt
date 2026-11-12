@@ -62,9 +62,11 @@ SavedPlayerRuneConfigDisabledIdsJson
 SavedProcsThisTurn
 SavedPurchaseCount
 SavedRarityByAct
+SavedRecentRewardRelicIds
 SavedRedEnvelopeForgeChanceOffset
 SavedRemovedPowerCardsJson
 SavedResolvedActs
+SavedRewardDropCount
 SavedRuneSelectionJournalJson
 SavedSeenPlayerRuneIdsJson
 SavedShivsPlayedThisCombat

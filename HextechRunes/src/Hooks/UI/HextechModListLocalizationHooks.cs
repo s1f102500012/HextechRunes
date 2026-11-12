@@ -27,7 +27,7 @@ internal static class HextechModListLocalizationHooks
 	internal const string SponsorNameKey = "HEXTECH_SPONSOR_MOD_NAME";
 	internal const string SponsorDescriptionKey = "HEXTECH_SPONSOR_MOD_DESCRIPTION";
 
-	// 原版场景节点名(0.107.1 / 0.110.0 / 0.111.0 一致):NModMenuRow._Ready 取 "Title",
+	// 原版场景节点名(0.107.1 / 0.111.0 一致):NModMenuRow._Ready 取 "Title",
 	// NModInfoContainer._Ready 取 "ModTitle" / "ModDescription"。用公开的节点查找，不读私有字段 _title/_description。
 	private const string RowTitleNode = "Title";
 	private const string InfoTitleNode = "ModTitle";
@@ -149,7 +149,7 @@ internal static class HextechModListLocalizationHooks
 	}
 
 	/// <summary>
-	/// 后缀：原版 <c>NModMenuRow._Ready</c> 在 Mod 非空时写入 Title 文本（0.107.1 / 0.110.0 / 0.111.0 一致）。
+	/// 后缀：原版 <c>NModMenuRow._Ready</c> 在 Mod 非空时写入 Title 文本（0.107.1 / 0.111.0 一致）。
 	/// <see cref="Priority.Low"/>：排在其他模组的后缀之后，看到他们改过的标签就不覆盖。
 	/// </summary>
 	[HarmonyPatch(typeof(NModMenuRow), nameof(NModMenuRow._Ready), new Type[0])]
@@ -172,7 +172,7 @@ internal static class HextechModListLocalizationHooks
 	}
 
 	/// <summary>
-	/// 后缀：原版 <c>NModInfoContainer.Fill(Mod)</c> 同步写入标题与详情文本（0.107.1 / 0.110.0 / 0.111.0 一致）。优先级理由同上。
+	/// 后缀：原版 <c>NModInfoContainer.Fill(Mod)</c> 同步写入标题与详情文本（0.107.1 / 0.111.0 一致）。优先级理由同上。
 	/// </summary>
 	[HarmonyPatch(typeof(NModInfoContainer), nameof(NModInfoContainer.Fill), typeof(Mod))]
 	[HextechPatch("ui.mod-list-loc.info", Feature, Optional = true)]

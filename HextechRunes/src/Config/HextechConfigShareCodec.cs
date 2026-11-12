@@ -8,7 +8,7 @@ namespace HextechRunes;
 /// 海克斯配置分享码：`HEXCFG1:` + base64(gzip(紧凑 JSON))。
 /// 导出取当前配置快照（不含 ModEnabled 与 UI 偏好——导入别人的码不应关掉对方 mod 或改界面习惯）；
 /// 导入只解析并生成快照与差异摘要，真正落盘由调用方确认后走 SaveSnapshot（内部全量 Normalize/Clamp，
-/// 未知条目自动丢弃、数值自动收敛，脏码不会产生非法状态）。
+/// 敌方海克斯禁用表按注册表丢弃未知 ID，我方符文与锻造器的未知 ID 原样保留；数值自动收敛，脏码不会产生非法状态）。
 /// </summary>
 internal static class HextechConfigShareCodec
 {

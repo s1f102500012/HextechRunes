@@ -8,7 +8,7 @@ internal static class HextechEnemyCuttingEdgeAlchemistHooks
 {
 	private const float PotionRewardMultiplier = 0.5f;
 	private const float FloatTolerance = 0.000001f;
-	// AbstractOdds._rng（0.107.1/0.110.0/0.111.0 原版私有字段）：药水掉落共用的奖励 RNG。
+	// AbstractOdds._rng（0.107.1/0.111.0 原版私有字段）：药水掉落共用的奖励 RNG。
 	// 缺失时本敌方海克斯不再减半药水掉落（保持原版结果），缺失成员进启动摘要。
 	private static readonly FieldInfo? OddsRngField = TryGetField(typeof(AbstractOdds), "_rng");
 

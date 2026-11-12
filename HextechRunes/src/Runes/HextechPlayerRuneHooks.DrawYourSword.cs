@@ -8,8 +8,8 @@ internal static partial class HextechPlayerRuneHooks
 	private const BindingFlags PublicInstance = BindingFlags.Instance | BindingFlags.Public;
 
 	/// <summary>
-	/// 只补原版程序集里的充能球 Evoke 覆写。以前会扫描所有已加载程序集并给第三方模组的充能球类也打补丁,
-	/// 那等于替别人的类型做决定;第三方充能球现在保持原版激发,亮剑不替换它们。
+	/// 只补原版程序集里的充能球 Evoke 覆写,不给第三方模组的充能球类打补丁:
+	/// 那等于替别人的类型做决定;第三方充能球保持原版激发,亮剑不替换它们。
 	/// 基类 OrbModel.Evoke(PlayerChoiceContext) 缺失时抛异常，由 HextechPatcher 把亮剑标为本运行时不可用。
 	/// </summary>
 	internal static IReadOnlyList<MethodInfo> FindOrbEvokeMethods()

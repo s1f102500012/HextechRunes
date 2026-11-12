@@ -2,11 +2,6 @@ namespace HextechRunes;
 
 public sealed class KakaRune : HextechRelicBase
 {
-	protected override IEnumerable<DynamicVar> CanonicalVars =>
-	[
-		new PowerVar<RitualPower>(1m)
-	];
-
 	protected override IEnumerable<IHoverTip> ExtraHoverTips =>
 	[
 		HoverTipFactory.FromPower<RitualPower>()

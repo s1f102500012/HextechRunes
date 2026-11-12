@@ -143,7 +143,7 @@ internal static class HextechAssetHooks
 
 	/// <summary>
 	/// 自定义休息室选项(「添柴」)的图标。基类 RestSiteOption.Icon 从 res://images/ui/rest_site/option_&lt;id&gt;.png 取图,
-	/// 模组无法在该 base-game 命名空间提供真实资源;旧实现用可被卸载的缓存别名兜底,在联机非持有方会取到 null 并在渲染
+	/// 模组无法在该 base-game 命名空间提供真实资源;不能用可被卸载的缓存别名兜底:联机非持有方会取到 null 并在渲染
 	/// 思考气泡时抛 NotImplementedException —— 该异常发生在同步的 ChooseOption 路径里,导致离开休息室时校验和分叉。
 	/// 这里直接返回稳定纹理(原版 Stoke 卡牌立绘),其它选项一律放行;解析失败同样放行,绝不抛出。
 	/// </summary>

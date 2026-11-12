@@ -19,7 +19,7 @@ public sealed class LoopUpgradeRune : CardUpgradeRuneBase<Loop>
 			orb => OrbCmd.Passive(context, orb, null));
 	}
 
-	// 跳过理由：原版 LoopPower.AfterPlayerTurnStart(0.107.1/0.110.0/0.111.0 反编译一致)写死只对 Orbs[0] 触发被动，
+	// 跳过理由：原版 LoopPower.AfterPlayerTurnStart(0.107.1/0.111.0 反编译一致)写死只对 Orbs[0] 触发被动，
 	// 每层一次、每次后 Cmd.Wait(0.25f)；Hook.ModifyOrbPassiveTriggerCount 只改单个球的次数，没有能改"触发哪些球"的 Hook。
 	// 激活条件：仅 LoopPower 持有者拥有本符文时替换，其余玩家走原版；替换体按回合开始时的球快照逐个触发，
 	// 未保留原版每次触发后的 0.25 秒表现等待。原方法 IL 由 vanilla_copy_guard 冻结，游戏更新漂移会在测试与启动日志显形。

@@ -4,7 +4,7 @@ internal static partial class HextechRuneSelectionCoordinator
 {
 	/// <summary>
 	/// 本幕稀有度抽签。deterministic=true(联机)用稳定哈希,各端独立算出同一结果;
-	/// false(单机)推进原版 Niche 随机流。两条路径的 RNG 调用次数与顺序与拆分前一致。
+	/// false(单机)推进原版 Niche 随机流。
 	/// </summary>
 	private static HextechRarityTier RollActRarity(
 		HextechMayhemModifier modifier,
@@ -93,8 +93,8 @@ internal static partial class HextechRuneSelectionCoordinator
 	}
 
 	/// <summary>
-	/// 本机先算出的本幕结果(稀有度、首个敌方海克斯、本局配置快照)。联机客户端算完后以房主同步值为准,
-	/// 但本机的抽签仍要执行以保持 RNG 推进与拆分前一致。
+	/// 本机先算出的本幕结果(稀有度、首个敌方海克斯、本局配置快照)。房主据此发送;客户端以房主同步值为准,
+	/// 本机结果只写进日志供比对。联机抽签走稳定哈希,不推进 RNG。
 	/// </summary>
 	private static LocalActRoll RollLocalActRoll(RunState runState, HextechMayhemModifier modifier, int actIndex, bool isMultiplayer)
 	{

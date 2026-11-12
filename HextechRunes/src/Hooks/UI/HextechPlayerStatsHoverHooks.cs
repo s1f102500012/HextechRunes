@@ -12,7 +12,7 @@ namespace HextechRunes;
 /// </summary>
 internal static class HextechPlayerStatsHoverHooks
 {
-	// 原版 NTopBarPortraitTip._hoverTip(IHoverTip,0.107.1 / 0.110.0 / 0.111.0)。
+	// 原版 NTopBarPortraitTip._hoverTip(IHoverTip,0.107.1 / 0.111.0)。
 	private static readonly FieldInfo? PortraitHoverTipField = HextechHookReflection.TryGetField(typeof(NTopBarPortraitTip), "_hoverTip");
 
 	private static readonly ConditionalWeakTable<NTopBarPortraitTip, Player> PortraitOwners = new();

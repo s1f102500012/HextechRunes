@@ -10,6 +10,7 @@ internal sealed partial class HextechMayhemCombatTrackingState
 	public readonly Dictionary<uint, int> CourageProcsThisTurn = new();
 	[CombatTrackingClear(CombatTrackingClearPhase.PlayerTurnStart)]
 	public readonly Dictionary<uint, int> BloodPactProcsThisTurn = new();
+	// 只剩敌方海克斯经 HextechCombatProcTracker 使用（我方符文计数在遗物实例上）；字段名是快照 JSON 键，不改名。
 	// 键为"玩家 NetId:计次键"。只在该玩家自己开始回合时清（见 ResetPlayerRuneProcsThisTurn）：
 	// 队友的额外回合不重置别人的每回合次数，自己的额外回合算新回合，与本地按 TurnNumber 计数一致。
 	[CombatTrackingClear(CombatTrackingClearPhase.None)]
@@ -62,7 +63,7 @@ internal sealed partial class HextechMayhemCombatTrackingState
 	public readonly Dictionary<ulong, int> PlayerAttackCardsPlayedThisTurn = new();
 	[CombatTrackingClear(CombatTrackingClearPhase.EveryTurnBoundary)]
 	public readonly Dictionary<ulong, int> BackToBasicsCardsPlayedThisTurn = new();
-	// 沃格莫特之灵(敌方)的每玩家累计抽牌数;快照里的 JSON 键保持旧名 PlayerCardsDrawnThisCombat。
+	// 沃格莫特之灵(敌方)的全队累计抽牌数(合计存在键 0,见 HextechEnemyDrawProgress);快照里的 JSON 键保持旧名 PlayerCardsDrawnThisCombat。
 	public readonly Dictionary<ulong, int> WarmogsSpiritPlayerCardsDrawnThisCombat = new();
 	public readonly Dictionary<ulong, int> SwiftAndSafePlayerCardsDrawnThisCombat = new();
 	public readonly Dictionary<ulong, int> NightstalkingPlayerCardsDrawnThisCombat = new();
@@ -136,8 +137,31 @@ internal sealed partial class HextechMayhemCombatTrackingState
 		HextechMayhemCombatTrackingSerializer.ClearPhase(this, CombatTrackingClearPhase.EnemyTurnStart);
 	}
 
-	public void Reset()
+	// atCombatStart：原版在调用 BeforeCombatStart 钩子之前就把 IsInProgress 置为 true，开战那次重置不算异常。
+	public void Reset(bool atCombatStart = false)
 	{
+		if (!atCombatStart)
+		{
+			WarnIfCombatInProgress("reset");
+		}
+
 		HextechMayhemCombatTrackingSerializer.Clear(this);
+	}
+
+	// 战斗追踪只该在战斗开始/结束与读档时整体清空或还原。战斗进行中被整体改写会让这一端的敌方海克斯
+	// 计数与另一端分叉，留下调用栈方便从玩家日志定位来源。
+	internal static void WarnIfCombatInProgress(string operation)
+	{
+		if (CombatManager.Instance?.IsInProgress != true)
+		{
+			return;
+		}
+
+		string stack = string.Join(" <- ", new System.Diagnostics.StackTrace(2, false).GetFrames()
+			.Select(static frame => frame.GetMethod())
+			.Where(static method => method != null)
+			.Take(8)
+			.Select(static method => $"{method!.DeclaringType?.Name}.{method.Name}"));
+		HextechLog.Warn("CombatTracking", $"Combat tracking {operation} while combat is in progress: {stack}");
 	}
 }

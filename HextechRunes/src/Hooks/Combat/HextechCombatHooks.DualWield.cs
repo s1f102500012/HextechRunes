@@ -5,7 +5,7 @@ namespace HextechRunes;
 
 internal static partial class HextechCombatHooks
 {
-	// AttackCommand._damagePerHit（decimal 白值）与 _hitCount（int 段数），0.107.1/0.110.0/0.111.0 原版私有字段。
+	// AttackCommand._damagePerHit（decimal 白值）与 _hitCount（int 段数），0.107.1/0.111.0 原版私有字段。
 	// 任一缺失时攻击改写与意图预览一并停用（Prepare 返回 false），缺失成员进启动摘要。
 	private static readonly FieldInfo DualWieldDamagePerHitField = TryGetField(typeof(AttackCommand), "_damagePerHit")!;
 	private static readonly FieldInfo DualWieldHitCountField = TryGetField(typeof(AttackCommand), "_hitCount")!;

@@ -217,8 +217,7 @@ public sealed partial class DoubleVisionRune
 	}
 
 	// 商店购买的属性锻造器不走 AfterRewardTaken/HextechForgeChoiceReward,而直接 RelicCmd.Obtain 又会被
-	// DuplicateObtainedRelic 的「本模组程序集」闸门跳过(锻造器全是本模组类型),因此复视此前复制不到商店锻造器。
-	// 由商店购买流程在成功获得后显式调用本入口,为玩家持有的每个复视各复制一份,复用与锻造奖励完全相同的
+	// DuplicateObtainedRelic 的「本模组程序集」闸门跳过(锻造器全是本模组类型)。因此由商店购买流程在成功获得后显式调用本入口,为玩家持有的每个复视各复制一份,复用与锻造奖励完全相同的
 	// ObtainSelectedForge(syncObtainedRelic) 路径。GetActiveRunes 已含「本地持有者」联机闸门(远端由广播兜底)。
 	internal static async Task DuplicatePurchasedForge(Player player, RelicModel forge)
 	{

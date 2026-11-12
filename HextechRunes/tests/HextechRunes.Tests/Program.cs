@@ -57,12 +57,6 @@ internal static partial class Program
 		typeof(MegaCrit.Sts2.Core.Multiplayer.Serialization.ModelIdSerializationCache)
 			.GetField("_initialized", BindingFlags.NonPublic | BindingFlags.Static)
 			?.SetValue(null, true);
-#elif STS2_108_OR_NEWER
-		// 0.108 起 SavedPropertiesTypeCache 未初始化即用会抛;真实游戏由启动流程 Init(),但 Init 又依赖
-		// AssemblyInfo 等更多游戏启动态。测试环境直接置 _initialized 标志,恢复 0.107.1 的无守卫语义。
-		typeof(MegaCrit.Sts2.Core.Saves.Runs.SavedPropertiesTypeCache)
-			.GetField("_initialized", BindingFlags.NonPublic | BindingFlags.Static)
-			?.SetValue(null, true);
 #endif
 		TestCase[] tests = DiscoverTests();
 

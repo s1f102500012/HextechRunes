@@ -30,7 +30,6 @@ public sealed class NearDeathFeastRune : HextechRelicBase
 
 	protected override IEnumerable<DynamicVar> CanonicalVars =>
 	[
-		new DynamicVar("DeathNegativeMaxHpPercent", 50m),
 		new DynamicVar("StrengthPerNegativeHp", 1m)
 	];
 
@@ -94,7 +93,7 @@ public sealed class NearDeathFeastRune : HextechRelicBase
 
 	// 在 Creature.LoseHpInternal 的同步前缀里运行：这里只改生命与负血债务，不发命令。
 	// 力量补差放在 AfterCurrentHpChanged：原版 CreatureCmd.Damage 只要 UnblockedDamage > 0 就会派发它
-	// （不看生命是否真的变化，0.107.1 / 0.110.0 / 0.111.0 相同），本方法返回的 UnblockedDamage 就是本次失血，
+	// （不看生命是否真的变化，0.107.1 / 0.111.0 相同），本方法返回的 UnblockedDamage 就是本次失血，
 	// 所以"生命钉在 1、只有债务增加"时同样会走到那里并被等待。
 	internal static DamageResult LoseHpAllowingDying(Creature creature, decimal amount, ValueProp props)
 	{

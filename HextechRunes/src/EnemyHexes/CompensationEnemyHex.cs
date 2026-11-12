@@ -114,7 +114,7 @@ internal sealed class CompensationEnemyHex : HextechEnemyHexEffect
 			|| HextechNextTurnDamagePower.IsResolvingDamage;
 	}
 
-	// 同一目标在受伤回调取走之前又确认一次时累加，与旧实现按目标合并一致。
+	// 同一目标在受伤回调取走之前又确认一次时累加，按目标合并。
 	private static void ConfirmPendingCompensation(PendingCompensation split)
 	{
 		for (int i = PendingCompensations.Count - 1; i >= 0; i--)

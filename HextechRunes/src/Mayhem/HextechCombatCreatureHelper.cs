@@ -20,7 +20,7 @@ internal static class HextechCombatCreatureHelper
 	/// 清理因 PainfulStabsPower 滞留场上的死亡敌人:该 power 覆写了
 	/// ShouldPowerBeRemovedAfterOwnerDeath/ShouldCreatureBeRemovedFromCombatAfterDeath,
 	/// 持有者死后尸体留场继续排意图(攻击打不出但 debuff 意图照常生效)。
-	/// 发疼痛戳刺的海克斯(GetExcited/TestSubject)在 BeforeSideTurnStart 兜底调用。
+	/// 发疼痛戳刺的敌方海克斯(TestSubject)在 BeforeSideTurnStart 兜底调用。
 	/// </summary>
 	public static async Task CleanUpRetainedPainfulStabsEnemies(HextechCombatState combatState)
 	{

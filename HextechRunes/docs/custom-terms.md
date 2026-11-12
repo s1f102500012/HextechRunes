@@ -33,14 +33,14 @@
 | `powers/HEXTECH_CLOUD_DRAGON_SOUL_POWER.title` | 云霄龙魂 | Cloud Dragon Soul | Alma de Dragón Nube | Alma de Dragón Nube | クラウドドラゴンソウル | 바람 드래곤의 영혼 | Alma do Dragão das Nuvens | Душа облачного дракона | วิญญาณมังกรเมฆา |
 | `powers/HEXTECH_DRAGON_SOUL_POWER.title` | 海克斯科技龙魂 | Hextech Dragon Soul | Alma de dragón hextech | Alma de dragón hextech | ヘクステックドラゴンソウル | 마법공학 드래곤의 영혼 | Alma do Dragão Hextech | Душа хекстек-дракона | วิญญาณมังกรเฮกซ์เทค |
 | `powers/HEXTECH_GALVANIC_POWER.title` | 流电 | Galvanic | Galvanismo | Galvanismo | ガルバニック | 전류 | Galvanização | Гальванизация | กัดกร่อน |
-| `powers/HEXTECH_HANG_POWER.title` | 吊杀 | Hang | Ahorcar | Ahorcar | 吊殺 | 교살 | Enforcar | Повешение | แขวนคอ |
+| `powers/HEXTECH_HANG_POWER.title` | 吊杀 | Hang | Ahorcar | Ahorcar | 絞首 | 교살 | Enforcar | Повешение | แขวนคอ |
 | `powers/HEXTECH_INFERNAL_DRAGON_SOUL_POWER.title` | 炼狱龙魂 | Infernal Dragon Soul | Alma de Dragón Infernal | Alma de Dragón Infernal | インファーナルドラゴンソウル | 화염 드래곤의 영혼 | Alma do Dragão Infernal | Душа огненного дракона | วิญญาณมังกรนรก |
 | `powers/HEXTECH_MOUNTAIN_DRAGON_SOUL_POWER.title` | 山脉龙魂 | Mountain Dragon Soul | Alma de dragón de montaña | Alma de dragón de montaña | マウンテンドラゴンソウル | 대지 드래곤의 영혼 | Alma do Dragão da Montanha | Душа горного дракона | วิญญาณมังกรภูผา |
 | `powers/HEXTECH_NEXT_TURN_DAMAGE_POWER.title` | 下回合伤害 | Next Turn Damage | Daño el próximo turno | Daño el próximo turno | 次ターンダメージ | 다음 턴 피해 | Dano no Próximo Turno | Урон в следующий ход | ความเสียหายเทิร์นถัดไป |
 | `powers/HEXTECH_OCEAN_DRAGON_SOUL_POWER.title` | 海洋龙魂 | Ocean Dragon Soul | Alma de dragón oceánico | Alma de dragón oceánico | オーシャンドラゴンソウル | 바다 드래곤의 영혼 | Alma do Dragão do Oceano | Душа морского дракона | วิญญาณมังกรสมุทร |
-| `powers/HEXTECH_PLAYER_SLOW_POWER.title` | 缓慢 | Slow | Lento | Lento | 遅い | 둔화 | Lentidão | Замедление | Slow |
+| `powers/HEXTECH_PLAYER_SLOW_POWER.title` | 缓慢 | Slow | Lento | Lento | スロウ | 둔화 | Lentidão | Замедление | Slow |
 | `powers/HEXTECH_VITAL_SPARK_POWER.title` | 活力火花 | Vital Spark | Chispa vital | Chispa vital | 生命の火花 | 생명의 불꽃 | Centelha vital | Искра жизни | ประกายชีวิต |
 
 ## 更新方式
 
-官方文本从本机 `SlayTheSpire2.app/Contents/Resources/Slay the Spire 2.pck` 的 `localization/<lang>/*.json` 现取（`scan_sts2_rich_text.py` 的 `read_pck_entries` / `read_entry`），导出文件只放临时目录，不进仓库。游戏升级后重新提取相同键，人工裁决缺译或改名；不得把模组翻译回写成“官方”。卡牌、能力、附魔、关键词不能因中文相似而混用 title。
+官方文本从本机 `SlayTheSpire2.app/Contents/Resources/Slay the Spire 2.pck` 的 `localization/<lang>/*.json` 现取（用本机 sts2-rich-text-tags 技能自带扫描脚本的 `read_pck_entries` / `read_entry`；该脚本不在本仓库），导出文件只放临时目录，不进仓库。游戏升级后重新提取相同键，人工裁决缺译或改名；不得把模组翻译回写成“官方”。卡牌、能力、附魔、关键词不能因中文相似而混用 title。

@@ -1,10 +1,8 @@
 using System.Reflection;
 using System.Runtime.CompilerServices;
 using HextechRunes;
-using MegaCrit.Sts2.Core.Entities.Creatures;
 using MegaCrit.Sts2.Core.Entities.Players;
 using MegaCrit.Sts2.Core.Entities.Relics;
-using MegaCrit.Sts2.Core.Map;
 using MegaCrit.Sts2.Core.Models;
 using MegaCrit.Sts2.Core.Models.Cards;
 using MegaCrit.Sts2.Core.Rewards;
@@ -60,18 +58,6 @@ internal static partial class Program
 	}
 
 	[HextechTest]
-	private static void MapLengthReducerRejectsGoldenPathAndThirdPartyMapTypes()
-	{
-		Expect(HextechMapLengthReducer.IsSupportedMapType(typeof(ActMap)), "vanilla ActMap hierarchy should be recognized");
-		Expect(
-			!HextechMapLengthReducer.IsSupportedMapType(typeof(GoldenPathActMap)),
-			"Golden Path must be excluded through its public type.");
-		Expect(
-			!HextechMapLengthReducer.IsSupportedMapType(typeof(CompatibilityExternalActMap)),
-			"third-party ActMap subclasses must fail open without rewriting.");
-	}
-
-	[HextechTest]
 	private static void InspectOpenScopesToHextechAndPreservesExternalPrefixChanges()
 	{
 		RelicModel requested = new ColorDiscoveryRune();
@@ -102,33 +88,6 @@ internal static partial class Program
 		Equal(requestedIndex, existingIndex, "existing Hextech inspect index");
 	}
 
-	[HextechTest]
-	private static void TurnProcKeysPreserveBuiltInsAndNamespaceExternalDerivatives()
-	{
-		Equal(
-			nameof(AdamantRune),
-			HextechRelicBase.GetStableTurnProcKey(typeof(AdamantRune)),
-			"built-in turn proc key");
-
-		Type externalTypeA = typeof(CompatibilityExternalModA.SharedDebuffRune);
-		Type externalTypeB = typeof(CompatibilityExternalModB.SharedDebuffRune);
-		Equal(externalTypeA.Name, externalTypeB.Name, "external test short names");
-
-		string expectedExternalKeyA = $"{externalTypeA.Assembly.GetName().Name}:{externalTypeA.FullName}";
-		string expectedExternalKeyB = $"{externalTypeB.Assembly.GetName().Name}:{externalTypeB.FullName}";
-		string firstKeyA = HextechRelicBase.GetStableTurnProcKey(externalTypeA);
-		string secondKeyA = HextechRelicBase.GetStableTurnProcKey(externalTypeA);
-		string keyB = HextechRelicBase.GetStableTurnProcKey(externalTypeB);
-		Equal(expectedExternalKeyA, firstKeyA, "first external turn proc key");
-		Equal(expectedExternalKeyB, keyB, "second external turn proc key");
-		Expect(firstKeyA != keyB, "external derived types with the same short name must not share a proc key");
-		Equal(firstKeyA, secondKeyA, "single-player and network turn proc key stability");
-	}
-
-	private abstract class CompatibilityExternalActMap : ActMap
-	{
-	}
-
 	private sealed class CompatibilityExternalInspectRelicA : RelicModel
 	{
 		public sealed override RelicRarity Rarity => RelicRarity.Event;
@@ -137,27 +96,5 @@ internal static partial class Program
 	private sealed class CompatibilityExternalInspectRelicB : RelicModel
 	{
 		public sealed override RelicRarity Rarity => RelicRarity.Event;
-	}
-
-	private static class CompatibilityExternalModA
-	{
-		public sealed class SharedDebuffRune : LimitedDebuffProcRelicBase
-		{
-			protected override Task OnDebuffProc(Player owner, Creature target)
-			{
-				return Task.CompletedTask;
-			}
-		}
-	}
-
-	private static class CompatibilityExternalModB
-	{
-		public sealed class SharedDebuffRune : LimitedDebuffProcRelicBase
-		{
-			protected override Task OnDebuffProc(Player owner, Creature target)
-			{
-				return Task.CompletedTask;
-			}
-		}
 	}
 }

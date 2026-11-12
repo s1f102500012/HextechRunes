@@ -20,7 +20,7 @@ public sealed class LingeringMightRune : HextechRelicBase
 
 	// 快照必须挂 AfterCombatEnd:原版胜利流程里 Player.AfterCombatEnd() 会在
 	// Hook.AfterCombatVictory 之前 RemoveAllPowersInternalExcept 清光玩家 powers
-	// (反编译取证),挂 victory 时 powers 恒空 → 永不生效(玩家实报)。
+	// (反编译取证),挂 victory 时 powers 恒空 → 永不生效。
 	// AfterCombatEnd 两端确定性触发 + 稳定盐,联机无需额外同步。
 	public override Task AfterCombatEnd(CombatRoom room)
 	{

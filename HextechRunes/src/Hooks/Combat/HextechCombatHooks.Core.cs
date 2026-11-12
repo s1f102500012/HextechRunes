@@ -15,7 +15,7 @@ internal static partial class HextechCombatHooks
 	internal const string RitsuLibCoreHarmonyId = "com.ritsukage.sts2-RitsuLib.framework-core";
 	internal const string BaseLibHarmonyId = "BaseLib";
 
-	// MoveState.Intents 的自动属性后备字段（0.107.1/0.110.0/0.111.0 原版只有 private set）。
+	// MoveState.Intents 的自动属性后备字段（0.107.1/0.111.0 原版只有 private set）。
 	// 珠光护手临时替换显示意图、仪式兽/偷窃草蜢升级追加意图共用；缺失时两项功能各自降级
 	// （珠光护手由 Prepare 停用，升级意图在 AddMonsterUpgradeIntents 入口判空）。
 	private static readonly FieldInfo MoveStateIntentsField =

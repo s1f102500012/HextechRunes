@@ -4,7 +4,6 @@ public sealed class CondensedRadianceRune : HextechRelicBase
 {
 	protected override IEnumerable<DynamicVar> CanonicalVars =>
 	[
-		new CardsVar(1),
 		new StarsVar(1)
 	];
 

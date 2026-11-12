@@ -97,3 +97,30 @@
 有意保留：`DeckContains<TCard>`、`HextechPowerCmdCompat.RequireModifyAmountMethod`（公开类，硬依赖模组可能使用）；旧权重字段 `FirstActRuneRarityWeights` 等（牵涉配置、分享码、本局快照三种 JSON 形状）；自然即是治愈的联机分支（兜底联机禁用前已持有的旧存档）；薄暮法衣旧存档兼容；同步协议的旧版本分支；仅测试使用的两个方法。
 
 未处理：A3、A4（按裁决）、A6、A7、A8、A12～A14、A16，第三至六节的重复实现、元数据手工同步、版本符号、反射集中、补丁基础设施与结构调整。
+
+### 2026-11-10 复核
+
+仍未处理（位置按复核时的代码）：
+
+- A6：运行时过滤仍进入候选池，`Selection/Pool/HextechRunePoolBuilder.cs:30,418`（`IsPlayerRuneAvailableForCurrentRuntime`）。
+- A7：顶栏延迟刷新仍会调 `TryRecoverResolvedActsFromPlayerRelics`，`Hooks/RunLifecycle/HextechRunLifecycleHooks.LoadedUi.cs:153-201`。
+- A12：大号匕首 `AddGeneratedCardsToCombat` 前缀仍整段吞异常并捎带敌方操纵现实，`Runes/BigKnifeRune.cs:126-178`。
+- A13：缺 Modifier 时仍读本地配置的只剩 `Forges/HextechForgeGrantHelper.cs`（稀有度权重、禁用列表）与 `Forges/HextechForgeShopPriceHelper.cs`（售价）；锻造选择协调器已改为联机不读本地值。
+- 运行配置双份存储：`Mayhem/HextechMayhem.SavedState.cs` 的配置快照 JSON 与玩家符文禁用列表 JSON 仍各存一份。
+- 补丁器仍把 `[HarmonyPrepare]` 返回 false 的补丁记为已应用：`Patching/HextechPatcher.cs:61-70`。
+- 补丁元数据张冠李戴：濒死狂宴补丁仍承载敌方濒死，`reward.card-select` 仍挂“复视奖励事务”却含禁忌魔典逻辑。
+- 静态状态快照测试仍跳过 `static readonly` 字段（`StaticStateManifestTests.cs` 的 `IsInitOnly` 判断），readonly 可变集合不在清单内。
+
+已解决：
+
+- A8：读档补发锻造器走选择协议同步，按 `SavedInitialForgeGrantCompletedCount` 只发剩余数量，幂等。
+- A14：`ShouldRefillMerchantEntry` 跳过前缀已删除，改为条目级 `ClearAfterPurchase` 前缀；`ModifyMerchantPrice` 非跳过前缀已裁决保留并登记在架构说明。
+- A16：游戏结算兜底只接 `NScoreLine.Create` 自身的 `InvalidCastException`，UI 安全补丁只在节点失效时跳过原版。
+- 单人/联机候选生成合并为同一抽取流程，只差随机源（`HextechRunePoolBuilder`）。
+- 选择载荷解析集中到 `Selection/Sync/HextechChoiceCodec*.cs`。
+- 混沌概率常量集中为 `HextechRuneConfiguration.DefaultChaosRuneChancePercent`。
+- 锻造器开局施加 Power 收进 `HextechForgeBase` 的共用方法。
+- 关键词持久化追踪器收进 `Hooks/Runes/KeywordPersistenceTracker.cs`。
+- 濒死狂宴的结算不再脱离伤害链（A9 遗留项）。
+- 玩家属性悬浮取本机玩家（`LocalContext.GetMe`，`Hooks/UI/HextechPlayerStatsHoverHooks.cs`）。
+- `MonsterHexKind` 编号由 `monster_hex_kind_manifest.txt`（`MonsterHexKindManifestTests`）守护。

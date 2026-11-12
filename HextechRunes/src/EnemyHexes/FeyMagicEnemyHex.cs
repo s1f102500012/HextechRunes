@@ -6,7 +6,7 @@ internal sealed class FeyMagicEnemyHex : HextechEnemyHexEffect
 
 	internal override async Task BeforePlayerSideTurnStart(HextechEnemyHexContext context, HextechCombatState combatState, IReadOnlyList<Creature> players)
 	{
-		foreach (KeyValuePair<uint, uint> pending in context.Tracking.FeyMagicPendingNoDrawPlayers.ToList())
+		foreach (KeyValuePair<uint, uint> pending in context.Tracking.FeyMagicPendingNoDrawPlayers.OrderBy(static entry => entry.Key).ToList())
 		{
 			uint combatId = pending.Key;
 			Creature? creature = combatState.GetCreature(combatId);

@@ -15,8 +15,7 @@ internal sealed class HextechMayhemActState
 	public int ActCount => _resolvedActs.Length;
 
 	// 单调递增的脏标记:任何会改变 GetActiveMonsterHexes 结果的写入都自增它。
-	// HextechActiveMonsterHexCache 比对这个版本号决定是否重算,取代了过去散落在
-	// facade/SavedState 各处的手动 InvalidateActiveMonsterHexCache 调用。
+	// HextechActiveMonsterHexCache 比对这个版本号决定是否重算,不需要手动失效缓存。
 	// 新增 mutating 方法时记得调用 MarkChanged()。
 	public int Version { get; private set; }
 

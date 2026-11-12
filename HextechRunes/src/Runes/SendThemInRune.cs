@@ -35,7 +35,7 @@ public sealed class SendThemInRune : HextechRelicBase
 			return;
 		}
 
-		int ordinal = ConsumeCombatProcOrdinal(nameof(SendThemInRune), ref _generatedMinionsThisCombat);
+		int ordinal = ConsumeCombatProcOrdinal(ref _generatedMinionsThisCombat);
 		CardModel card = HextechStableCombatSpawns.CreateMinionCard(combatState, Owner, "send-them-in", ordinal);
 
 		Flash();

@@ -2,11 +2,6 @@ namespace HextechRunes;
 
 public sealed class PlasterRune : HextechRelicBase
 {
-	protected override IEnumerable<DynamicVar> CanonicalVars =>
-	[
-		new SummonVar(1m)
-	];
-
 	public override bool IsAvailableForPlayer(Player player)
 	{
 		return IsNecrobinderPlayer(player);

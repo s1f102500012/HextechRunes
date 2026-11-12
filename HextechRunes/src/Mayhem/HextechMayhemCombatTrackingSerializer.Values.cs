@@ -150,7 +150,7 @@ internal static partial class HextechMayhemCombatTrackingSerializer
 		}
 
 		// string 的 IComparable 实现是 culture-sensitive 的，两端 locale 不同会把同一组键排出不同序，
-		// 序列化结果参与联机 checksum，必须走 ordinal。
+		// 序列化结果须两端一致（不参与原版联机校验，靠本模组保证），必须走 ordinal。
 		if (left is string leftText && right is string rightText)
 		{
 			return string.CompareOrdinal(leftText, rightText);

@@ -2,7 +2,6 @@ using Godot;
 using MegaCrit.Sts2.Core.Helpers;
 using MegaCrit.Sts2.Core.Nodes;
 using MegaCrit.Sts2.Core.Nodes.Combat;
-using MegaCrit.Sts2.Core.Nodes.Vfx;
 
 namespace HextechRunes;
 
@@ -338,9 +337,9 @@ internal static partial class HextechCombatVfx
 	{
 		try
 		{
-			// 与本模组其他实机验证过的特效同一挂法:挂到生物节点的父节点(角色所在的画布坐标系),
+			// 与本模组其他特效同一挂法:挂到生物节点的父节点(角色所在的画布坐标系),
 			// 定位到碰撞框中心,再调到所有角色之上。不挂 CombatVfxContainer、不用 Visuals 的 VfxSpawnPosition
-			// 标记:这两者组合在实机上把金币放到了屏幕左上角。
+			// 标记:这两者组合会把金币放到屏幕左上角。
 			NCreature? node = HextechCreatureNodeRegistry.TryGet(target);
 			Node? parent = node?.GetParent();
 			if (node == null || parent == null || !node.IsInsideTree())

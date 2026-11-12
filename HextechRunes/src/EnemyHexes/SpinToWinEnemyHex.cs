@@ -6,8 +6,9 @@ namespace HextechRunes;
 /// </summary>
 internal sealed class SpinToWinEnemyHex : HextechEnemyHexEffect
 {
-	// ModifyEnergyGain 与 AfterModifyingEnergyGain 在同一次 GainEnergy 里紧挨着调用；嵌套的获得能量会一并结算，
-	// 所以按玩家累加、结算时全部清空。不保存：两次调用之间不会存档。
+	// 原版 GainEnergy 里 ModifyEnergyGain 之后紧接着 AfterModifyingEnergyGain，这里只暂存这一次获得的量。
+	// 查询钩子可能被本机模拟（如随机数预测模组）单独调用而没有后续结算，所以每次查询都覆盖暂存，
+	// 不累加，避免模拟留下的量在下一次真实获得时只在这一端多结算。不保存：两次调用之间不会存档。
 	private readonly Dictionary<Player, decimal> _pendingEnergy = new();
 
 	internal override MonsterHexKind Kind => MonsterHexKind.SpinToWin;
@@ -40,7 +41,8 @@ internal sealed class SpinToWinEnemyHex : HextechEnemyHexEffect
 			return amount;
 		}
 
-		_pendingEnergy[player] = _pendingEnergy.GetValueOrDefault(player) + amount;
+		_pendingEnergy.Clear();
+		_pendingEnergy[player] = amount;
 		return 0m;
 	}
 

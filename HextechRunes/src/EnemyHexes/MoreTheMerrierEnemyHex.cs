@@ -38,7 +38,14 @@ internal sealed class MoreTheMerrierEnemyHex : HextechEnemyHexEffect, IHextechEn
 	private static decimal GetMultiplier(HextechEnemyHexContext context)
 	{
 		// 与我方同名符文一致，统计原版遗物集合；全队合计后按人数分组，不逐人取整。
-		int relicCount = context.RunState.Players.Sum(static player => player.Relics.Count);
+		// 数值每次现算、不缓存；按索引累加不分配，checked 与 Enumerable.Sum 的溢出行为一致。
+		IReadOnlyList<Player> players = context.RunState.Players;
+		int relicCount = 0;
+		for (int i = 0; i < players.Count; i++)
+		{
+			relicCount = checked(relicCount + players[i].Relics.Count);
+		}
+
 		return 1m + (relicCount / context.ScalingPlayerCount) * 0.01m;
 	}
 }

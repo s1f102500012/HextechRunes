@@ -4,7 +4,7 @@ using MegaCrit.Sts2.Core.Saves.Runs;
 
 namespace HextechRunesSponsorPack;
 
-// 只读迁移壳:0.9.2 起附魔大师不再实现「多重附魔」,复合附魔不会再被创建。
+// 只读迁移壳:附魔大师不实现「多重附魔」,复合附魔不会再被创建。
 // 保留以读取 0.9.1 及更早版本的复合附魔存档；不注册图标，也不进入随机附魔池。
 // 类名与 [SavedProperty] 属性名 SavedEnchantmentsJson 都不能改:它们决定 ModelId 与 net-id 布局。
 public sealed class SponsorCompositeEnchantment : EnchantmentModel

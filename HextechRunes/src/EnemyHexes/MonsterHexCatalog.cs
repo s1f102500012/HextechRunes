@@ -236,7 +236,7 @@ internal static class MonsterHexCatalog
 	/// 用于描述显示的玩家数：单人（或非联机/取不到状态）为 1，联机时取本局玩家数并夹到 [1,16]，
 	/// 与 <c>HextechEnemyPowerScalingHooks.MultiplyByPlayerCount</c> 的实际缩放保持一致。
 	/// 原版 RunManager 没有公开的当前 RunState 取法（只有 DebugOnlyGetState，本体其它入口也都用它）；
-	/// 它只读字段、不会抛异常，所以这里不再包裸 catch。
+	/// 它只读字段、不会抛异常，所以这里不包裸 catch。
 	/// </summary>
 	private static int GetScalingPlayerCount()
 	{
