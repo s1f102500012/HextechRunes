@@ -76,6 +76,8 @@ internal static partial class HextechRunLifecycleHooks
 		private static void Postfix(RunState? __state, bool isVictory, SerializableRun __result)
 		{
 			ResetTransientRunState();
+			// 生物节点映射只供本机视觉查找，下一场战斗的 NCombatRoom._Ready 会重建；跑局结束时先放掉上一场的生物引用。
+			HextechCreatureNodeRegistry.Clear();
 			HextechSelectionProgress.Reset([]);
 			HextechGoldrendSync.ClearRun(__state);
 			HextechTelemetry.OnRunEnded(__state, __result, isVictory);

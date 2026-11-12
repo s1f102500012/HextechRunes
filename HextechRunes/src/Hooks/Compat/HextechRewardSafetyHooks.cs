@@ -417,7 +417,7 @@ internal static class HextechRewardSafetyHooks
 	}
 
 	[HarmonyPatch(typeof(CardReward), "OnSelect")]
-	[HextechPatch("reward.card-select", "复视奖励事务")]
+	[HextechPatch("reward.card-select", "复视奖励事务 / 敌方海克斯:禁忌魔典", MonsterHexes = [MonsterHexKind.ForbiddenGrimoire])]
 	private static class CardRewardSelectPatch
 	{
 		[HarmonyPrefix]

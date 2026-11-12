@@ -123,26 +123,31 @@ public sealed class BigKnifeRune : HextechRelicBase
 		}
 	}
 
+	// 敌方「操控现实」的状态牌翻倍是同一目标上的独立前缀（HextechEnemyManipulateRealityHooks，优先级 Normal - 1），
+	// 依赖本前缀先完成小刀替换；本前缀的优先级显式固定为 Normal，二者先后由补丁清单冻结。
 	[HarmonyPatch(typeof(CardPileCmd), nameof(CardPileCmd.AddGeneratedCardsToCombat), typeof(IEnumerable<CardModel>), typeof(PileType), typeof(Player), typeof(CardPilePosition))]
 	[HextechPatch("rune.big-knife.generated-cards", "大刀", Rune = typeof(BigKnifeRune))]
 	private static class GeneratedCardsPatch
 	{
 		[HarmonyPrefix]
-		private static void Prefix(ref IEnumerable<CardModel> cards, Player? creator)
+		[HarmonyPriority(Priority.Normal)]
+		private static void Prefix(ref IEnumerable<CardModel> cards)
 		{
-			// 整体兜底:本 prefix 在"敌人塞状态牌/生成卡进战斗"的必经路径上,任何异常都会让
-			// 整个 AddGeneratedCardsToCombat 调用中断、上层塞牌任务链卡死(游戏卡住)。
-			// 枚举外部传入的 cards(可能已被其他模组的 hook 改写为脆弱的惰性序列)是主要风险点;
-			// 出错时放行原始参数、放弃本次改写(大刀替换/操控现实翻倍),绝不让塞牌流程断掉。
+			// 兜底理由：本前缀在"敌人塞状态牌/生成卡进战斗"的必经路径上，异常会中断整个 AddGeneratedCardsToCombat、
+			// 让上层塞牌任务链卡死。cards 来自外部，可能是其他模组改写后的惰性序列；枚举失败或替换出错时原样放行，不做替换。
+			List<CardModel> originals;
 			try
 			{
-				List<CardModel> originals = cards.ToList();
-				if (originals.Count == 0)
-				{
-					return;
-				}
+				originals = cards.ToList();
+			}
+			catch (Exception ex)
+			{
+				HextechLog.Error("BigKnife", $"rune.big-knife.generated-cards: enumerating generated cards failed; passing cards through without replacement.\n{ex}");
+				return;
+			}
 
-				bool addedByPlayer = creator != null;
+			try
+			{
 				List<CardModel>? rewritten = null;
 				for (int i = 0; i < originals.Count; i++)
 				{
@@ -160,19 +165,14 @@ public sealed class BigKnifeRune : HextechRelicBase
 					rewritten.Add(replacement);
 				}
 
-				List<CardModel>? realityRewritten = HextechPlayerRuneHooks.TryApplyEnemyManipulateRealityStatusDoubling(rewritten ?? originals, addedByPlayer);
-				if (realityRewritten != null)
-				{
-					cards = realityRewritten;
-				}
-				else if (rewritten != null)
+				if (rewritten != null)
 				{
 					cards = rewritten;
 				}
 			}
 			catch (Exception ex)
 			{
-				HextechLog.Warn("Mayhem", $"AddGeneratedCardsToCombat prefix failed; passing cards through unmodified: {ex.GetType().Name}: {ex.Message}");
+				HextechLog.Error("BigKnife", $"rune.big-knife.generated-cards: Shiv replacement failed; passing cards through without replacement.\n{ex}");
 			}
 		}
 	}
