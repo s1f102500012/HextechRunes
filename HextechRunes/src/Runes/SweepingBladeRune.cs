@@ -4,7 +4,7 @@ namespace HextechRunes;
 
 public sealed class SweepingBladeRune : HextechRelicBase
 {
-	// 原版 AttackCommand 私有字段 _singleTarget / _combatState(0.107.1~0.111.0)；缺失时进启动摘要，横扫不改目标。
+	// 原版 AttackCommand 私有字段 _singleTarget / _combatState(0.107.1~0.113.0)；缺失时进启动摘要，横扫不改目标。
 	private static readonly FieldInfo? AttackCommandSingleTargetField = TryGetField(typeof(AttackCommand), "_singleTarget");
 	private static readonly FieldInfo? AttackCommandCombatStateField = TryGetField(typeof(AttackCommand), "_combatState");
 	private SweepingBladeContext? _activeContext;
@@ -160,6 +160,12 @@ public sealed class SweepingBladeRune : HextechRelicBase
 
 	private static PowerModel? GetCanonicalPowerForReplication(PowerModel power)
 	{
+		// 私有数据不随规范模型复制的能力（0.113.0 的穿刺：箭矢存在私有数据里，空副本会在计数归零时抛异常）不扩散。
+		if (HextechV113ApiCompat.IsPowerExcludedFromReplication(power))
+		{
+			return null;
+		}
+
 		ModelId powerId = power.Id;
 		PowerModel? canonicalPower = powerId == ModelId.none
 			? null

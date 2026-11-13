@@ -3,12 +3,12 @@
     <TargetFramework>net9.0</TargetFramework>
     <AssemblyName>HextechRunesSponsorPack</AssemblyName>
     <RootNamespace>HextechRunesSponsorPack</RootNamespace>
-    <Version>0.9.8</Version>
+    <Version>0.10.0</Version>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <HextechSts2Target Condition="'$(HextechSts2Target)' == ''">0.107.1</HextechSts2Target>
     <!--
-      支持 0.107.1 / 0.110.0 / 0.111.0;版本符号、未知目标拦截、引用目录(与目标版本联动)
+      支持 0.107.1 / 0.111.0 / 0.113.0;版本符号、未知目标拦截、引用目录(与目标版本联动)
       以及 sts2/GodotSharp/0Harmony 引用都与本体共用仓库根 Directory.Build.targets;
       目标属性与本体同名(HextechSts2Target),并经 ProjectReference 传给本体。
     -->

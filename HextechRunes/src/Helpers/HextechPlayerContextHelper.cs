@@ -86,7 +86,14 @@ internal static class HextechPlayerContextHelper
 		return player.Character.Id == ModelDb.GetId<Necrobinder>();
 	}
 
-	public static ModelId GetCharacterId(PlayerRuneCharacterPool characterPool)
+	// 角色类型只在 0.113.0 存在，判断经兼容层；旧变体恒为 false。
+	public static bool IsFoolPlayer(Player player)
+	{
+		return HextechFoolCompat.IsFoolPlayer(player);
+	}
+
+	/// <summary>角色池对应的原版角色 ID；本变体没有该角色（旧变体上的愚者池）时返回 null。</summary>
+	public static ModelId? GetCharacterId(PlayerRuneCharacterPool characterPool)
 	{
 		return characterPool switch
 		{
@@ -95,8 +102,15 @@ internal static class HextechPlayerContextHelper
 			PlayerRuneCharacterPool.Regent => ModelDb.GetId<Regent>(),
 			PlayerRuneCharacterPool.Defect => ModelDb.GetId<Defect>(),
 			PlayerRuneCharacterPool.Necrobinder => ModelDb.GetId<Necrobinder>(),
+			PlayerRuneCharacterPool.Fool => HextechFoolCompat.FoolCharacterId,
 			_ => throw new ArgumentOutOfRangeException(nameof(characterPool), characterPool, null)
 		};
+	}
+
+	/// <summary>角色池在本变体是否有对应的原版角色。没有的池仍在注册表里，只是配置菜单与图鉴不列出。</summary>
+	public static bool IsCharacterPoolPresentInGame(PlayerRuneCharacterPool characterPool)
+	{
+		return characterPool != PlayerRuneCharacterPool.Fool || HextechFoolCompat.IsFoolCharacterAvailable;
 	}
 
 	public static bool TryGetRuneCharacterPool(Player player, out PlayerRuneCharacterPool characterPool)
@@ -128,6 +142,12 @@ internal static class HextechPlayerContextHelper
 		if (IsNecrobinderPlayer(player))
 		{
 			characterPool = PlayerRuneCharacterPool.Necrobinder;
+			return true;
+		}
+
+		if (IsFoolPlayer(player))
+		{
+			characterPool = PlayerRuneCharacterPool.Fool;
 			return true;
 		}
 

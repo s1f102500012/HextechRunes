@@ -22,6 +22,10 @@ internal sealed class HextechMayhemRunContext
 	// 载入时由 SavedProperty 恢复，客户端使用房主同步的快照值。
 	public bool? ModActiveForRun { get; set; }
 
+	// 原版游戏模式不满足本模组流程假设时的原因（null 表示支持）。按各端一致的 RunState.GameMode 在
+	// 挂上/读入 Modifier 时重算，不随存档保存，换局时由新局重算覆盖。
+	public string? UnsupportedGameModeReason { get; set; }
+
 	public bool IsEndlessLoopActive => MonsterHexStrengthTierFloor >= 3;
 
 	public void ResetForNewRun(IReadOnlyList<int> playerHexCountsByAct, IReadOnlyList<int> enemyHexCountsByAct)

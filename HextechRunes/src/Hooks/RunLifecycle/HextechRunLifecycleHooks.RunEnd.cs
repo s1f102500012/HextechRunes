@@ -61,6 +61,26 @@ internal static partial class HextechRunLifecycleHooks
 		}
 	}
 
+	/// <summary>
+	/// 跑局结束后的本机清理与遥测。清理全部幂等，同一局重复结束时照常执行；
+	/// <paramref name="endedRun"/> 为 null 表示原版判定本局已经结束过（0.113.0 起的重复调用守卫），不再上报遥测。
+	/// </summary>
+	internal static void HandleRunEnded(RunState? runState, SerializableRun? endedRun, bool isVictory)
+	{
+		ResetTransientRunState();
+		// 生物节点映射只供本机视觉查找，下一场战斗的 NCombatRoom._Ready 会重建；跑局结束时先放掉上一场的生物引用。
+		HextechCreatureNodeRegistry.Clear();
+		HextechSelectionProgress.Reset([]);
+		HextechGoldrendSync.ClearRun(runState);
+		if (endedRun == null)
+		{
+			HextechLog.Info("Mayhem", "Run end reported again without a save; cleanup repeated, telemetry skipped");
+			return;
+		}
+
+		HextechTelemetry.OnRunEnded(runState, endedRun, isVictory);
+	}
+
 	[HarmonyPatch(typeof(RunManager), nameof(RunManager.OnEnded), typeof(bool))]
 	[HextechPatch("run.end", "跑局结束统计")]
 	private static class RunEndedPatch
@@ -68,19 +88,26 @@ internal static partial class HextechRunLifecycleHooks
 		[HarmonyPrefix]
 		private static void Prefix(RunManager __instance, bool isVictory, out RunState? __state)
 		{
-			EnsureCombatHistoryBeforeLossSave(__instance, isVictory);
+			// 0.113.0 起原版第二次调用直接返回、不再 ToSave，不补历史；旧版本没有这道守卫，恒为 false。
+			if (!HextechV113ApiCompat.HasRunEnded(__instance))
+			{
+				EnsureCombatHistoryBeforeLossSave(__instance, isVictory);
+			}
+
 			__state = __instance.DebugOnlyGetState();
 		}
 
 		[HarmonyPostfix]
-		private static void Postfix(RunState? __state, bool isVictory, SerializableRun __result)
+		private static void Postfix(
+			RunState? __state,
+			bool isVictory,
+#if STS2_113_OR_NEWER
+			MegaCrit.Sts2.Core.Entities.Save.PostRunProgressUpdateResult __result)
+#else
+			SerializableRun __result)
+#endif
 		{
-			ResetTransientRunState();
-			// 生物节点映射只供本机视觉查找，下一场战斗的 NCombatRoom._Ready 会重建；跑局结束时先放掉上一场的生物引用。
-			HextechCreatureNodeRegistry.Clear();
-			HextechSelectionProgress.Reset([]);
-			HextechGoldrendSync.ClearRun(__state);
-			HextechTelemetry.OnRunEnded(__state, __result, isVictory);
+			HandleRunEnded(__state, HextechV113ApiCompat.GetEndedRun(__result), isVictory);
 		}
 	}
 }

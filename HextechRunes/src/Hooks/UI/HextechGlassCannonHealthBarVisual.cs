@@ -22,6 +22,10 @@ internal sealed class HextechGlassCannonHealthBarVisual : HextechCreatureAttache
 	// 以生物节点本身逐帧驱动:遮罩节点按需创建,在封顶生效前可能还不存在。
 	protected override Node? FrameNode => Creature;
 
+	// 我方回复封顶在战斗外仍然生效,胜利后奖励界面期间血条还留在房间里;遮罩不读 Spine、不刷日志,
+	// 跟随房间切换与节点失效结束即可。
+	protected override bool EndsWithCombat => false;
+
 	internal static void TryAttach(NCreature? creature)
 	{
 		TryAttach(

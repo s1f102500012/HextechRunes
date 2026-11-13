@@ -1,6 +1,8 @@
 using Godot;
+using MegaCrit.Sts2.Core.Combat;
 using MegaCrit.Sts2.Core.Helpers;
 using MegaCrit.Sts2.Core.Nodes.Combat;
+using MegaCrit.Sts2.Core.Nodes.Rooms;
 
 namespace HextechRunes;
 
@@ -10,6 +12,9 @@ namespace HextechRunes;
 /// </summary>
 /// <remarks>
 /// 驱动方式:在 <see cref="FrameNode"/> 上逐帧等待 <c>ProcessFrame</c>,首帧在挂载调用中同步执行。
+/// 每帧先按 <see cref="HextechAttachmentLifetime"/> 判定是否继续:生物节点失效或离开场景树、
+/// 所属战斗房间不再是当前房间、(常驻附件)本场战斗已结束,任一成立即结束并释放。
+/// 战败后原版的结算界面盖在战斗房间之上,房间与存活的生物节点会一直留在场景树里,只靠节点有效性无法结束循环。
 /// 异常只记日志,绝不外抛(附件由战斗构建与召唤同步链触发)。
 /// </remarks>
 internal abstract class HextechCreatureAttachedVisual
@@ -18,12 +23,15 @@ internal abstract class HextechCreatureAttachedVisual
 
 	private readonly string _logTag;
 	private readonly string _displayName;
+	private readonly NCombatRoom? _ownerRoom;
+	private HextechAttachmentLifetime _lifetime;
 
 	protected HextechCreatureAttachedVisual(NCreature creature, string logTag, string displayName)
 	{
 		Creature = creature;
 		_logTag = logTag;
 		_displayName = displayName;
+		_ownerRoom = FindOwnerRoom(creature);
 	}
 
 	protected NCreature Creature { get; }
@@ -33,6 +41,9 @@ internal abstract class HextechCreatureAttachedVisual
 
 	/// <summary>附件是否仍应继续运行;默认要求生物节点与 <see cref="FrameNode"/> 都有效。</summary>
 	protected virtual bool IsAlive => GodotObject.IsInstanceValid(Creature) && GodotObject.IsInstanceValid(FrameNode);
+
+	/// <summary>常驻附件是否在本场战斗结束(胜利或战败结算)时结束;房间切换与节点失效始终结束。</summary>
+	protected virtual bool EndsWithCombat => true;
 
 	/// <summary>创建节点;返回 false 表示本次不挂(资源缺失等),不会进入逐帧循环。</summary>
 	protected abstract bool Start();
@@ -107,7 +118,9 @@ internal abstract class HextechCreatureAttachedVisual
 	{
 		try
 		{
-			while (IsAlive && Tick())
+			// 一次性特效(无去重键)自带时长,不随战斗结束提前收掉。
+			bool endsWithCombat = key != null && EndsWithCombat;
+			while (ShouldContinue(endsWithCombat) && Tick())
 			{
 				if (FrameNode is not { } frameNode || !await HextechGodotAsync.AwaitProcessFrameAsync(frameNode))
 				{
@@ -127,6 +140,82 @@ internal abstract class HextechCreatureAttachedVisual
 				ActiveAttachments.Remove(activeKey);
 			}
 		}
+	}
+
+	private bool ShouldContinue(bool endsWithCombat)
+	{
+		if (!IsAlive)
+		{
+			return false;
+		}
+
+		bool? roomIsCurrent = _ownerRoom == null
+			? null
+			: GodotObject.IsInstanceValid(_ownerRoom) && _ownerRoom.IsInsideTree() && ReferenceEquals(NCombatRoom.Instance, _ownerRoom);
+		return _lifetime.Observe(
+			creatureInTree: Creature.IsInsideTree(),
+			combatInProgress: CombatManager.Instance.IsInProgress,
+			roomIsCurrent: roomIsCurrent,
+			endsWithCombat: endsWithCombat);
+	}
+
+	private static NCombatRoom? FindOwnerRoom(NCreature creature)
+	{
+		for (Node? node = creature.GetParent(); node != null; node = node.GetParent())
+		{
+			if (node is NCombatRoom room)
+			{
+				return room;
+			}
+		}
+
+		return null;
+	}
+}
+
+/// <summary>
+/// 生物附件逐帧循环的退出判定(不依赖节点,可单测)。战斗进行与房间为当前房间都按"先见到再失去"触发:
+/// 附件常在原版开战(<c>IsInProgress</c> 置真)之前挂上,挂载那一刻的房间指针也可能尚未切换,
+/// 只有曾经成立、之后不再成立才算战斗结束或房间切换。
+/// </summary>
+internal struct HextechAttachmentLifetime
+{
+	private bool _sawCombatInProgress;
+	private bool _sawRoomCurrent;
+
+	/// <param name="creatureInTree">生物节点仍在场景树里(节点有效性由调用方先判)。</param>
+	/// <param name="combatInProgress">原版 <c>CombatManager.IsInProgress</c>;胜利与战败结算都会把它置假。</param>
+	/// <param name="roomIsCurrent">生物所属战斗房间仍有效、在树且是当前战斗房间;生物不在战斗房间下时为 null,不参与判定。</param>
+	/// <param name="endsWithCombat">常驻附件随战斗结束而结束;一次性特效为 false。</param>
+	internal bool Observe(bool creatureInTree, bool combatInProgress, bool? roomIsCurrent, bool endsWithCombat)
+	{
+		if (!creatureInTree)
+		{
+			return false;
+		}
+
+		if (roomIsCurrent is { } current)
+		{
+			if (current)
+			{
+				_sawRoomCurrent = true;
+			}
+			else if (_sawRoomCurrent)
+			{
+				return false;
+			}
+		}
+
+		if (combatInProgress)
+		{
+			_sawCombatInProgress = true;
+		}
+		else if (_sawCombatInProgress && endsWithCombat)
+		{
+			return false;
+		}
+
+		return true;
 	}
 }
 

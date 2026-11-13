@@ -32,7 +32,40 @@ internal sealed partial class HextechMayhemModifier
 
 	// 首次 act-roll 同步完成后冻结本局开关，之后不随进幕或局内改配置而变。
 	// 冻结前使用本局有效配置；客户端必须等房主快照同步后再冻结。
-	internal bool IsModActiveForRun => _runContext.ModActiveForRun ?? ModEnabled;
+	// 游戏模式不受支持的局（见 IsGameModeUnsupportedForRun）恒为未启用，不看配置与冻结值。
+	internal bool IsModActiveForRun => _runContext.UnsupportedGameModeReason == null
+		&& (_runContext.ModActiveForRun ?? ModEnabled);
+
+	internal bool IsGameModeUnsupported => _runContext.UnsupportedGameModeReason != null;
+
+	/// <summary>
+	/// 本局的原版游戏模式不满足每幕海克斯选择的流程假设（进幕后能挡住地图行进、选完再放行）时返回 true，本局不启用模组。
+	/// 判断只看 <see cref="IRunState.GameMode"/>：它在开局时由大厅定下、随存档保存，各端一致，不需要等房主同步。
+	/// </summary>
+	internal static bool IsGameModeUnsupportedForRun(IRunState? runState)
+	{
+		return runState != null && HextechV113ApiCompat.GetUnsupportedGameModeReason(runState.GameMode) != null;
+	}
+
+	protected override void AfterRunCreated(RunState runState)
+	{
+		RefreshGameModeSupport(runState);
+	}
+
+	protected override void AfterRunLoaded(RunState runState)
+	{
+		RefreshGameModeSupport(runState);
+	}
+
+	private void RefreshGameModeSupport(RunState runState)
+	{
+		string? reason = HextechV113ApiCompat.GetUnsupportedGameModeReason(runState.GameMode);
+		_runContext.UnsupportedGameModeReason = reason;
+		if (reason != null)
+		{
+			HextechLog.Warn("Mayhem", $"Hextech disabled for this run: gameMode={runState.GameMode} reason={reason}");
+		}
+	}
 
 	// act-roll 同步后首次冻结有效配置值；返回 true 表示本局禁用模组。
 	internal bool FreezeModActiveForRunAndCheckDisabled()

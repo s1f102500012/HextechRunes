@@ -1,6 +1,8 @@
 {
   "HEXTECH_RUNES_SUBCATEGORY": "[gold]마법공학:[/gold] 마법공학 룬 풀의 커스텀 유물입니다.",
   "HEXTECH_FORGES_SUBCATEGORY": "[gold]능력치 모루:[/gold] 능력치 단조 시스템의 커스텀 유물입니다.",
+  "HEXTECH_INSPECT_RELIC_RARITY": "마법공학 유물",
+  "HEXTECH_RUN_HISTORY_RELICS": "{StarterRelics:cond:>0?,|} {HextechRelics} 마법공학",
   "HEXTECH_CHARACTER.IRONCLAD": "[gold]아이언클래드 마법공학:[/gold] 아이언클래드 전용 마법공학 룬입니다.",
   "HEXTECH_CHARACTER.SILENT": "[gold]사일런트 마법공학:[/gold] 사일런트 전용 마법공학 룬입니다.",
   "HEXTECH_CHARACTER.REGENT": "[gold]리젠트 마법공학:[/gold] 리젠트 전용 마법공학 룬입니다.",
@@ -178,5 +180,11 @@
   "HEXTECH_GODSLAYER_FINALE_3": "그 일격으로는 나를 조금도 다치게 할 수 없다. 하지만 그것이 떨어진 곳은…… 내가 한 번도 붓을 대지 않은 곳이다.",
   "HEXTECH_GODSLAYER_FINALE_4": "이 탑의 선 하나, 획 하나까지 모두 내 손에서 나왔다—네 손에 든 그것만 빼고.",
   "HEXTECH_GODSLAYER_FINALE_5": "설계도에 붓을 댄 것이, 나 혼자가 아니었던가.",
-  "HEXTECH_GODSLAYER_FINALE_6": "[jitter]……누구냐?[/jitter]"
+  "HEXTECH_GODSLAYER_FINALE_6": "[jitter]……누구냐?[/jitter]",
+  "HEXTECH_CHARACTER.FOOL": "[gold]풀 마법공학:[/gold] 풀 전용 마법공학 룬입니다.",
+  "HEXTECH_POOL.FOOL": "풀",
+  "HEXTECH_TAG.ARROW": "화살",
+  "HEXTECH_TAG.MELODY": "선율",
+  "HEXTECH_TAG.EMOTION": "희비",
+  "HEXTECH_TAG.TAROT": "타로"
 }

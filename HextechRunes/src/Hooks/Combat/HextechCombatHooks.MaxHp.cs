@@ -97,7 +97,11 @@ internal static partial class HextechCombatHooks
 		private static Exception? Finalizer(bool __state, Exception? __exception) => ExitGuardAfterSynchronousFailure(GoliathMaxHpGuard, __state, __exception);
 	}
 
+#if STS2_113_OR_NEWER
+	[HarmonyPatch(typeof(CreatureCmd), nameof(CreatureCmd.LoseMaxHp), typeof(PlayerChoiceContext), typeof(Creature), typeof(decimal), typeof(CardModel))]
+#else
 	[HarmonyPatch(typeof(CreatureCmd), nameof(CreatureCmd.LoseMaxHp), typeof(PlayerChoiceContext), typeof(Creature), typeof(decimal), typeof(bool))]
+#endif
 	[HextechPatch("combat.lose-max-hp", "最大生命换算")]
 	private static class LoseMaxHpPatch
 	{

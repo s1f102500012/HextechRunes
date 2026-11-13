@@ -21,7 +21,7 @@ public static class HextechRunesInterop
 	/// <param name="runeType">具体、封闭的 RelicModel 子类。</param>
 	/// <param name="rarity">海克斯品级名：Silver / Gold / Prismatic（不区分大小写）。</param>
 	/// <param name="flags">PlayerRuneFlags 名称，逗号分隔；null 或空串为 None。GuaranteedFirstPick 需要 ApiVersion ≥ 2。</param>
-	/// <param name="characterPool">角色池名：Ironclad / Silent / Regent / Defect / Necrobinder；null 为通用。</param>
+	/// <param name="characterPool">角色池名：Ironclad / Silent / Regent / Defect / Necrobinder / Fool（愚者只在 0.113.0 有对应角色）；null 为通用。</param>
 	/// <param name="characterOrder">角色池内排序。</param>
 	/// <param name="tagKey">海克斯标签键；null 或空白为 COMPREHENSIVE。</param>
 	/// <param name="assetModId">图标与配置菜单来源显示用的模组 ID；null 视为本体。</param>

@@ -1,6 +1,8 @@
 {
   "HEXTECH_RUNES_SUBCATEGORY": "[gold]ヘクステック:[/gold] Hexルーンプールからのカスタムレリック。",
   "HEXTECH_FORGES_SUBCATEGORY": "[gold]ステータス金床:[/gold] ステータス鍛造システムのカスタムレリック。",
+  "HEXTECH_INSPECT_RELIC_RARITY": "レリック（ヘクステック）",
+  "HEXTECH_RUN_HISTORY_RELICS": "{StarterRelics:cond:>0?,|} {HextechRelics} ヘクステック",
   "HEXTECH_CHARACTER.IRONCLAD": "[gold]アイアンクラッドのHexルーン:[/gold] アイアンクラッドのみ使用可能なHexルーン。",
   "HEXTECH_CHARACTER.SILENT": "[gold]サイレントのHexルーン:[/gold] サイレントのみ使用可能なHexルーン。",
   "HEXTECH_CHARACTER.REGENT": "[gold]リージェントのHexルーン:[/gold] リージェントのみ使用可能なHexルーン。",
@@ -178,5 +180,11 @@
   "HEXTECH_GODSLAYER_FINALE_3": "その一撃では、私に傷ひとつ付けられん。だがそれは……私が一度も筆を入れなかった場所に落ちた。",
   "HEXTECH_GODSLAYER_FINALE_4": "この塔の一線一画は、すべて私の手によるもの——お前の掌にある、その一枚を除いて。",
   "HEXTECH_GODSLAYER_FINALE_5": "設計図に筆を入れていたのは、私だけではなかったのか。",
-  "HEXTECH_GODSLAYER_FINALE_6": "[jitter]……誰だ？[/jitter]"
+  "HEXTECH_GODSLAYER_FINALE_6": "[jitter]……誰だ？[/jitter]",
+  "HEXTECH_CHARACTER.FOOL": "[gold]フールのHexルーン:[/gold] フールのみ使用可能なHexルーン。",
+  "HEXTECH_POOL.FOOL": "フール",
+  "HEXTECH_TAG.ARROW": "矢",
+  "HEXTECH_TAG.MELODY": "旋律",
+  "HEXTECH_TAG.EMOTION": "悲喜",
+  "HEXTECH_TAG.TAROT": "タロット"
 }

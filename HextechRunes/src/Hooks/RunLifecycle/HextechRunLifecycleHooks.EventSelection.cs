@@ -82,7 +82,8 @@ internal static partial class HextechRunLifecycleHooks
 		state = null;
 		if (RunManager.Instance.DebugOnlyGetState() is not RunState runState
 			|| runState.CurrentActIndex < 0
-			|| runState.CurrentRoom is not EventRoom { CanonicalEvent: AncientEventModel ancientEvent })
+			|| runState.CurrentRoom is not EventRoom { CanonicalEvent: AncientEventModel ancientEvent }
+			|| HextechMayhemModifier.IsGameModeUnsupportedForRun(runState))
 		{
 			return false;
 		}

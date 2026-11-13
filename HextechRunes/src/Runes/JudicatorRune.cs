@@ -21,7 +21,11 @@ public sealed class JudicatorRune : HextechRelicBase
 		return DynamicVars["DamageMultiplier"].BaseValue;
 	}
 
+#if STS2_113_OR_NEWER
+	public override async Task AfterDeath(PlayerChoiceContext choiceContext, Creature target, CardModel? source, bool wasRemovalPrevented, float deathAnimLength)
+#else
 	public override async Task AfterDeath(PlayerChoiceContext choiceContext, Creature target, bool wasRemovalPrevented, float deathAnimLength)
+#endif
 	{
 		if (wasRemovalPrevented
 			|| Owner.Creature.IsDead

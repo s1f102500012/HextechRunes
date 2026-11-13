@@ -11,18 +11,32 @@ namespace HextechRunes;
 /// </summary>
 internal static class HextechAssetHooks
 {
-	// PowerModel.PackedIconPath 不是 virtual,自定义能力图标只能在 getter 后替换。
+	/// <summary>
+	/// 本模组能力的小图标:直接返回自带贴图,不让原版 getter 去 <c>power_atlas</c> 里按名字找。
+	/// </summary>
+	/// <remarks>
+	/// 跳过型前缀:原版 <c>PowerModel.Icon</c> 固定 <c>ResourceLoader.Load(PackedIconPath)</c>,
+	/// <c>PackedIconPath</c> 不是 virtual,没有能改路径的入口。图集里没有本模组的精灵,原版
+	/// <c>AtlasResourceLoader</c> 每次实际走到加载都打一条 "Missing sprite 'hextech_..._power' in power_atlas" 告警并返回占位图;
+	/// 后缀替换返回值时原版加载已经发生,占位图随后无人持有,资源缓存不保证留住它。
+	/// 激活条件:实例是本模组的能力且解析到了贴图;其余(含原版与第三方能力)返回 true 交给原版。
+	/// 原方法只有一行加载调用,已进原版拷贝守卫;<see cref="Priority.Low"/> 让他人前缀先跑。
+	/// </remarks>
 	[HarmonyPatch(typeof(PowerModel), nameof(PowerModel.Icon), MethodType.Getter)]
 	[HextechPatch("assets.power-icon", "自定义能力图标")]
 	private static class PowerIconPatch
 	{
-		[HarmonyPostfix]
-		private static void Postfix(PowerModel __instance, ref Texture2D __result)
+		[HarmonyPrefix]
+		[HarmonyPriority(Priority.Low)]
+		private static bool Prefix(PowerModel __instance, ref Texture2D __result)
 		{
-			if (TryGetHextechPowerTexture(__instance, out Texture2D? texture))
+			if (__instance is not HextechPowerBase || !TryGetHextechPowerTexture(__instance, out Texture2D? texture))
 			{
-				__result = texture;
+				return true;
 			}
+
+			__result = texture;
+			return false;
 		}
 	}
 
@@ -194,7 +208,7 @@ internal static class HextechAssetHooks
 		// 复用原版能力图标的自定义能力:直接取对应原版能力的图标。
 		Texture2D? vanillaIcon = self switch
 		{
-			HextechPlayerSlowPower => ModelDb.Power<SlowPower>().Icon,
+			HextechPlayerSlowPower or HextechTemporarySlowPower => ModelDb.Power<SlowPower>().Icon,
 			HextechGalvanicPower => ModelDb.Power<GalvanicPower>().Icon,
 			HextechNextTurnDamagePower => ModelDb.Power<BlockNextTurnPower>().Icon,
 			HextechVitalSparkPower => ModelDb.Power<VitalSparkPower>().Icon,

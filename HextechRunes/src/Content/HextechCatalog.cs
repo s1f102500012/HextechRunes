@@ -8,17 +8,31 @@ internal static partial class HextechCatalog
 {
 	public readonly record struct RuneSeriesGroup(string LocalizationKey, IReadOnlyList<RelicModel> Relics);
 
-	private readonly record struct CharacterRunePool(string LocalizationKey, IReadOnlyList<Type> RuneTypes);
+	private readonly record struct CharacterRunePool(string LocalizationKey, PlayerRuneCharacterPool Pool, IReadOnlyList<Type> RuneTypes);
 
 	// 注册表查询统一经 HextechContentRegistry(文件头 using static),本类不另包同名私有属性。
+	// 键是来源标签与图鉴分组的本地化后缀(HEXTECH_POOL.<键> / HEXTECH_CHARACTER.<键>),也是原版角色 ID 的 Entry。
 	private static IReadOnlyList<CharacterRunePool> CharacterRunePools =>
 	[
-		new("IRONCLAD", PlayerRuneMetadata.TypesByCharacter[PlayerRuneCharacterPool.Ironclad]),
-		new("SILENT", PlayerRuneMetadata.TypesByCharacter[PlayerRuneCharacterPool.Silent]),
-		new("REGENT", PlayerRuneMetadata.TypesByCharacter[PlayerRuneCharacterPool.Regent]),
-		new("DEFECT", PlayerRuneMetadata.TypesByCharacter[PlayerRuneCharacterPool.Defect]),
-		new("NECROBINDER", PlayerRuneMetadata.TypesByCharacter[PlayerRuneCharacterPool.Necrobinder])
+		new("IRONCLAD", PlayerRuneCharacterPool.Ironclad, PlayerRuneMetadata.TypesByCharacter[PlayerRuneCharacterPool.Ironclad]),
+		new("SILENT", PlayerRuneCharacterPool.Silent, PlayerRuneMetadata.TypesByCharacter[PlayerRuneCharacterPool.Silent]),
+		new("REGENT", PlayerRuneCharacterPool.Regent, PlayerRuneMetadata.TypesByCharacter[PlayerRuneCharacterPool.Regent]),
+		new("DEFECT", PlayerRuneCharacterPool.Defect, PlayerRuneMetadata.TypesByCharacter[PlayerRuneCharacterPool.Defect]),
+		new("NECROBINDER", PlayerRuneCharacterPool.Necrobinder, PlayerRuneMetadata.TypesByCharacter[PlayerRuneCharacterPool.Necrobinder]),
+		new("FOOL", PlayerRuneCharacterPool.Fool, PlayerRuneMetadata.TypesByCharacter[PlayerRuneCharacterPool.Fool])
 	];
+
+	/// <summary>
+	/// 符文所属角色池在本变体有对应原版角色(或不属于任何角色池)。旧变体上的愚者专属符文仍在注册表、
+	/// 配置 ID 集合与联机位图里(身份一致),只是配置菜单、图鉴与检视列表不列出;发放由各符文的
+	/// IsAvailableForPlayer 拦下(旧变体恒为 false)。
+	/// </summary>
+	public static bool IsPlayerRuneTypeShownInUi(Type runeType)
+	{
+		return !PlayerRuneMetadata.TryGetRegistration(runeType, out PlayerRuneRegistration registration)
+			|| registration.CharacterPool is not PlayerRuneCharacterPool characterPool
+			|| HextechPlayerContextHelper.IsCharacterPoolPresentInGame(characterPool);
+	}
 
 	public static IReadOnlyList<Type> GetAllConfigurableRuneTypes()
 	{
@@ -34,7 +48,7 @@ internal static partial class HextechCatalog
 
 	public static bool IsPlayerRuneTypeVisibleInCollection(Type runeType)
 	{
-		if (!PlayerRuneMetadata.AllTypes.Contains(runeType))
+		if (!PlayerRuneMetadata.AllTypes.Contains(runeType) || !IsPlayerRuneTypeShownInUi(runeType))
 		{
 			return false;
 		}

@@ -74,6 +74,19 @@ internal static partial class Program
 		return (new HextechEnemyHexContext(modifier), first, second);
 	}
 
+	/// <summary>
+	/// 只带 NetId 与角色的玩家壳（不跑构造函数，见 <see cref="CreateOrdinalTestPlayer"/>）。角色模型同样不构造，
+	/// 只写入按类型推导的 ModelId，足够让 <c>player.Character.Id</c> 的角色判定走真实路径；没有 RunState、遗物与战斗状态。
+	/// </summary>
+	private static Player CreateCharacterTestPlayer(Type characterType, ulong netId = 1)
+	{
+		CharacterModel character = (CharacterModel)RuntimeHelpers.GetUninitializedObject(characterType);
+		SetAutoProperty(character, nameof(AbstractModel.Id), ModelDb.GetId(characterType));
+		Player player = CreateOrdinalTestPlayer(netId);
+		SetAutoProperty(player, nameof(Player.Character), character);
+		return player;
+	}
+
 	private static Creature CreatePrismaticTestCreature(CombatSide side, CombatState combat)
 	{
 		Creature creature = (Creature)RuntimeHelpers.GetUninitializedObject(typeof(Creature));

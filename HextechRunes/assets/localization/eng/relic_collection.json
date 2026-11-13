@@ -1,6 +1,8 @@
 {
   "HEXTECH_RUNES_SUBCATEGORY": "[gold]Hextech:[/gold] Custom relics from the Hextech rune pool.",
   "HEXTECH_FORGES_SUBCATEGORY": "[gold]Stat Forgers:[/gold] Custom relics from the stat forging system.",
+  "HEXTECH_INSPECT_RELIC_RARITY": "Hextech Relic",
+  "HEXTECH_RUN_HISTORY_RELICS": "{StarterRelics:cond:>0?,|} {HextechRelics} Hextech",
   "HEXTECH_CHARACTER.IRONCLAD": "[gold]Ironclad Hexes:[/gold] Hextech runes only available to Ironclad.",
   "HEXTECH_CHARACTER.SILENT": "[gold]Silent Hexes:[/gold] Hextech runes only available to Silent.",
   "HEXTECH_CHARACTER.REGENT": "[gold]Regent Hexes:[/gold] Hextech runes only available to Regent.",
@@ -178,5 +180,11 @@
   "HEXTECH_GODSLAYER_FINALE_3": "That blow cannot harm me. Yet it struck a place my pen never touched.",
   "HEXTECH_GODSLAYER_FINALE_4": "Every line of this Spire is of my making—save for the piece in your hand.",
   "HEXTECH_GODSLAYER_FINALE_5": "So mine is not the only hand drawing upon the blueprint.",
-  "HEXTECH_GODSLAYER_FINALE_6": "[jitter]...Who?[/jitter]"
+  "HEXTECH_GODSLAYER_FINALE_6": "[jitter]...Who?[/jitter]",
+  "HEXTECH_CHARACTER.FOOL": "[gold]The Fool Hexes:[/gold] Hextech runes only available to The Fool.",
+  "HEXTECH_POOL.FOOL": "The Fool",
+  "HEXTECH_TAG.ARROW": "Arrow",
+  "HEXTECH_TAG.MELODY": "Melody",
+  "HEXTECH_TAG.EMOTION": "Emotion",
+  "HEXTECH_TAG.TAROT": "Tarot"
 }

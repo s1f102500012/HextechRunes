@@ -21,7 +21,12 @@ internal static partial class Program
 	private static void ArchaicToothTransformsEternalOnlyWithinItsNativeObtainTask()
 	{
 		using IDisposable models = InjectMissingModels(typeof(Bash), typeof(Break), typeof(Neutralize), typeof(Suppress), typeof(Unleash),
-			typeof(Protector), typeof(FallingStar), typeof(MeteorShower), typeof(Dualcast), typeof(Quadcast));
+			typeof(Protector), typeof(FallingStar), typeof(MeteorShower), typeof(Dualcast), typeof(Quadcast)
+#if STS2_113_OR_NEWER
+			// 0.113.0 起 ArchaicTooth 的转换表含愚者的 FoolishShot → DivineShot,构造转换表要求两者已注册。
+			, typeof(FoolishShot), typeof(DivineShot)
+#endif
+			);
 		using ModEnabledOverride modSwitch = new();
 		Harmony harmony = new("HextechRunes.Tests.ArchaicToothEternal");
 		try

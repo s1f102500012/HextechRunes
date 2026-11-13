@@ -21,7 +21,9 @@ public enum PlayerRuneCharacterPool
 	Silent,
 	Regent,
 	Defect,
-	Necrobinder
+	Necrobinder,
+	// 原版角色「愚者」只存在于 0.113.0；旧变体保留该池与其登记（身份一致），但没有对应角色、界面不列出。
+	Fool
 }
 
 public readonly record struct PlayerRuneRegistration(

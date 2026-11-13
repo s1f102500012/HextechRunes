@@ -1,5 +1,5 @@
 {
-  "source": "STS2 0.111.0 PCK localization/zhs; titles only, exported 2026-09-21",
+  "source": "STS2 0.111.0 PCK localization/zhs; titles only, exported 2026-09-21; plus 0.113.0 Fool terms (cards SADNESS/JOY/MYTHIC_FORM, powers AIM/STRETCH, static ARROW/TAROT/TRANSFORM) added 2026-11-13",
   "cards": {
     "ABRASIVE": "磨蚀",
     "ABUNDANCE": "富足",
@@ -624,7 +624,10 @@
     "WRAITH_FORM": "幽魂形态",
     "WRITHE": "苦恼",
     "WROUGHT_IN_WAR": "战火铸就",
-    "ZAP": "电击"
+    "ZAP": "电击",
+    "SADNESS": "悲伤",
+    "JOY": "喜悦",
+    "MYTHIC_FORM": "神话形态"
   },
   "powers": {
     "ACCELERANT_POWER": "触媒",
@@ -915,7 +918,9 @@
     "WELL_LAID_PLANS_POWER": "计划妥当",
     "WINGED_JUMP_POWER": "翱翔之跃",
     "WITHERING_PRESENCE_POWER": "凋萎存在",
-    "WRAITH_FORM_POWER": "幽魂形态"
+    "WRAITH_FORM_POWER": "幽魂形态",
+    "AIM_POWER": "瞄准",
+    "STRETCH_POWER": "拉伸"
   },
   "other_official_terms": {
     "monsters:CORPSE_SLUG.moves.GOOP.title": "黏液",
@@ -986,6 +991,9 @@
     "orbs:DARK_ORB.title": "黑暗",
     "orbs:LIGHTNING_ORB.title": "闪电",
     "eras:BLIGHT0.name": "感染",
-    "enchantments:STEADY.title": "稳定"
+    "enchantments:STEADY.title": "稳定",
+    "static_hover_tips:ARROW.title": "箭矢",
+    "static_hover_tips:TAROT.title": "塔罗牌",
+    "static_hover_tips:TRANSFORM.title": "变化"
   }
 }

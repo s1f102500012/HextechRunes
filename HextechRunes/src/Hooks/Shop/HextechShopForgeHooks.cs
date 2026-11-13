@@ -1,6 +1,5 @@
 using System.Diagnostics.CodeAnalysis;
 using Godot;
-using MegaCrit.Sts2.Core.Entities.Gold;
 using MegaCrit.Sts2.Core.Entities.Merchant;
 using MegaCrit.Sts2.Core.Nodes.Screens.Shops;
 using CoreHook = MegaCrit.Sts2.Core.Hooks.Hook;
@@ -8,11 +7,9 @@ using static HextechRunes.HextechHookReflection;
 
 namespace HextechRunes;
 
-internal static class HextechShopForgeHooks
+internal static partial class HextechShopForgeHooks
 {
-	private const float CardRemovalRandomForgeOffsetY = 60f;
-
-	// MerchantInventory._relicEntries（List<MerchantRelicEntry>，0.107.1/0.111.0 原版私有字段）：
+	// MerchantInventory._relicEntries（List<MerchantRelicEntry>，0.107.1/0.111.0/0.113.0 原版私有字段）：
 	// 假商店（NFakeMerchantInventory）里移除随机锻造器条目用；缺失时条目保留，只影响假商店展示。
 	private static readonly FieldInfo? MerchantInventoryRelicEntriesField = TryGetField(typeof(MerchantInventory), "_relicEntries");
 
@@ -28,7 +25,7 @@ internal static class HextechShopForgeHooks
 	{
 		const BindingFlags instanceNonPublic = BindingFlags.Instance | BindingFlags.NonPublic;
 		bool available =
-			TryGetMethod(typeof(MerchantRelicEntry), "OnTryPurchase", instanceNonPublic, typeof(MerchantInventory), typeof(bool)) != null
+			TryGetMethod(typeof(MerchantRelicEntry), RelicEntryPurchaseMethodName, instanceNonPublic, typeof(MerchantInventory), typeof(bool)) != null
 			&& TryGetMethod(typeof(MerchantRelicEntry), "RestockAfterPurchase", instanceNonPublic, typeof(MerchantInventory)) != null
 			&& TryGetMethod(typeof(MerchantRelicEntry), "ClearAfterPurchase", instanceNonPublic) != null
 			&& TryGetMethod(typeof(CoreHook), nameof(CoreHook.ModifyMerchantPrice), BindingFlags.Static | BindingFlags.Public, typeof(IRunState), typeof(Player), typeof(MerchantEntry), typeof(decimal)) != null;
@@ -61,76 +58,7 @@ internal static class HextechShopForgeHooks
 		HextechForgeShopPriceHelper.RefreshRandomForgeShopRelic(shopRelic, player.RunState as RunState);
 		MerchantRelicEntry entry = new(shopRelic, player);
 		entry.PurchaseCompleted += (_, _) => UpdateInventoryEntries(inventory);
-		inventory.AddRelicEntry(entry);
-	}
-
-	private static async Task<(bool, int)> PurchaseRandomForge(MerchantRelicEntry entry, MerchantInventory inventory, bool ignoreCost)
-	{
-		// 只由 PurchasePatch 在 IsRandomForgeEntry 为真时调用；商店专属遗物只有 RandomForgeShopRelic 一种。
-		Player player = inventory.Player;
-		RandomForgeShopRelic shopRelic = (RandomForgeShopRelic)entry.Model!;
-		HextechForgeShopPriceHelper.RefreshRandomForgeShopRelic(shopRelic, player.RunState as RunState);
-		int cost = entry.Cost;
-		if (!HextechForgeGrantHelper.TryCreateStableShopForgeChoice(player, shopRelic.PurchaseCount, out List<RelicModel> options))
-		{
-			entry.InvokePurchaseFailed(PurchaseStatus.FailureOutOfStock);
-			return (false, 0);
-		}
-
-		RelicModel? forge = await HextechForgeSelectionCoordinator.SelectForge(player, options, "shop", syncMultiplayerChoice: false);
-		if (forge == null)
-		{
-			return (false, 0);
-		}
-
-		// 主机权威复核:被配置禁用的锻造器即便因配置同步时序混进了候选,也要在扣钱前挡下,避免客机白花金币又拿到被禁锻造器。
-		if (HextechForgeGrantHelper.IsForgeDisabledForPlayer(player, forge))
-		{
-			HextechLog.Warn("Mayhem", $"Blocked purchasing a config-disabled forge: player={player.NetId} relic={forge.CanonicalId().Entry}");
-			entry.InvokePurchaseFailed(PurchaseStatus.FailureOutOfStock);
-			return (false, 0);
-		}
-
-		if (!CanContinueSynchronizedPurchase())
-		{
-			HextechLog.Warn("Mayhem", "Random forge purchase cancelled because multiplayer service is disconnected.");
-			return (false, 0);
-		}
-
-		if (!ignoreCost)
-		{
-			await PlayerCmd.LoseGold(cost, player, GoldLossType.Spent);
-			if (HextechPlayerContextHelper.IsMultiplayerConnected())
-			{
-				RunManager.Instance.RewardSynchronizer.SyncLocalGoldLost(cost);
-			}
-		}
-
-		player.RunState.CurrentMapPointHistoryEntry?
-			.GetEntry(player.NetId)
-			.BoughtRelics
-			.Add(forge.Id);
-
-		await HextechForgeGrantHelper.ObtainSelectedForge(player, forge, syncObtainedRelic: true);
-
-		// 复视复制商店购买的锻造器:商店购买不走锻造奖励(HextechForgeChoiceReward)那条已支持的复制路径,
-		// 且直接 RelicCmd.Obtain 会被复视的「本模组程序集」闸门跳过,故在此显式触发一次(复用锻造奖励同款逻辑)。
-		// 复制只在本地持有者一端开选择界面，复制份走 syncObtainedRelic 广播;它失败时若把异常抛进购买流程，
-		// 只有本端会跳过下面的购买计数与原版补货/购买事件，两端商店状态就此分叉。所以这里只兜住复制本身的失败，
-		// 取消（OperationCanceledException）照常向上传。
-		try
-		{
-			await DoubleVisionRune.DuplicatePurchasedForge(player, forge);
-		}
-		catch (Exception ex) when (ex is not OperationCanceledException)
-		{
-			HextechLog.Warn("Mayhem", $"Double Vision failed to duplicate purchased forge: player={player.NetId} relic={forge.CanonicalId().Entry}: {ex.GetType().Name}: {ex.Message}");
-		}
-
-		shopRelic.IncrementPurchaseCount();
-		entry.OnMerchantInventoryUpdated();
-
-		return (true, ignoreCost ? 0 : cost);
+		HextechV113ApiCompat.AddRelicEntry(inventory, entry);
 	}
 
 	// 单人流程照常继续；联机局只在连接仍在时继续。
@@ -228,7 +156,7 @@ internal static class HextechShopForgeHooks
 		}
 
 		cardRemoval.Position = GetOriginalCardRemovalPosition(cardRemoval, cardRemoval.Position)
-			+ new Vector2(0f, CardRemovalRandomForgeOffsetY);
+			+ CardRemovalRandomForgeOffset;
 	}
 
 	private static Vector2 GetOriginalCardRemovalPosition(GodotObject node, Vector2 currentPosition)
@@ -257,10 +185,11 @@ internal static class HextechShopForgeHooks
 		return new Vector2(160f, 0f);
 	}
 
-	// 跳过型前缀（已裁决保留，见 architecture.md）：原版 MerchantRelicEntry.OnTryPurchase 直接 RelicCmd.Obtain 条目模型，
-	// 没有"购买时改发别的遗物"的 Hook；只对本模组的随机锻造器条目替换为"选锻造器 → 扣款 → 发放"，其余条目走原版。
-	// 替换体对照原版 OnTryPurchase 的扣款/历史/同步步骤逐步复制（0.107.1/0.111.0），IL 由原版拷贝守卫冻结。
-	[HarmonyPatch(typeof(MerchantRelicEntry), "OnTryPurchase", typeof(MerchantInventory), typeof(bool))]
+	// 跳过型前缀（已裁决保留，见 architecture.md）：原版 MerchantRelicEntry 的购买步骤（0.107.1/0.111.0 为 OnTryPurchase，
+	// 0.113.0 为 OnTryPurchaseInternal，方法名见各版本分部文件）直接 RelicCmd.Obtain 条目模型，没有"购买时改发别的遗物"的 Hook；
+	// 只对本模组的随机锻造器条目替换为"选锻造器 → 扣款 → 发放"，其余条目走原版。替换体按各版本原版的扣款/历史/同步步骤复制，
+	// 两版的同步语义不同（见 PurchaseRandomForge 所在分部文件），IL 由原版拷贝守卫冻结。
+	[HarmonyPatch(typeof(MerchantRelicEntry), RelicEntryPurchaseMethodName, typeof(MerchantInventory), typeof(bool))]
 	[HextechPatch("shop.random-forge.purchase", "商店随机锻造器")]
 	private static class PurchasePatch
 	{
@@ -321,7 +250,7 @@ internal static class HextechShopForgeHooks
 		}
 	}
 
-	// 购买后保留条目：原版 OnTryPurchaseWrapper 在 Hook.ShouldRefillMerchantEntry 为假时调用 ClearAfterPurchase 清空槽位。
+	// 购买后保留条目：原版 OnTryPurchaseWrapper（0.113.0 为 OnTryPurchaseUnsynchronized）在 Hook.ShouldRefillMerchantEntry 为假时调用 ClearAfterPurchase 清空槽位。
 	// 只在本模组条目自己的 ClearAfterPurchase 上跳过，不在 ShouldRefillMerchantEntry 分发上强制返回真（会吞掉其他监听器）：
 	// 分发结果为真走 RestockAfterPurchase（上面已对本条目跳过），为假走这里，
 	// 两条路都保持条目不变，其他监听器照常被询问。补丁 ID 沿用 shop.random-forge.refill。
@@ -372,7 +301,7 @@ internal static class HextechShopForgeHooks
 				return;
 			}
 
-			InstallRandomForgeEntry(inventory, inventory.Player);
+			InstallRandomForgeEntryBeforeLayout(inventory);
 			EnsureRandomForgeRelicSlot(__instance, inventory);
 		}
 

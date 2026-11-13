@@ -62,6 +62,39 @@ internal static partial class HextechCatalog
 		return IsHextechRelic(relic) || IsHextechForgeRelic(relic) || IsHextechShopRelic(relic) || IsHextechEnemyHexIconRelic(relic);
 	}
 
+	/// <summary>
+	/// 本模组注册表管理的全部遗物:<see cref="IsHextechCustomRelic"/> 的四类,再加欧洛巴斯强化遗物与经接口登记的事件遗物。
+	/// 只读查询,供界面把这些遗物与原版初始遗物区分显示;不参与任何获取池或战斗判定。
+	/// </summary>
+	public static bool IsHextechManagedRelic(RelicModel? relic)
+	{
+		return relic != null && IsHextechManagedRelicId(relic.CanonicalId());
+	}
+
+	/// <inheritdoc cref="IsHextechManagedRelic"/>
+	internal static bool IsHextechManagedRelicId(ModelId id)
+	{
+		ModelIdLookupCache lookups = ModelIdLookups;
+		if (lookups.RuneIds.Contains(id)
+			|| lookups.ForgeIds.Contains(id)
+			|| lookups.ShopOnlyRelicIds.Contains(id)
+			|| lookups.EnemyHexIconRelicIds.Contains(id))
+		{
+			return true;
+		}
+
+		// 事件遗物只有个位数,按类型现查,不进 ModelId 缓存。
+		foreach (Type eventRelicType in HextechContentRegistry.EventRelicTypes)
+		{
+			if (ModelDb.GetId(eventRelicType) == id)
+			{
+				return true;
+			}
+		}
+
+		return false;
+	}
+
 	public static bool TryGetPlayerRuneRarity(RelicModel? relic, out HextechRarityTier rarity)
 	{
 		rarity = default;

@@ -18,12 +18,13 @@ internal static partial class Program
 			(typeof(AutomationUpgradeRune), "AutomationDataType"),
 			(typeof(AutomationUpgradeRune), "PowerGetInternalDataMethod"),
 			(typeof(AutomationUpgradeRune), "AutomationCardsLeftField"),
-			(typeof(AutomationUpgradeRune), "PowerInvokeDisplayAmountChangedMethod"),
-			(typeof(AutomationUpgradeRune), "PowerFlashMethod"),
+			(typeof(EarthAwakensRune), "PowerFlashMethod"),
 			(typeof(SolidTimeRune), "CardOnPlayMethod"),
 			(typeof(DoubleVisionRune), "GoldRewardWasStolenBackField"),
 			(typeof(SweepingBladeRune), "AttackCommandSingleTargetField"),
-			(typeof(SweepingBladeRune), "AttackCommandCombatStateField")
+			(typeof(SweepingBladeRune), "AttackCommandCombatStateField"),
+			(typeof(HextechTreasureRuneHooks), "CurrentRelicsField"),
+			(typeof(HextechTreasureRuneHooks), "PlayerCollectionField")
 		})
 		{
 			FieldInfo handle = owner.GetField(field, BindingFlags.NonPublic | BindingFlags.Static)

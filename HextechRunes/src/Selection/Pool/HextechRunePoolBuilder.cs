@@ -456,7 +456,7 @@ internal static class HextechRunePoolBuilder
 		return new HextechWeightedRuneOptions(selected, characterWeight);
 	}
 
-	// 原版五个角色都有专属池；其他角色（模组角色）登记过专属符文（SetPlayerRuneCharacter）才参与加权，
+	// 原版六个角色（愚者只在 0.113.0）都有专属池；其他角色（模组角色）登记过专属符文（SetPlayerRuneCharacter）才参与加权，
 	// 否则返回 null，权重进度也不推进。
 	internal static ModelId? GetRuneCharacterId(Player player)
 	{

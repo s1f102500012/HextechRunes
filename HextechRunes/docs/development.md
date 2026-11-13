@@ -61,7 +61,7 @@
 
 ## 6. 检查与交接
 
-当前维护版本以 `src/HextechRunes.csproj` 和 `tools/build_and_deploy.sh` 为准；本文编写时为 0.107.1、0.111.0（0.110.0 已于 0.9.8 退役），模组版本由 manifest/ModInfo 决定。不要把某个版本的 DLL 当跨版本证据。
+当前维护版本以仓库根 `Directory.Build.targets` 和 `tools/lib_build.sh` 为准；本文编写时为 0.107.1、0.111.0、0.113.0（0.110.0 已于 0.9.8 退役；目标清单以 `tools/lib_build.sh` 的 `HEXTECH_TARGETS` 和仓库根 `Directory.Build.targets` 为准），模组版本由 manifest/ModInfo 决定。不要把某个版本的 DLL 当跨版本证据。
 
 角色卡牌升级符文的作用范围与永久成长、战斗中发放金币的联机路径与递归限制、隐藏的角色二次升级遗物（先古遗物+）的获取与隐藏约定，都记在 [设计裁决](design-decisions.md) 的对应小节。
 

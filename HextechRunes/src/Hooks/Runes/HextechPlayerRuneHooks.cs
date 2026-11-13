@@ -20,6 +20,7 @@ internal static partial class HextechPlayerRuneHooks
 	}
 
 	// 刀扇打出君王之剑：DamageCmd 的 TargetingAllOpponents 需要具体 CombatState，拿不到时不出手。
+	// 段数与原版 OnPlay 同源（0.111.0 的 RepeatVar / 0.113.0 的 HitCountVar），由兼容层按版本读取。
 	internal static async Task PlayFanOfKnivesSovereignBlade(PlayerChoiceContext choiceContext, SovereignBlade card)
 	{
 		if (card.CombatState is not CombatState combatState)
@@ -29,7 +30,7 @@ internal static partial class HextechPlayerRuneHooks
 
 		AttackCommand attack = DamageCmd.Attack(card.DynamicVars.Damage.BaseValue)
 			.FromCardCompat(card)
-			.WithHitCount(card.DynamicVars.Repeat.IntValue)
+			.WithHitCount(HextechV113ApiCompat.GetSovereignBladeHitCount(card))
 			.WithAttackerAnim("Cast", card.Owner.Character.AttackAnimDelay)
 			.WithAttackerFx(null, "event:/sfx/characters/regent/regent_sovereign_blade")
 			.TargetingAllOpponents(combatState)

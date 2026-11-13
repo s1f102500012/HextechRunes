@@ -1,6 +1,7 @@
 using System.Reflection;
 using System.Reflection.Emit;
 using System.Runtime.CompilerServices;
+using HarmonyLib;
 using HextechRunesSponsorPack;
 using MegaCrit.Sts2.Core.Entities.Cards;
 using MegaCrit.Sts2.Core.Entities.Enchantments;
@@ -303,5 +304,51 @@ internal static partial class Program
 		Expect(AbyssalContractRune.IsWarriorForbiddenCardType(CardType.Power), "powers should be forbidden");
 		Expect(!AbyssalContractRune.IsWarriorForbiddenCardType(CardType.Status), "statuses should remain legal");
 		Expect(!AbyssalContractRune.IsWarriorForbiddenCardType(CardType.Curse), "curses should remain legal");
+	}
+
+	// 拓展包补丁的注入参数与目标签名，规则与本体的 PatchMethodSignaturesMatchTargets 共用。
+	// 声明合法、目标也能解析，但 __result 等参数与新版本目标对不上时，Harmony 在游戏里拒绝整个补丁类。
+	[HextechTest]
+	private static void SponsorPatchMethodSignaturesMatchTargets()
+	{
+		List<string> problems = [];
+		int checkedParameters = CollectPatchSignatureProblems(
+			typeof(SponsorCatalog).Assembly,
+			static type => type.GetCustomAttribute<SponsorPatchAttribute>()?.Id,
+			problems);
+
+		// 拓展包 5 个补丁类共 11 个注入参数；明显少于这个数说明目标解析失效、测试在空转。
+		Expect(checkedParameters >= 10, $"only {checkedParameters} sponsor patch parameters were checked; target resolution is probably broken");
+		Expect(problems.Count == 0, "sponsor patch signature problems:\n  " + string.Join("\n  ", problems));
+	}
+
+	// 拓展包补丁目标都能在当前目标版本的原版里解析（Optional 的补丁允许解析失败，与本体同规则）。
+	[HextechTest]
+	private static void SponsorPatchDeclarationsResolveToRealTargets()
+	{
+		List<string> problems = [];
+		int resolved = 0;
+		foreach (Type type in typeof(SponsorCatalog).Assembly.GetTypes())
+		{
+			List<HarmonyMethod> harmonyAttributes = HarmonyMethodExtensions.GetFromType(type);
+			if (harmonyAttributes.Count == 0)
+			{
+				continue;
+			}
+
+			SponsorPatchAttribute? meta = type.GetCustomAttribute<SponsorPatchAttribute>();
+			string? failure = DescribeUnresolvedTarget(HarmonyMethod.Merge(harmonyAttributes), type, type.GetMethods(PatchMemberFlags));
+			if (failure == null)
+			{
+				resolved++;
+			}
+			else if (meta?.Optional != true)
+			{
+				problems.Add($"{type.FullName} ({meta?.Id}): {failure}");
+			}
+		}
+
+		Expect(resolved > 0, "sponsor pack declares resolvable patches");
+		Expect(problems.Count == 0, "sponsor patch target problems:\n  " + string.Join("\n  ", problems));
 	}
 }

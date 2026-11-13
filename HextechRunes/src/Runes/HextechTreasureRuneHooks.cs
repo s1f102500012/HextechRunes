@@ -9,15 +9,16 @@ namespace HextechRunes;
 /// 「roll 遗物列表 → 玩家投票选牌位 → 发放」小游戏。替换必须在 roll 阶段
 /// (BeginRelicPicking 之后、UI 初始化之前)做:UI 节点按遗物实例反查,发放阶段换实例会让
 /// AnimateRelicAwards 的 First 匹配不到 → 状态机卡死无法拾取(实测踩坑)。
-/// 语义:N 个玩家 N 个遗物,局内有 A 个持蛋玩家就把其中 A 个换成随机符文,谁拿谁定。
+/// 语义:N 个玩家 N 个遗物(0.113.0 闪电战模式会额外多 roll,单人分两轮选),局内有 A 个持蛋玩家就把其中 A 个换成随机符文,谁拿谁定。
 /// 槽位与符文都用确定性随机(盐=楼层+槽位),联机两端一致;排除所有玩家已拥有的符文。
 /// </summary>
 internal static class HextechTreasureRuneHooks
 {
-	// TreasureRoomRelicSynchronizer._currentRelics（List<RelicModel>）与 _playerCollection（IPlayerCollection），
-	// 0.107.1/0.111.0 原版私有字段；缺失时宝箱保持原版遗物，缺失成员进启动摘要。
+	// TreasureRoomRelicSynchronizer._currentRelics（List<RelicModel>，0.107.1~0.113.0）与玩家集合字段
+	// （0.107.1/0.111.0 为 IPlayerCollection _playerCollection，0.113.0 为 IRunState _runState，字段名由兼容层按版本给出），
+	// 均为原版私有字段；缺失时宝箱保持原版遗物，缺失成员进启动摘要。
 	private static readonly FieldInfo? CurrentRelicsField = TryGetField(typeof(TreasureRoomRelicSynchronizer), "_currentRelics");
-	private static readonly FieldInfo? PlayerCollectionField = TryGetField(typeof(TreasureRoomRelicSynchronizer), "_playerCollection");
+	private static readonly FieldInfo? PlayerCollectionField = TryGetField(typeof(TreasureRoomRelicSynchronizer), HextechV113ApiCompat.TreasureRelicSynchronizerPlayersFieldName);
 
 	internal static void ReplaceRelicsForEggOwners(TreasureRoomRelicSynchronizer synchronizer)
 	{

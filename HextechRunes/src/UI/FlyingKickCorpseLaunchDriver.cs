@@ -126,13 +126,10 @@ internal sealed class FlyingKickCorpseLaunchDriver
 				_creature.Position += _velocity * dt;
 				_velocity *= MathF.Pow(DampingPerFrame, dt * 60f);
 
-				SceneTree tree = _visuals.GetTree();
-				if (!GodotObject.IsInstanceValid(tree))
+				if (!await HextechGodotAsync.AwaitProcessFrameAsync(_visuals))
 				{
 					return;
 				}
-
-				await _visuals.ToSignal(tree, SceneTree.SignalName.ProcessFrame);
 			}
 		}
 		catch (Exception ex)
