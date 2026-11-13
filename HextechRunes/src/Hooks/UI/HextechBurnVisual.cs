@@ -33,9 +33,21 @@ internal sealed class HextechBurnVisual : HextechCreatureAttachedVisual
 	// SpineBoneData.get_name 返回空串,get_global_bone_transform 按名查找永远失败并回退成 sprite 原点
 	// (火会聚成一个固定点)——所以必须缓存骨骼对象、
 	// 每帧读 get_world_x/get_world_y(骨架本地坐标,y 已是 Godot 朝向)再经 sprite.ToGlobal 转换。
+	// 骨骼包装(SpineBone)只在取得它的那份骨架存续期间有效:SpineSprite 重建骨架
+	// (on_skeleton_data_changed,立绘节点实例不变)时旧包装被置为"未设置",之后每次 get_world_x
+	// 都由引擎打印一条 "Native Spine object not set." 并返回 0,不抛 C# 异常。
+	// 因此每帧读骨骼前先核对立绘节点与骨架实例仍是取骨骼时那一份,不是就重新取。
+	private const int MaxBoneReacquires = 8;
 	private Node2D? _spineSpriteNode;
 	private ulong _spineSpriteInstanceId;
+	private ulong _skeletonInstanceId;
 	private GodotObject[]? _emissionBones;
+	private int _sentinelBoneIndex = -1;
+	private int _boneReacquireCount;
+	private bool _boneFollowDisabled;
+	private Vector2 _flamesRectPosition;
+	private Vector2 _flamesFrontRectPosition;
+	private Vector2 _sparksRectPosition;
 	private float _smoothIntensity;
 
 	private HextechBurnVisual(NCreature creature)
@@ -107,6 +119,9 @@ internal sealed class HextechBurnVisual : HextechCreatureAttachedVisual
 		_backRoot.AddChild(_smoke);
 		_frontRoot.AddChild(_flamesFront);
 		_frontRoot.AddChild(_sparks);
+		_flamesRectPosition = _flames.Position;
+		_flamesFrontRectPosition = _flamesFront.Position;
+		_sparksRectPosition = _sparks.Position;
 		TryInitBoneEmission();
 		return true;
 	}
@@ -237,30 +252,41 @@ internal sealed class HextechBurnVisual : HextechCreatureAttachedVisual
 	}
 
 	/// <summary>
-	/// 缓存 Spine 骨架的骨骼对象,供发射点每帧跟随。原生 spine-godot API 通过 BoundObject.Call
-	/// 访问,任何缺失都静默回退矩形发射。
+	/// 缓存 Spine 骨架的骨骼对象,供发射点每帧跟随,并记下立绘节点与骨架实例作为有效性凭据。
+	/// 原生 spine-godot API 通过 BoundObject.Call 访问,任何缺失都回退矩形发射。
 	/// </summary>
 	private void TryInitBoneEmission()
 	{
+		ClearBones();
 		try
 		{
-			GodotObject? sprite = Creature.Visuals?.SpineBody?.BoundObject;
+			GodotObject? sprite = GodotObject.IsInstanceValid(Creature.Visuals) ? Creature.Visuals.SpineBody?.BoundObject : null;
 			if (sprite is not Node2D spriteNode || !GodotObject.IsInstanceValid(spriteNode) || !spriteNode.HasMethod("get_skeleton"))
 			{
 				return;
 			}
 
-			if (spriteNode.Call("get_skeleton").AsGodotObject() is not { } skeleton || !skeleton.HasMethod("get_bones"))
+			if (spriteNode.Call("get_skeleton").AsGodotObject() is not { } skeleton
+				|| !GodotObject.IsInstanceValid(skeleton)
+				|| !skeleton.HasMethod("get_bones"))
 			{
 				return;
 			}
 
 			List<GodotObject> bones = [];
+			int sentinel = -1;
 			foreach (Variant boneVariant in skeleton.Call("get_bones").AsGodotArray())
 			{
 				if (boneVariant.AsGodotObject() is not { } bone || !bone.HasMethod("get_world_x"))
 				{
 					continue;
+				}
+
+				// 哨兵骨骼:取骨骼时世界坐标非零的第一根。失效的包装读数恒为 (0,0),
+				// 每帧先读它,意外失效时只付出一次引擎报错。
+				if (sentinel < 0 && !HextechBoneFollow.IsUnsetReading(ReadBoneWorld(bone)))
+				{
+					sentinel = bones.Count;
 				}
 
 				bones.Add(bone);
@@ -270,50 +296,139 @@ internal sealed class HextechBurnVisual : HextechCreatureAttachedVisual
 				}
 			}
 
+			ulong skeletonId = skeleton.GetInstanceId();
 			// 防 use-after-free:枚举期间保持 skeleton 包装存活(MegaSpineBinding 的 remarks 所述陷阱)。
 			GC.KeepAlive(skeleton);
-			if (bones.Count >= 3)
+			if (bones.Count >= 3 && sentinel >= 0)
 			{
 				_spineSpriteNode = spriteNode;
 				_spineSpriteInstanceId = spriteNode.GetInstanceId();
+				_skeletonInstanceId = skeletonId;
 				_emissionBones = [.. bones];
+				_sentinelBoneIndex = sentinel;
 			}
 		}
 		catch (Exception ex)
 		{
-			DisableBoneEmission();
-			HextechLog.Warn("Burn", $"Bone emission init failed, using rect emission: {ex.Message}");
+			StopBoneFollow($"Bone emission init failed, using rect emission: {ex.Message}");
 		}
 	}
 
-	private void DisableBoneEmission()
+	private void ClearBones()
 	{
 		_spineSpriteNode = null;
+		_spineSpriteInstanceId = 0;
+		_skeletonInstanceId = 0;
 		_emissionBones = null;
+		_sentinelBoneIndex = -1;
+	}
+
+	/// <summary>本附件实例永久停用骨骼跟随:清掉缓存骨骼、发射回到矩形发射带;告警每个实例只记一次,并受全局预算限制。</summary>
+	private void StopBoneFollow(string reason)
+	{
+		bool firstStop = !_boneFollowDisabled;
+		_boneFollowDisabled = true;
+		ClearBones();
+		RestoreRectEmission();
+		if (firstStop && HextechRunLogBudget.TryConsume("visual.burn-bone-follow", 3))
+		{
+			HextechLog.Warn(LogTag, reason);
+		}
+	}
+
+	private void RestoreRectEmission()
+	{
+		RestoreRectEmission(_flames, _flamesRectPosition);
+		RestoreRectEmission(_flamesFront, _flamesFrontRectPosition);
+		RestoreRectEmission(_sparks, _sparksRectPosition);
+	}
+
+	private static void RestoreRectEmission(CpuParticles2D? particles, Vector2 position)
+	{
+		if (!GodotObject.IsInstanceValid(particles))
+		{
+			return;
+		}
+
+		particles.EmissionShape = CpuParticles2D.EmissionShapeEnum.Rectangle;
+		particles.Position = position;
+	}
+
+	private static Vector2 ReadBoneWorld(GodotObject bone)
+	{
+		return new Vector2(bone.Call("get_world_x").AsSingle(), bone.Call("get_world_y").AsSingle());
+	}
+
+	/// <summary>核对立绘节点与骨架是否仍是取骨骼时那一份;只调用不会因骨骼失效而报错的节点/骨架方法。</summary>
+	private HextechBoneFollowAction EvaluateBoneFollow()
+	{
+		bool spriteValid = GodotObject.IsInstanceValid(_spineSpriteNode);
+		bool spriteIsCurrent = false;
+		bool skeletonIsCurrent = false;
+		if (spriteValid)
+		{
+			GodotObject? current = GodotObject.IsInstanceValid(Creature.Visuals) ? Creature.Visuals.SpineBody?.BoundObject : null;
+			spriteIsCurrent = GodotObject.IsInstanceValid(current) && current.GetInstanceId() == _spineSpriteInstanceId;
+			if (spriteIsCurrent)
+			{
+				GodotObject? skeleton = _spineSpriteNode!.Call("get_skeleton").AsGodotObject();
+				skeletonIsCurrent = GodotObject.IsInstanceValid(skeleton) && skeleton.GetInstanceId() == _skeletonInstanceId;
+			}
+		}
+
+		return HextechBoneFollow.Decide(
+			_boneFollowDisabled,
+			_emissionBones != null,
+			spriteValid,
+			spriteIsCurrent,
+			skeletonIsCurrent,
+			_boneReacquireCount,
+			MaxBoneReacquires);
 	}
 
 	/// <summary>每帧把火焰/火星的发射点更新为当前骨骼位置(root 局部坐标),火随动画摆动。</summary>
 	private void UpdateBoneEmissionPoints()
 	{
-		if (_spineSpriteNode == null || _emissionBones == null
-			|| _backRoot == null || _flames == null || _flamesFront == null || _sparks == null)
+		if (_backRoot == null || _flames == null || _flamesFront == null || _sparks == null)
 		{
-			return;
-		}
-
-		// 立绘被释放或替换(死亡、变身):骨骼包装指向的底层数据同时失效,必须立即停用,
-		// 避免悬垂指针访问;下一帧会用新立绘重新初始化。
-		if (!GodotObject.IsInstanceValid(_spineSpriteNode)
-			|| Creature.Visuals?.SpineBody?.BoundObject is not { } current
-			|| current.GetInstanceId() != _spineSpriteInstanceId)
-		{
-			DisableBoneEmission();
-			TryInitBoneEmission();
 			return;
 		}
 
 		try
 		{
+			switch (EvaluateBoneFollow())
+			{
+				case HextechBoneFollowAction.Skip:
+					return;
+				case HextechBoneFollowAction.Disable:
+					StopBoneFollow("Spine skeleton kept being rebuilt under the burn visual; bone-follow emission disabled.");
+					return;
+				case HextechBoneFollowAction.Reacquire:
+					// 立绘被替换或骨架重建(死亡、变身、骨架数据重载):旧骨骼包装已失效,从当前骨架重新取;
+					// 取不到时缓存保持为空,之后按 Skip 走矩形发射。
+					_boneReacquireCount++;
+					TryInitBoneEmission();
+					if (_emissionBones == null)
+					{
+						RestoreRectEmission();
+						return;
+					}
+
+					break;
+			}
+
+			if (_spineSpriteNode == null || _emissionBones == null)
+			{
+				return;
+			}
+
+			// 保险:凭据核对之外的意外失效(读数恒为 0)也只让引擎报一次错,随即永久停用。
+			if (HextechBoneFollow.IsUnsetReading(ReadBoneWorld(_emissionBones[_sentinelBoneIndex])))
+			{
+				StopBoneFollow("Spine bone wrappers became unset under the burn visual; bone-follow emission disabled.");
+				return;
+			}
+
 			Vector2 bottom = Creature.GetBottomOfHitbox();
 			Vector2 top = Creature.GetTopOfHitbox();
 			float height = bottom.Y - top.Y;
@@ -328,7 +443,7 @@ internal sealed class HextechBurnVisual : HextechCreatureAttachedVisual
 			foreach (GodotObject bone in _emissionBones)
 			{
 				// 骨架本地坐标(y 已是 Godot 朝向),经立绘节点变换到全局(含缩放/朝向翻转)。
-				Vector2 world = new(bone.Call("get_world_x").AsSingle(), bone.Call("get_world_y").AsSingle());
+				Vector2 world = ReadBoneWorld(bone);
 				if (world.Y >= 0f)
 				{
 					// 骨架原点在脚底、身体骨骼一律 y<0;y>=0 的是 root/地面/阴影类控制骨,
@@ -365,8 +480,7 @@ internal sealed class HextechBurnVisual : HextechCreatureAttachedVisual
 		}
 		catch (Exception ex)
 		{
-			DisableBoneEmission();
-			HextechLog.Warn("Burn", $"Bone emission update failed, keeping last emission: {ex.Message}");
+			StopBoneFollow($"Bone emission update failed, using rect emission: {ex.Message}");
 		}
 	}
 
@@ -542,5 +656,52 @@ internal sealed class HextechBurnVisual : HextechCreatureAttachedVisual
 			FillTo = new Vector2(1f, 0.5f)
 		};
 		return _particleTexture;
+	}
+}
+
+internal enum HextechBoneFollowAction
+{
+	/// <summary>没有可用骨骼或已停用:不读骨骼,保持当前发射方式。</summary>
+	Skip,
+
+	/// <summary>立绘与骨架都仍是取骨骼时那一份:可以读骨骼。</summary>
+	Read,
+
+	/// <summary>立绘被替换或骨架已重建:旧骨骼包装失效,需要从当前骨架重新取。</summary>
+	Reacquire,
+
+	/// <summary>重取次数已达上限:永久停用骨骼跟随。</summary>
+	Disable
+}
+
+/// <summary>灼烧火焰骨骼跟随的读骨骼判定(不依赖节点,可单测)。</summary>
+internal static class HextechBoneFollow
+{
+	internal static HextechBoneFollowAction Decide(
+		bool followDisabled,
+		bool hasBones,
+		bool spriteValid,
+		bool spriteIsCurrent,
+		bool skeletonIsCurrent,
+		int reacquireCount,
+		int maxReacquires)
+	{
+		if (followDisabled || !hasBones)
+		{
+			return HextechBoneFollowAction.Skip;
+		}
+
+		if (spriteValid && spriteIsCurrent && skeletonIsCurrent)
+		{
+			return HextechBoneFollowAction.Read;
+		}
+
+		return reacquireCount >= maxReacquires ? HextechBoneFollowAction.Disable : HextechBoneFollowAction.Reacquire;
+	}
+
+	/// <summary>失效的 SpineBone 包装读世界坐标恒返回 0;哨兵骨骼读到精确的 (0,0) 即视为失效。</summary>
+	internal static bool IsUnsetReading(Vector2 world)
+	{
+		return world.X == 0f && world.Y == 0f;
 	}
 }

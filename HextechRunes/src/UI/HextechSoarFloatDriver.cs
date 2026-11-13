@@ -83,13 +83,11 @@ internal sealed class HextechSoarFloatDriver
 					return;
 				}
 
-				SceneTree tree = visuals.GetTree();
-				if (!GodotObject.IsInstanceValid(tree))
+				// 立绘离开场景树(房间切换、节点被移走)即停:不在树里时不再调用 GetTree,避免引擎报错。
+				if (!await HextechGodotAsync.AwaitProcessFrameAsync(visuals))
 				{
 					return;
 				}
-
-				await visuals.ToSignal(tree, SceneTree.SignalName.ProcessFrame);
 			}
 		}
 		catch (Exception ex)
