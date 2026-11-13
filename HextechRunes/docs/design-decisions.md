@@ -52,6 +52,16 @@
 - **升级打击/防御放开上限后，“镜中倒影”与敌方“神化”的降级只降一级，其余降级（魔法骑士 `DampenPower`、`WelcomeToWongos` 等）照原版清零。** 原版所有降级都走 `CardCmd.Downgrade` 并清零，调用方不可区分；`Reflections.TouchAMirror` 的状态机单步与 `UpgradeEnemyHex` 的同步调用期间进入降一级作用域（`[ThreadStatic]` 计数，不跨 await），`CardCmd.Downgrade` 的前缀记下“原等级 - 1”、原版照常清零后由后缀按原版读档同口径逐级升回。不跳过原版，降级记录与 `DowngradeInternal` 的重建保持原样。`HextechStarterUpgradeHooks.SteppedDowngradePatch`
 - **升级打击/防御持有者手牌里本场未打出过的牌库打击/防御显示原版金色高亮。** 通过 `CardModel.ShouldGlowGold` 后缀实现，去重口径与胜利后升级相同（按 `DeckVersion`，战斗中生成的临时牌不发光）；手牌高亮只在牌面刷新时读取，所以每次直接扫描本场出牌历史，不另建缓存。纯本机表现。`HextechStarterUpgradeHooks.UnplayedGoldGlowPatch`
 - **穿针引线只登记经原版 `CreatureCmd.Damage` 进入的伤害。** 第三方模组自己实现、不经原版伤害命令的独立伤害通道下 `CurrentActualDamageCommandId` 为 0，这类伤害不登记穿透；要适配须先明确该通道的记账、嵌套与清理边界，不能对所有伤害重复建立命令作用域。`PiercingThreadRune`、`HextechCombatHooks.DamageCommandPatch`
+- **横扫不复制私有数据不随模型复制的能力（0.113.0 的 `ImpaledPower`）。** 扎穿的箭矢存在能力的私有数据里，复制出的副本是空的，计数归零时会抛异常；原版射箭以打出的牌为来源施加扎穿，会被横扫的复制逻辑抓到。判断收在 `HextechV113ApiCompat.IsPowerExcludedFromReplication`，旧目标恒为 false。
+
+- **愚者海克斯里“你的箭矢”只认持有者自己射出的箭（`ArrowSlot.owner` / `ImpaledPower.Applier`），“松脱”以原版 `AfterArrowDislodged` 为准；被摧毁的箭不算。** 忠诚在本方回合结束时按生物战斗编号逐个调用原版 `ArrowCmd.DislodgeArrow`（来源牌为空，依赖“来源是这张牌”的原版效果不触发）。
+- **箭无虚发在持有者的攻击结算期间松脱所得的瞄准先记账，最外层攻击的 `AfterAttack` 再获得。** 原版 `AimPower` 登记一次箭矢攻击后不清除登记，攻击中途获得的瞄准会留在已登记的旧实例上，之后既不加伤也不被消耗。
+- **穿云箭不打补丁：在 `AfterArrowImpaled` / `AfterArrowDislodged` 把持有者扎穿能力的计数压到“原版初值减 `HitReduction`”，至少为 1，只降不升。** 原版只在新施加与数满重置这两处写入初值，紧接着就是这两个钩子；原版扎穿说明里的次数是写死文本，界面计数以实际为准。
+- **百步穿杨与柔韧的“一半”都是原版整笔扣除之后补回，保留量向下取整（5 保留 2，1 保留 0）。** 百步穿杨的登记条件照抄 `AimPower.BeforeAttack`；散雨射击这类在攻击中途直接移除瞄准的牌不经过这条消耗路径，不返还。柔韧只认原版 `StretchPower.AfterCardPlayed` 那一笔无施加者、无来源牌的负数变化。
+- **回马枪的伤害取箭从射出到扎穿之间持有者对该目标造成的箭矢伤害 `DamageResult.TotalDamage`（含被格挡部分），松脱时以 `ValueProp.Unpowered` 结算；目标已死不结算。** 不吃力量与瞄准，不让扎穿计数减少，也不再触发松脱。
+- **开嗓、引吭高歌直接给予的旋律经 `MelodyCmd.PlayedThisTurn` 后缀（`fool.granted-melodies`）生效，只在持有者本方回合内算数。** 读旋律种类的原版效果与界面会算上它；按出牌历史计数的原版“获得旋律时”效果（曲中意、失落鲁特琴、暴力和弦、歌之道）不会自己触发：引吭高歌给予旋律算“获得旋律”，抽完起手牌后由它按能力列表顺序各结算一次（照原版效果调用同一条命令，数值读能力层数）；开嗓是“拥有”，不结算。之后打出同一旋律的第一张牌，原版仍按自己的规则再触发一次，不为此改原版能力。弦外之音、三重唱按“持有者本回合旋律种类数达到 1 / 3”判定，直接给予的旋律也算。引吭高歌用稳定随机，优先从本回合尚未拥有的旋律里选。
+- **“生成悲伤”与原版万事无忧、肥料同一口径（`AfterCardGeneratedForCombat`，生成者与牌主都是持有者），一次生成多张逐张触发。** 破涕为笑挂在弃完手牌之后的 `AfterFlush`，把手牌里的悲伤全部变化，变出的喜悦留到下个回合。
+- **水晶球、塔罗牌桌布用稳定随机从 `TarotCards.All` 里本局允许的牌中挑选，一次多张不重复，不消耗原版战斗随机流；牌进抽牌堆随机位置。** 塔罗牌按类型属于这 22 种判定，其他来源产出的塔罗牌同样重放；重放口径同其他重放海克斯，自动打出的塔罗牌也重放。升级：神话形态逐张走原版自动打出，不进形态合并结算。
 
 ## 敌方海克斯
 
@@ -83,6 +93,7 @@
 - **「我细看」的已阻止次数在 `AfterPreventingDraw` 里记，`ShouldDraw` 只读。** 原版钩子不带玩家参数，由 Mayhem 在 `ShouldDraw` 里记下最近一次拦下的玩家；原版 `CardPileCmd.Draw` 与 `HextechSelectedDrawHelper` 都在查询返回 false 后同步紧接着调 After，中间没有等待。`HextechMayhemModifier.CombatModifiers`、`IInspectEnemyHex`
 - **原版"战斗状态变化"通知不继承伤害命令作用域。** 它在伤害命令内部启动延迟任务，下一帧带着命令 ID 调订阅者，随机数预测在订阅里模拟回合结束，滑溜、穿针引线这些按命令 ID 记账的查询钩子会把模拟记成真实结算（代偿已改为不依赖命令 ID，见下条）。补丁在同步的 `NotifyCombatStateChanged` 入口清空、返回前恢复。`HextechCombatHooks.CombatStateNotifyScopePatch`
 - **代偿（我方/敌方）不再依赖伤害命令作用域，改为"查询记录 + 原版 After 确认"。** `ModifyHpLostAfterOsty` 每次都按同步状态拆分并覆盖"最近一次拆分"记录，不记待结算；原版只在 `CreatureCmd.Damage` 里、紧接着改动了数值的那次 `Hook.ModifyHpLost` 调 `AfterModifyingHpLostAfterOsty`，在这里把记录确认成按目标的待结算项，受伤回调再取走施加下回合伤害/灾厄。旧实现要求查询时能读到 AsyncLocal 命令 ID，联机中出现过主机读不到（全额扣血）而客户端能读到（拆分）的分歧，且可从读档稳定复现；查询结果只取决于同步状态后，各端拆分一致。只在查询里调用、不走 After 的模拟（随机数预测）只改写记录，下一次真实查询会覆盖。滑溜、穿针引线仍按命令 ID 记账。`CompensationEnemyHex`、`CompensationRune`、`HextechMayhemModifier.AfterModifyingHpLostAfterOsty`
+- **敌方海克斯给玩家施加的虚弱、脆弱、易伤跟随原版的递减规则，不补偿版本差异（用户裁决）。** 0.113.0 起原版只对敌方回合里新施加给玩家的这三种效果设置 `SkipNextDurationTick`；0.111.0 及更早是任何时候都设置。全能龙魂在玩家回合开始时施加，0.113.0 上 N 层持续 N 回合（旧版本为 N+1）；腐蚀在玩家回合里被触发时同理。这是有意保留的差异，不要当成缺陷去“修”。
 
 ## 卡牌升级
 
@@ -104,6 +115,7 @@
 - **`SavedCountThisCombat` / `SavedCounter` 只是存档占位（getter 恒为 0、setter 丢弃），名称与类型保留。** 金币在触发时立即发放；旧档里的遗留计数读档后总会先经过 `BeforeCombatStart` 清零，所以不设战后补发路径。改名或删除这些属性会破坏旧档反序列化。
 - **欧洛巴斯二次强化只在 `TouchOfOrobas.GetUpgradedStarterRelic` 的 postfix 里、且原结果是头环时才补映射。** 不覆盖其他模组已有的非头环升级结果；已持有"+"版时再次获得仍映射到同一"+"版，不叠加也不降级。`OrobasPlusUpgrades`
 - **"+"版继承 `RelicModel` 而非 `HextechRelicBase`。** 因此不参加海克斯计数、重铸与候选生成，只注册到 EventRelicPool；保留 Starter 稀有度并默认在图鉴隐藏。类名是联机契约，不要改。
+- **欧洛巴斯之触挑选初始遗物时跳过本模组的海克斯、锻造器、商店随机锻造器与敌方海克斯图标遗物（`HextechCatalog.IsHextechCustomRelic`）。** 这些遗物底层都是 Starter 类别，原版把第一个 Starter 遗物当作角色初始遗物，角色初始遗物不在或排在后面时会把海克斯换成头环。只在原版选中本模组遗物时改写；除去它们后没有真正的初始遗物就按“没有初始遗物”处理：事件不提供该选项，欧洛巴斯祝福的捆绑发放跳过这件，未经 `SetupForPlayer` 获得（控制台、其他模组直接发放）时跳过替换。“+”版不在过滤范围内，仍可再次强化。`TouchOfOrobasStarterHooks`
 - **启用判定复用 `HextechMayhemModifier.IsEnabledForRun`：缺少 modifier ≠ 禁用。** 单机旧局或控制台缺 modifier 时读菜单开关，否则单机会回退成头环；联机缺快照时不使用各端本地配置。
 - **古老牙齿遇到永恒牌会抛异常并卡住整条组合奖励链。** 原版 `CardTransformation` 构造器与 `CardCmd.Transform` 都检查 `IsTransformable`。修法是 AsyncLocal 作用域 + `CardModel.IsTransformable` postfix 只放行本次记录的那一张永恒牌，不改 `IsRemovable`、不删原牌关键词、不复制原版转换命令、不吞其他异常。`ArchaicToothEternalHooks`
 - **神迹事件的锻造器稀有度 65/25/10 是固定值，不跟随本局配置里改过的权重。** 是否跟随属于平衡裁决，未改。`MiracleEvent`（拓展包）
@@ -116,6 +128,8 @@
 - **红光几何是调出来的固定值：** 中心在碰撞框自底向上 64% 处，基础宽度 = 碰撞框宽度夹取到 120–360 像素后的 2.45 倍，两层同步缩放。
 - **表现节点不进战斗状态、不调用共享 RNG。** 死亡或脱离濒死时隐藏，角色节点销毁时释放。
 - **灼烧常驻火焰保持程序化渐变粒子(沿骨骼发射的火焰、烟与火星);每次灼烧结算额外升起原版地面火 `NGroundFireVfx`(状态牌"灼伤"同款)。** 实机试过三种替代都被否决:原版火把 4 帧翻页图放大后像多边形碎片,整团着色器火焰摆在脚下像站在一排篝火上,着色器火苗无论撒在身上还是从脚底窜起都像火焰贴纸。`HextechBurnVisual`
+- **挂在生物身上的常驻表现（灼烧火焰、玻璃大炮血条、腾空浮动、男爵之手、慢炖光环）每帧先过 `HextechAttachmentLifetime.Observe`：生物节点失效或离开场景树、所属战斗房间不再是当前房间、或战斗已结束（常驻附件）即自行释放，不等能力移除回调。** 战败不会走能力移除，早先的逐帧循环会一直空转。灼烧的骨骼跟随另经 `HextechBoneFollow.Decide` 核对立绘与骨架仍是取骨骼时那一份（骨架实例 id 加哨兵骨骼），失效时从当前骨架重取，重取次数用尽后永久停用骨骼跟随；读骨骼的异常不逐帧写日志。可见后果：胜利时这些表现立即消失，不做淡出。
+- **本模组管理的遗物（`HextechCatalog.IsHextechManagedRelic`：海克斯、锻造器、敌方海克斯图标遗物、欧洛巴斯“+”版、经接口登记的事件遗物）在检视界面的类别行统一显示“海克斯遗物”，不按稀有度分名称或颜色；对局记录的遗物栏标题把它们从“初始”计数里拆出单列。** 底层 `Rarity` 仍是原版 Starter（不可交易、不进商店的保护来自它），只换显示文字；对局记录只在标题仍以原版分类串结尾时改写，被其他模组改过就原样保留。`HextechInspectHooks.GetInspectRarityLocKey`、`HextechRunHistoryHooks`
 - **夺金命中爆金币复用原版小鬼佣兵的 `vfx_coin_explosion_regular` 场景，挂到被命中生物的父节点、定位到碰撞框中心，并在主线程读取坐标。** 挂 `CombatVfxContainer` + 读 `VfxSpawnPosition` 的原版组合在实机上把金币放到了屏幕左上角；Godot 在非主线程读全局坐标会得到原点。不用 `VfxCmd.PlayOnCreatureCenter`，它会跳过已死目标。`HextechCombatVfx.CoinBurst`
 - **海克斯选择界面的金色重随按钮光与点击、卡牌弹出、重随、常驻、悬停、选中与未选中特效按原版海克斯大乱斗选取界面的粒子定义播放，不再手调着色器。** 数据和贴图来自英雄联盟 16.20 `UI.wad.client` 的 `KiwiAugmentSelection/Particles`（共 25 个系统，播放其中 21 个、223 个发射器；背景魔法流、任务与"必出新"标签三组不适用，理由见 `assets/images/effects/kiwi_selection/SOURCE.md`），出处与换算见同一文件。接入时机和上下层次照抄原版 `UIBase` 里各粒子节点：Layer 低于卡面图标（15）的常驻（5）、悬停（6）、未选中（6）、重随重建（7）插在稀有度边框之后、卡面内容之前，弹出与重随闪光（21）、选中（25）盖在卡面上，同一区域按 Layer 排序；粒子原点是节点矩形的中心，不是锚点 (0.5,1.0)。常驻光去掉重画卡底与卡框的发射器（本模组卡牌自己画边框，银色因此没有常驻光）并再乘 0.75 亮度；悬停光跟鼠标悬停与手柄焦点，离开淡出 0.2 秒；粒子寿命 -1 表示常驻粒子，直到特效被释放。选中后的退场照抄原版：确认时按钮切到选中状态（原版各状态列表只剩常驻光），悬停光立即撤掉，选中卡播放选中特效、其余卡播放未选中特效（压在内容下方、0.4 秒内自行褪去的灰卡，不负责移除卡牌）；界面关闭时三个卡槽按原版 `AugmentSelection` 场景的 `sceneTransitionOut`（1.0 秒、透明度 255→0）原大小原位置一起淡出，选中卡不单独停留，原版没有位移、缩放或飞向 HUD。缓动 `easingType` 18 只有枚举值，按常见排列推断为 InOutExpo；原版场景背景也随之淡出，本模组的面板底与其余元素没有原版对应物，为不在地图上留半透明黑底直接透明。时间线与出处见 `SOURCE.md` 的选中流程一节。每个发射器一个 `MultiMeshInstance2D`，曲线在 CPU 推进，贴图合成在着色器。本模组重随按钮相对卡牌比原版大，所以按钮外框一类发射器按按钮缩放、其余按卡牌缩放（数据里的 `space` 字段），卡牌比例取卡框高 = 2×187 单位。贴图寻址 0/1/2 按重复/夹紧/镜像、溶解默认读红通道、混合模式 4 视为加法，都是按原版用法推断的，实机效果不对先查这几处。随机数用节点 id 播种的本地序列，不进共享 RNG。模组程序集没有经过 Godot 源码生成器，引擎调不到模组节点覆写的 `_Process`，所以特效在进入场景树时订阅 `SceneTree.ProcessFrame` 推进；粒子每帧整块写入 MultiMesh 缓冲。原版亮度叠在本模组卡面上偏闪，着色器整体乘一个亮度系数（加法 0.55、Alpha 混合 0.8）。重随会重建全部卡槽，没被重随的卡上的特效先摘下再挂回，不中断；退场渐隐时界面挪到根节点下 Layer 100 的 CanvasLayer，画在随后打开的地图之上，选择结果与联机同步不等这段动画；锻造器选择用同一套退场。退场层高于叠加层栈，退场期间若有新界面入栈（连续锻造器选择、选完海克斯紧接着发锻造器、锻造器后的原版选牌界面），剩余淡出压到 0.12 秒，避免旧卡盖住新界面开头；局内场景退出时立即释放。数据与贴图在模组初始化时后台预解码。`HextechKiwiVfxPlayer`、`HextechGoldenRerollVisual`、`HextechRuneSelectionScreen.Vfx`
 - **原版能力牌飞入特效 `NCardFlyPowerVfx` 的 `SwooshPath` 曲线是场景共享资源，每个实例在 `_Ready` 改写同一条曲线的终点；曲线中间的弯曲点按“出牌区正中飞向角色”固定。** 同时飞多张时必须给每个实例一份私有曲线（`Create` 后缀），横向展开的牌还要把整条曲线按正中那张牌的路径做旋转与等比缩放对齐到自己的起终点（`_Ready` 后缀，按登记的横向偏移），否则终点排成直线、离角色近的牌越过角色再折回。单张飞行不登记偏移，保持原样。`HextechCombatVfxHooks.PowerFlyCurvePatch`、`PowerFlyReadyPatch`
@@ -128,6 +142,7 @@
 - **该过滤只读本局冻结配置，不读本地菜单值。** 联机房主配置尚未同步时读本地值会产生不同候选池。已接受的代价：开启模组的新局种子结果也可能与旧版本不同；旧存档已生成的房间和遭遇不重置。
 - **角色专属海克斯用动态权重，没有固定位置保底。** 每名玩家新局 150%，刷出非专属 +10 个百分点、刷出本角色专属 −10 个百分点，最低 0%、无上限；三个位置依次抽取并立即使用更新后的倍率。
 - **计数依据是刷出的候选，不是最终拿取。** 重掷成功生成的候选也计一次，未发生替换不计；混沌实验室在普通候选生成之后替换，不产生第二次计数。
+- **愚者（0.113.0 新角色）专属海克斯在三个变体里都注册（同一批类名、配置 ID、注册顺序，追加在注册表末尾），0.113.0 专属逻辑只写在整文件 `#if STS2_113_OR_NEWER` 的 `src/Runes/Fool/*.V113.cs` 里，直接调用原版类型；共享代码问"是不是愚者"只经 `HextechFoolCompat`（按类型名在原版程序集里查找愚者，旧变体查不到）。** 存档 net-id 表、配置与分享码都按注册内容取身份，各变体不一致会让同一份配置在不同游戏版本上含义不同。旧变体没有愚者：`IsFoolPlayer` 恒为 false，这些符文拿不到；配置菜单、图鉴与检视列表不列出愚者池（`IsPlayerRuneTypeShownInUi`），但条目仍在可配置 ID 集合与联机禁用位图里（位图按 Entry 字典序编码、只在同版本两端之间传输，新条目自然落位与以往新增符文相同；分享码与配置文件按 ID 字符串存储，含义不变）。新增的 SavedProperty 只能声明在共享类文件里，三个变体共用一份 `saved_property_manifest.txt`。`PlayerRuneCharacterPool.Fool`、`HextechFoolCompat`、`HextechCatalog.IsPlayerRuneTypeShownInUi`
 - **倍率为零且合法池只剩专属时回退到原有标签权重，避免空选项。** 没有映射到原版角色池的模组角色不推进专属权重。
 - **权重确认后提交绝对值，不按最后三个候选反推被重掷覆盖的历史。** 远端缺倍率或格式错误时中止该选择，禁止默默回退到 150%。`HextechWeightedRuneOptions`
 - **权重存进既有 `SavedRuneSelectionJournalJson` 的 `characterWeights`（按玩家 ID 排序），没有新增或改名 SavedProperty。** 旧存档缺这部分数据时从 150% 开始；无尽循环清理选择流水时保留倍率。
@@ -165,6 +180,11 @@
 - **每幕数量和玩家符文禁用表以 `_runContext` 为准；`SavedHextechRunConfigurationSnapshotJson` 写出时用当前值覆盖快照里的这三项，使它和三个单独的存档属性恒等。** 原版按类型分组还原存档属性（int[] 先于 string，同类型内按属性名），快照 JSON 晚于两个数量数组还原；两份不一致时局内改过的数量会被快照里开局时的值覆盖。新增依赖还原顺序的存档属性前先对照这个顺序。
 - **本机补丁失败的我方海克斯只在单机直接过滤候选；联机由房主冻结本局配置时并进本局禁用列表。** 联机新开局和房主幕掷骰首次冻结时，房主把本机补丁失败、且在可配置范围内的海克斯并入 `PlayerRuneConfigDisabledIds`，随幕掷骰位图下发、随存档保存。各端候选池、稀有度可用性、随机发放与奖励池只认这份列表，不看本机表，否则候选池长度按机器分歧。读档还原和客户端都不并入；不可配置的失败项只告警。客户端本机失败而房主没禁用的只写 Warn，不改共享状态。入口是 `HextechRuntimeRuneCompatibility.GetPlayerRunePoolRuntimeFilter` 与 `HextechMayhemModifier.FreezeNewRunConfigurationSnapshot`。
 - **配置快照里敌方海克斯禁用列表上限为 1024、锻造器禁用列表上限为 512，只是防畸形载荷的健全性上限。** 原版 0.107.1 / 0.111.0 按“完整 int 数量 + 每项完整 int”写选择结果，不限数量；两份都满额且锻造器 ID 取最长 128 字符时载荷约 265 KB，低于 Steam 单条 512 KiB。共用的 `HextechStableModelIdListCodec.MaxCount = 64` 不动：已见历史按它分块，改它会改变线格式。新开局冻结本局快照时，锻造器禁用列表去掉注册表里已不存在的 ID（只改本局快照，内容未登记完时不过滤），不改本机配置文件。
+- **0.113.0 起商店随机锻造器改为各端同时执行（联机语义变更）。** 原版 0.113.0 把购买改成“买家广播条目 Id、每一端对买家那份库存执行购买”，条目里扣钱和获得的广播随之删除。随机锻造器的替换体照这个模型在各端执行：锻造器选择走选择同步（买家本机弹界面、同步下标，取消同步 -1），扣钱、购买历史、获得锻造器、复视复制（`DuplicateReplicatedForge`）、购买次数都在各端各自完成；补货或清空、`AfterItemPurchased`、`PurchaseCompleted` 由原版在各端执行。条目在创建普通商店库存之后追加，并按原版编号的口径（Id 等于在全部条目中的下标）重编全部条目 Id，原版商品生成和随机数消耗顺序不变。0.113.0 不在开店界面补装条目：那里只有本机库存，补装会让各端条目和 Id 错位。0.107.1 / 0.111.0 保持买家本机执行加广播的旧流程。`HextechShopForgeHooks.Purchase.V113.cs`、`HextechV113ApiCompat.AssignMerchantEntryIdsLikeSetup`
+- **0.113.0 的 `RunManager.OnEnded` 返回 `PostRunProgressUpdateResult`，`run.end` 补丁取 `.run`；原版重复调用守卫返回 `default`（`.run` 为 null）时只做幂等清理，不补败北历史、不上报遥测。** 后缀 `__result` 的类型必须与目标返回类型一致，否则 Harmony 会拒绝整个补丁类，前缀“败北存档前补历史”也一起失效。`HextechRunLifecycleHooks.HandleRunEnded`、`HextechV113ApiCompat.Flow`
+- **极速（Blitz）模式的对局不启用本模组；恐惧（Dread）沿用标准流程，照常启用。** 极速每幕从先古开始，离开事件与奖励界面时 `RunManager.Proceed` 直接为下一节点投票，不经过地图，`SetTravelEnabled` 挡不住，海克斯选择会和进入下一房间并发。判断只看各端一致的 `RunState.GameMode`，不同步、不保存；选择入口排在幕掷骰同步之前返回。`HextechMayhemModifier.IsGameModeUnsupportedForRun`、`HextechV113ApiCompat.GetUnsupportedGameModeReason`
+- **信徒的神迹在 0.113.0 挂 `RunManager.ProceedFromTerminalRewardsScreenAsync`，极速对局不触发（拓展包）。** 0.113.0 的同名无后缀方法改为 `void` 包装（`TaskHelper.RunSafely(...Async())`），领奖界面与宝箱房调包装，无奖励的战斗直接调 `...Async`；挂在 `...Async` 上每次领奖结束恰好经过一次，时机仍是原版开图之后。极速判断与本体同口径，由拓展包自己的 `SponsorV113ApiCompat.IsGameModeUnsupported` 给出（本体那份是 internal）。`MiracleEventTriggerPatch`
+- **自然遗物池过滤只看内容归属，不依赖洗牌步数。** 0.113.0 起 `UnstableShuffle` 先派生子随机数生成器、外层固定走 1 步；未过滤时多出的 Starter 牌堆仍会推进 UpFront 随机数，测试同时比较牌堆顺序与外层计数。
 
 ## 待实机验证
 

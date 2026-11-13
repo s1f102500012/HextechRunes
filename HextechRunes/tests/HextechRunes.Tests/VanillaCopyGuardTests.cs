@@ -1,4 +1,5 @@
 using System.Reflection;
+using HarmonyLib;
 using HextechRunes;
 
 namespace HextechRunes.Tests;
@@ -18,8 +19,11 @@ internal static partial class Program
 		string currentPath = Path.Combine(testsRoot, $"vanilla_copy_guard.{ModInfo.TargetGameVersion}.txt");
 		string referencePath = Path.Combine(testsRoot, $"vanilla_copy_guard.{GuardReferenceTarget}.txt");
 		Dictionary<string, string> current = ReadGuardTable(currentPath);
+		// 目标清单 = 参考表 + 本目标表 + 本程序集里声明为跳过型前缀或 CopiesVanillaLogic 的补丁目标。
+		// 只从表行取键时，新增的跳过型前缀漏登记不会被发现（启动日志只提示一次）；从补丁声明派生后会在这里失败。
 		IEnumerable<string> entryKeys = ReadGuardTable(referencePath).Keys
 			.Concat(current.Keys)
+			.Concat(EnumerateDeclaredGuardTargets().Select(HextechVanillaCopyGuard.DescribeTarget))
 			.Where(static key => !key.EndsWith("::MoveNext()", StringComparison.Ordinal))
 			.Distinct(StringComparer.Ordinal);
 
@@ -56,6 +60,58 @@ internal static partial class Program
 
 		Expect(drifted.Count == 0, "vanilla copy guard drift needs review:\n  " + string.Join("\n  ", drifted));
 		Expect(missing.Count == 0, "vanilla copy guard is missing rows (regenerate with HEXTECH_WRITE_PATCH_MANIFEST=1):\n  " + string.Join("\n  ", missing));
+	}
+
+	/// <summary>
+	/// 属性式补丁里会被运行时守卫纳入的目标：带 <c>bool</c> 返回值的 <c>[HarmonyPrefix]</c>（可跳过原方法，
+	/// 与 <c>HextechPatcher.IsSkipCapable</c> 同口径），或补丁类声明 <c>CopiesVanillaLogic</c>。
+	/// <c>[HarmonyTargetMethod(s)]</c> 与动态 <c>Apply</c> 的目标要在运行时枚举，不在这里派生，仍靠已有表行与启动日志。
+	/// </summary>
+	private static IEnumerable<MethodBase> EnumerateDeclaredGuardTargets()
+	{
+		const BindingFlags memberFlags = BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic;
+		foreach (Type type in typeof(ModEntry).Assembly.GetTypes())
+		{
+			List<HarmonyMethod> harmonyAttributes = HarmonyMethodExtensions.GetFromType(type);
+			if (harmonyAttributes.Count == 0)
+			{
+				continue;
+			}
+
+			MethodInfo[] methods = type.GetMethods(memberFlags);
+			if (methods.Any(static method => method.GetCustomAttribute<HarmonyTargetMethod>() != null
+				|| method.GetCustomAttribute<HarmonyTargetMethods>() != null))
+			{
+				continue;
+			}
+
+			bool skipCapable = methods.Any(static method => method.GetCustomAttribute<HarmonyPrefix>() != null && method.ReturnType == typeof(bool));
+			bool copiesVanilla = type.GetCustomAttribute<HextechPatchAttribute>()?.CopiesVanillaLogic == true;
+			if (!skipCapable && !copiesVanilla)
+			{
+				continue;
+			}
+
+			HarmonyMethod merged = HarmonyMethod.Merge(harmonyAttributes);
+			if (merged.declaringType == null)
+			{
+				continue;
+			}
+
+			MethodType methodType = merged.methodType ?? MethodType.Normal;
+			MethodBase? target = methodType switch
+			{
+				MethodType.Constructor => AccessTools.Constructor(merged.declaringType, merged.argumentTypes),
+				MethodType.Getter => merged.methodName == null ? null : AccessTools.PropertyGetter(merged.declaringType, merged.methodName),
+				MethodType.Setter => merged.methodName == null ? null : AccessTools.PropertySetter(merged.declaringType, merged.methodName),
+				MethodType.Normal => merged.methodName == null ? null : AccessTools.Method(merged.declaringType, merged.methodName, merged.argumentTypes),
+				_ => null
+			};
+			if (target != null)
+			{
+				yield return target;
+			}
+		}
 	}
 
 	private static Dictionary<string, string> ReadGuardTable(string path)
