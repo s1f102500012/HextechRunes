@@ -136,7 +136,12 @@ internal static partial class HextechCombatHooks
 		}
 	}
 
+	// 0.113.0 起伤害、灾厄等击杀直接调用带击杀来源卡的重载，旧签名只转发到它；只挂新重载，避免旧签名调用触发两次。
+#if STS2_113_OR_NEWER
+	[HarmonyPatch(typeof(CreatureCmd), nameof(CreatureCmd.Kill), typeof(Creature), typeof(CardModel), typeof(bool))]
+#else
 	[HarmonyPatch(typeof(CreatureCmd), nameof(CreatureCmd.Kill), typeof(Creature), typeof(bool))]
+#endif
 	[HextechPatch("combat.near-death-feast.kill", "濒死狂宴 / 敌方海克斯:濒死狂宴", Rune = typeof(NearDeathFeastRune), MonsterHexes = [MonsterHexKind.NearDeathFeast])]
 	private static class NearDeathFeastKillPatch
 	{
@@ -144,7 +149,11 @@ internal static partial class HextechCombatHooks
 		private static void Prefix(Creature creature) => NearDeathFeastKillPrefix(creature);
 	}
 
+#if STS2_113_OR_NEWER
+	[HarmonyPatch(typeof(CreatureCmd), nameof(CreatureCmd.Kill), typeof(IReadOnlyCollection<Creature>), typeof(CardModel), typeof(bool))]
+#else
 	[HarmonyPatch(typeof(CreatureCmd), nameof(CreatureCmd.Kill), typeof(IReadOnlyCollection<Creature>), typeof(bool))]
+#endif
 	[HextechPatch("combat.near-death-feast.kill-many", "濒死狂宴 / 敌方海克斯:濒死狂宴", Rune = typeof(NearDeathFeastRune), MonsterHexes = [MonsterHexKind.NearDeathFeast])]
 	private static class NearDeathFeastKillManyPatch
 	{
@@ -158,7 +167,11 @@ internal static partial class HextechCombatHooks
 		}
 	}
 
+#if STS2_113_OR_NEWER
+	[HarmonyPatch(typeof(CreatureCmd), "KillWithoutCheckingWinCondition", typeof(Creature), typeof(CardModel), typeof(bool), typeof(int))]
+#else
 	[HarmonyPatch(typeof(CreatureCmd), "KillWithoutCheckingWinCondition", typeof(Creature), typeof(bool), typeof(int))]
+#endif
 	[HextechPatch("combat.near-death-feast.kill-no-win-check", "濒死狂宴 / 敌方海克斯:濒死狂宴", Rune = typeof(NearDeathFeastRune), MonsterHexes = [MonsterHexKind.NearDeathFeast])]
 	private static class NearDeathFeastKillWithoutWinCheckPatch
 	{

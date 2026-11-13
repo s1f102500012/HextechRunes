@@ -11,7 +11,7 @@
   -->
 
   <!--
-    发布目标只有 0.107.1 / 0.111.0 两个变体（0.110.0 已于 0.9.8 退役）。
+    发布目标为 0.107.1 / 0.111.0 / 0.113.0 三个变体（0.110.0 已于 0.9.8 退役）。
     STS2_107_1 表示"0.107.1 分支";STS2_1xx_OR_NEWER 表示"该版本引入的 API 在本目标可用"。
     0.104~0.107.0 的符号已随这些版本退役,代码里不再出现。
   -->
@@ -23,11 +23,15 @@
     <DefineConstants>$(DefineConstants);STS2_108_OR_NEWER;STS2_109_OR_NEWER;STS2_110_OR_NEWER;STS2_111_OR_NEWER</DefineConstants>
   </PropertyGroup>
 
+  <PropertyGroup Condition="'$(HextechUsesVariantTargets)' == 'true' and '$(HextechVariantTarget)' == '0.113.0'">
+    <DefineConstants>$(DefineConstants);STS2_108_OR_NEWER;STS2_109_OR_NEWER;STS2_110_OR_NEWER;STS2_111_OR_NEWER;STS2_113_OR_NEWER</DefineConstants>
+  </PropertyGroup>
+
   <!-- 未知目标不能静默落进 #else(最新 API)分支编译。 -->
   <Target Name="HextechValidateTarget"
           BeforeTargets="CoreCompile"
-          Condition="'$(HextechUsesVariantTargets)' == 'true' and '$(HextechVariantTarget)' != '0.107.1' and '$(HextechVariantTarget)' != '0.111.0'">
-    <Error Text="$(MSBuildProjectName): target '$(HextechVariantTarget)' is not a shipped variant (0.107.1 / 0.111.0)." />
+          Condition="'$(HextechUsesVariantTargets)' == 'true' and '$(HextechVariantTarget)' != '0.107.1' and '$(HextechVariantTarget)' != '0.111.0' and '$(HextechVariantTarget)' != '0.113.0'">
+    <Error Text="$(MSBuildProjectName): target '$(HextechVariantTarget)' is not a shipped variant (0.107.1 / 0.111.0 / 0.113.0)." />
   </Target>
 
   <!--

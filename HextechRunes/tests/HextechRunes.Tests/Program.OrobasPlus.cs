@@ -126,6 +126,10 @@ internal static partial class Program
 			typeof(VanillaBurningBlood), typeof(BlackBlood), typeof(RingOfTheSnake), typeof(RingOfTheDrake),
 			typeof(DivineRight), typeof(DivineDestiny), typeof(BoundPhylactery), typeof(PhylacteryUnbound),
 			typeof(CrackedCore), typeof(InfusedCore), typeof(Circlet),
+#if STS2_113_OR_NEWER
+			// 0.113.0 起 TouchOfOrobas 的初始遗物映射含愚者的 SongBow → Storyteller,构造映射表要求两者已注册。
+			typeof(SongBow), typeof(Storyteller),
+#endif
 			.. HextechCustomModelRegistry.EventRelicTypes.Where(type => typeof(OrobasPlusRelicBase).IsAssignableFrom(type))
 		];
 		using IDisposable models = InjectMissingModels(types);

@@ -58,7 +58,10 @@ internal static partial class HextechCombatHooks
 		ActualDamageCommandIds.Value = next.Length == 0 ? null : next;
 	}
 
-#if STS2_108_OR_NEWER
+#if STS2_113_OR_NEWER
+	// 0.113.0 起所有伤害(含 AttackCommand)都汇入 IEnumerable<DamageTargetData> 重载,IEnumerable<Creature> 重载只是转发。
+	[HarmonyPatch(typeof(CreatureCmd), nameof(CreatureCmd.Damage), typeof(PlayerChoiceContext), typeof(IEnumerable<DamageTargetData>), typeof(decimal), typeof(ValueProp), typeof(Creature), typeof(CardModel), typeof(CardPlay), typeof(MegaCrit.Sts2.Core.Hooks.ModifyDamageHookType))]
+#elif STS2_108_OR_NEWER
 	[HarmonyPatch(typeof(CreatureCmd), nameof(CreatureCmd.Damage), typeof(PlayerChoiceContext), typeof(IEnumerable<Creature>), typeof(decimal), typeof(ValueProp), typeof(Creature), typeof(CardModel), typeof(CardPlay))]
 #else
 	[HarmonyPatch(typeof(CreatureCmd), nameof(CreatureCmd.Damage), typeof(PlayerChoiceContext), typeof(IEnumerable<Creature>), typeof(decimal), typeof(ValueProp), typeof(Creature), typeof(CardModel))]

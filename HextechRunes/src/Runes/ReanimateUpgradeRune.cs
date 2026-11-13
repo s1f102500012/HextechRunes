@@ -16,7 +16,11 @@ public sealed class ReanimateUpgradeRune : CardUpgradeRuneBase<Reanimate>
 		return IsNecrobinderPlayer(player);
 	}
 
+#if STS2_113_OR_NEWER
+	public override async Task AfterDeath(PlayerChoiceContext choiceContext, Creature target, CardModel? source, bool wasRemovalPrevented, float deathAnimLength)
+#else
 	public override async Task AfterDeath(PlayerChoiceContext choiceContext, Creature target, bool wasRemovalPrevented, float deathAnimLength)
+#endif
 	{
 		// 与原版忧郁一样只排除被阻止的死亡；爪牙和小手回调时可能已经脱离 CombatState，所以取持有者的战斗。
 		if (wasRemovalPrevented

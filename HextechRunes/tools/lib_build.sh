@@ -7,7 +7,7 @@
 # 游戏安装位置可用环境变量 STS2_GAME_APP 覆盖(与 tools/mplab/run_mplab.sh 一致)。
 
 # 发布目标的唯一清单;变体版本符号见仓库根 Directory.Build.targets。
-HEXTECH_TARGETS=(0.107.1 0.111.0)
+HEXTECH_TARGETS=(0.107.1 0.111.0 0.113.0)
 # 加载器固定对最低目标编译(加载器自身只用各版本共有的 API)。
 HEXTECH_LOADER_REFS_TARGET=0.107.1
 

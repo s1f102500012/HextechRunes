@@ -53,10 +53,9 @@ public sealed class ExtremeSpeedRune : HextechRelicBase
 
 		Flash();
 		await CardCmd.Transform(transformations, null, CardPreviewStyle.GridLayout);
-		await CreatureCmd.LoseMaxHp(
+		await HextechV113ApiCompat.LoseMaxHpNotFromCard(
 			new BlockingPlayerChoiceContext(),
 			Owner.Creature,
-			transformations.Count * DynamicVars["MaxHpLoss"].BaseValue,
-			isFromCard: false);
+			transformations.Count * DynamicVars["MaxHpLoss"].BaseValue);
 	}
 }

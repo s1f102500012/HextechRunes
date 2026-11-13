@@ -24,6 +24,11 @@ internal sealed partial class HextechMayhemModifier : HextechModifierBase
 
 	internal static bool IsEnabledForRun(IRunState? runState)
 	{
+		if (IsGameModeUnsupportedForRun(runState))
+		{
+			return false;
+		}
+
 		if (FindIn(runState) is HextechMayhemModifier modifier)
 		{
 			return modifier.IsModActiveForRun;

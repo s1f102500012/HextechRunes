@@ -61,7 +61,11 @@ public sealed class DieForYouRune : HextechRelicBase
 		return Task.CompletedTask;
 	}
 
+#if STS2_113_OR_NEWER
+	public override Task AfterDeath(PlayerChoiceContext choiceContext, Creature target, CardModel? source, bool wasRemovalPrevented, float deathAnimLength)
+#else
 	public override Task AfterDeath(PlayerChoiceContext choiceContext, Creature target, bool wasRemovalPrevented, float deathAnimLength)
+#endif
 	{
 		HextechCombatState? combatState = target.CombatState;
 		if (wasRemovalPrevented

@@ -148,7 +148,8 @@ internal sealed class ThievingHopperEnemyHex : HextechEnemyHexEffect
 			NCreature? node = NCombatRoom.Instance?.GetCreatureNode(enemy);
 			if (node != null && GodotObject.IsInstanceValid(node))
 			{
-				node.ToggleIsInteractable(false);
+				// 关点选、收起状态栏的方式与同版本原版逃跑怪物一致（0.111.0 立即隐藏，0.113.0 渐隐）。
+				HextechV113ApiCompat.DisableCreatureInteractionForEscape(node);
 				// 保持模型自己的待机姿态，仅移动表现节点；不要求各怪物提供 Flee 动画。
 				node.SetAnimationTrigger("Idle");
 				Tween tween = node.CreateTween();

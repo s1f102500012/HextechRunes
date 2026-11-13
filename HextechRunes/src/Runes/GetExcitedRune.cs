@@ -33,7 +33,11 @@ public sealed class GetExcitedRune : HextechRelicBase
 		return Task.CompletedTask;
 	}
 
+#if STS2_113_OR_NEWER
+	public override Task AfterDeath(PlayerChoiceContext choiceContext, Creature target, CardModel? source, bool wasRemovalPrevented, float deathAnimLength)
+#else
 	public override Task AfterDeath(PlayerChoiceContext choiceContext, Creature target, bool wasRemovalPrevented, float deathAnimLength)
+#endif
 	{
 		if (wasRemovalPrevented
 			|| target.Side == Owner.Creature.Side

@@ -44,6 +44,13 @@ internal static partial class HextechRuneSelectionCoordinator
 
 	public static async Task HandleStageSelection(RunState runState, HextechMayhemModifier modifier, int actIndex)
 	{
+		// 不受支持的游戏模式：本局不启用，不做幕掷骰同步、不弹选择、不存档，各端按同一 GameMode 得出相同结论。
+		if (HextechMayhemModifier.IsGameModeUnsupportedForRun(runState))
+		{
+			HextechLog.Info("Mayhem", $"HandleHextechActSelection skip: game mode {runState.GameMode} is not supported act={actIndex}");
+			return;
+		}
+
 		if (!modifier.IsStageResolved(actIndex) && modifier.TryRecoverResolvedActsFromPlayerRelics(nameof(HandleStageSelection), actIndex))
 		{
 			HextechEnemyUi.Refresh(modifier);
