@@ -1,6 +1,8 @@
 {
   "HEXTECH_RUNES_SUBCATEGORY": "[gold]เฮกซ์เทค:[/gold] เครื่องรางพิเศษจากกองรูนเฮกซ์เทค",
   "HEXTECH_FORGES_SUBCATEGORY": "[gold]ช่างหลอมค่าสถานะ:[/gold] เครื่องรางพิเศษจากระบบหลอมค่าสถานะ",
+  "HEXTECH_INSPECT_RELIC_RARITY": "เครื่องรางเฮกซ์เทค",
+  "HEXTECH_RUN_HISTORY_RELICS": "{StarterRelics:cond:>0?,|} {HextechRelics} เฮกซ์เทค",
   "HEXTECH_CHARACTER.IRONCLAD": "[gold]เฮกซ์ของนักรบเกราะเหล็ก:[/gold] รูนเฮกซ์เทคที่มีเฉพาะนักรบเกราะเหล็ก",
   "HEXTECH_CHARACTER.SILENT": "[gold]เฮกซ์ของนักฆ่าแห่งความเงียบ:[/gold] รูนเฮกซ์เทคที่มีเฉพาะนักฆ่าแห่งความเงียบ",
   "HEXTECH_CHARACTER.REGENT": "[gold]เฮกซ์ของ Regent:[/gold] รูนเฮกซ์เทคที่มีเฉพาะ Regent",
@@ -178,5 +180,11 @@
   "HEXTECH_GODSLAYER_FINALE_3": "การโจมตีนั้นทำอะไรข้าไม่ได้ แต่มันตกลงตรงที่ปลายพู่กันของข้าไม่เคยแตะ",
   "HEXTECH_GODSLAYER_FINALE_4": "ทุกเส้นสายในหอคอยนี้ล้วนมาจากมือข้า——ยกเว้นชิ้นที่อยู่ในมือเจ้า",
   "HEXTECH_GODSLAYER_FINALE_5": "ที่แท้ ผู้ลงเส้นบนพิมพ์เขียวนี้ไม่ได้มีเพียงข้า",
-  "HEXTECH_GODSLAYER_FINALE_6": "[jitter]……ใคร?[/jitter]"
+  "HEXTECH_GODSLAYER_FINALE_6": "[jitter]……ใคร?[/jitter]",
+  "HEXTECH_CHARACTER.FOOL": "[gold]เฮกซ์ของเดอะฟูล:[/gold] รูนเฮกซ์เทคที่มีเฉพาะเดอะฟูล",
+  "HEXTECH_POOL.FOOL": "เดอะฟูล",
+  "HEXTECH_TAG.ARROW": "ลูกธนู",
+  "HEXTECH_TAG.MELODY": "ทำนอง",
+  "HEXTECH_TAG.EMOTION": "อารมณ์",
+  "HEXTECH_TAG.TAROT": "ทาโรต์"
 }

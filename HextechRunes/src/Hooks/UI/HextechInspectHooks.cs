@@ -76,9 +76,28 @@ internal static class HextechInspectHooks
 		}
 	}
 
+	/// <summary>检视界面类别行显示的本模组文本键(<see cref="HextechRuneLabels.LocTable"/> 表)。</summary>
+	internal const string HextechRelicRarityKey = "HEXTECH_INSPECT_RELIC_RARITY";
+
 	internal static bool ShouldHandleInspectRequest(RelicModel relic)
 	{
 		return HextechCatalog.IsHextechCustomRelic(relic);
+	}
+
+	/// <summary>
+	/// 检视界面类别行接管的文本键:本模组管理的遗物统一用 <see cref="HextechRelicRarityKey"/>,其余返回 null 保持原版。
+	/// 底层 <c>Rarity</c> 仍是原版 Starter,稀有度视觉照旧由原版 <c>SetRarityVisuals(relic.Rarity)</c> 设置,只换这一行文字。
+	/// </summary>
+	internal static string? GetInspectRarityLocKey(RelicModel relic)
+	{
+		return HextechCatalog.IsHextechManagedRelic(relic) ? HextechRelicRarityKey : null;
+	}
+
+	private static string GetInspectRarityText(RelicModel relic)
+	{
+		string? key = GetInspectRarityLocKey(relic);
+		string? text = key == null ? null : HextechRuneLabels.TryGetText(key);
+		return text ?? new LocString("gameplay_ui", "RELIC_RARITY." + relic.Rarity.ToString().ToUpperInvariant()).GetFormattedText();
 	}
 
 	internal static IReadOnlyList<RelicModel> MergeRequestedInspectRelic(
@@ -117,8 +136,7 @@ internal static class HextechInspectHooks
 		}
 
 		nameLabel.SetTextAutoSize(relic.Title.GetFormattedText());
-		LocString rarityText = new("gameplay_ui", "RELIC_RARITY." + relic.Rarity.ToString().ToUpperInvariant());
-		rarityLabel.SetTextAutoSize(rarityText.GetFormattedText());
+		rarityLabel.SetTextAutoSize(GetInspectRarityText(relic));
 		image.SelfModulate = Colors.White;
 		description.SetTextAutoSize(relic.DynamicDescription.GetFormattedText());
 		flavor.SetTextAutoSize(relic.Flavor.GetFormattedText());
@@ -225,6 +243,8 @@ internal static class HextechInspectHooks
 	/// 海克斯的隐藏遗物(不进 UnlockState)与缺规范实例的可变副本会落进"未解锁"分支。
 	/// 不跳过原版:原版照常渲染后,后缀按原版"正常"分支逐项重写(名称、稀有度、描述、风味、稀有度视觉、大图、提示),
 	/// 三个分支设置的字段都会被覆盖。激活条件:当前索引的遗物属于海克斯(<see cref="HextechCatalog.IsHextechCustomRelic"/>)。
+	/// 类别行显示本模组的"海克斯遗物"(<see cref="GetInspectRarityLocKey"/>);欧洛巴斯强化与事件遗物不重写其余字段,
+	/// 只在原版走"正常"分支(类别行非空)时替换类别行文字。
 	/// </remarks>
 	[HarmonyPatch(typeof(NInspectRelicScreen), "UpdateRelicDisplay")]
 	// 后缀逐项复制原版"正常"分支，目标 IL 仍由原版拷贝守卫冻结。
@@ -247,6 +267,13 @@ internal static class HextechInspectHooks
 				if (HextechCatalog.IsHextechCustomRelic(relic))
 				{
 					RenderHextechInspect(members, __instance, relic);
+				}
+				else if (HextechCatalog.IsHextechManagedRelic(relic)
+					&& members.RarityLabel.GetValue(__instance) is MegaLabel rarityLabel
+					&& !string.IsNullOrEmpty(rarityLabel.Text))
+				{
+					// 欧洛巴斯强化与事件遗物走原版分支;类别行非空即原版"正常"分支,只换这一行文字。
+					rarityLabel.SetTextAutoSize(GetInspectRarityText(relic));
 				}
 			}
 		}

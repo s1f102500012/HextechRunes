@@ -1,6 +1,8 @@
 {
   "HEXTECH_RUNES_SUBCATEGORY": "[gold]Hextech:[/gold] Reliquias personalizadas del grupo de runas Hextech.",
   "HEXTECH_FORGES_SUBCATEGORY": "[gold]Forjador de atributos:[/gold] Reliquias personalizadas del sistema de forja de estadísticas.",
+  "HEXTECH_INSPECT_RELIC_RARITY": "Reliquia Hextech",
+  "HEXTECH_RUN_HISTORY_RELICS": "{StarterRelics:cond:>0?,|} {HextechRelics} de Hextech",
   "HEXTECH_CHARACTER.IRONCLAD": "[gold]Hexes del Blindado:[/gold] Runas hextech disponibles solo para el Blindado.",
   "HEXTECH_CHARACTER.SILENT": "[gold]Hexes de la Silenciosa:[/gold] Runas hextech disponibles solo para la Silenciosa.",
   "HEXTECH_CHARACTER.REGENT": "[gold]Hexes del Regente:[/gold] Runas hextech disponibles solo para el Regente.",
@@ -178,5 +180,11 @@
   "HEXTECH_GODSLAYER_FINALE_3": "Ese golpe no puede herirme. Pero cayó donde mi pluma nunca tocó.",
   "HEXTECH_GODSLAYER_FINALE_4": "Cada trazo de esta Aguja es obra mía… salvo la pieza que tienes en la mano.",
   "HEXTECH_GODSLAYER_FINALE_5": "Así que no soy la única mano que dibuja sobre el plano.",
-  "HEXTECH_GODSLAYER_FINALE_6": "[jitter]…¿Quién?[/jitter]"
+  "HEXTECH_GODSLAYER_FINALE_6": "[jitter]…¿Quién?[/jitter]",
+  "HEXTECH_CHARACTER.FOOL": "[gold]Hexes de El Bufón:[/gold] Runas hextech disponibles solo para El Bufón.",
+  "HEXTECH_POOL.FOOL": "El Bufón",
+  "HEXTECH_TAG.ARROW": "Flecha",
+  "HEXTECH_TAG.MELODY": "Melodía",
+  "HEXTECH_TAG.EMOTION": "Emoción",
+  "HEXTECH_TAG.TAROT": "Tarot"
 }

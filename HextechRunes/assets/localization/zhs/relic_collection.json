@@ -1,6 +1,8 @@
 {
   "HEXTECH_RUNES_SUBCATEGORY": "[gold]海克斯：[/gold] 来自海克斯符文池的自定义遗物。",
   "HEXTECH_FORGES_SUBCATEGORY": "[gold]属性锻造器：[/gold] 来自属性锻造系统的自定义遗物。",
+  "HEXTECH_INSPECT_RELIC_RARITY": "海克斯遗物",
+  "HEXTECH_RUN_HISTORY_RELICS": "{StarterRelics:cond:>0?，|}{HextechRelics}海克斯",
   "HEXTECH_CHARACTER.IRONCLAD": "[gold]铁甲战士海克斯：[/gold] 仅铁甲战士可抽取的海克斯符文。",
   "HEXTECH_CHARACTER.SILENT": "[gold]静默猎手海克斯：[/gold] 仅静默猎手可抽取的海克斯符文。",
   "HEXTECH_CHARACTER.REGENT": "[gold]储君海克斯：[/gold] 仅储君可抽取的海克斯符文。",
@@ -178,5 +180,11 @@
   "HEXTECH_GODSLAYER_FINALE_3": "这一击伤不了我分毫。可它落下的地方……我从未落过笔。",
   "HEXTECH_GODSLAYER_FINALE_4": "塔中的一砖一瓦皆出自我手——唯独你掌心这一枚。",
   "HEXTECH_GODSLAYER_FINALE_5": "原来在蓝图上落笔的，不止我一人。",
-  "HEXTECH_GODSLAYER_FINALE_6": "[jitter]……是谁？[/jitter]"
+  "HEXTECH_GODSLAYER_FINALE_6": "[jitter]……是谁？[/jitter]",
+  "HEXTECH_CHARACTER.FOOL": "[gold]愚者海克斯：[/gold] 仅愚者可抽取的海克斯符文。",
+  "HEXTECH_POOL.FOOL": "愚者",
+  "HEXTECH_TAG.ARROW": "箭矢",
+  "HEXTECH_TAG.MELODY": "旋律",
+  "HEXTECH_TAG.EMOTION": "悲喜",
+  "HEXTECH_TAG.TAROT": "塔罗"
 }

@@ -73,6 +73,13 @@
     },
     {
       "pack": "HextechRunes",
+      "language": "ptb",
+      "table": "relic_collection.json",
+      "key": "HEXTECH_RUN_HISTORY_RELICS",
+      "reason": "对局记录遗物分类片段；ptb 原版分类串与 eng 同为“ {} 名词”结构，Hextech 是本模组 ptb 图鉴分组沿用的品牌名，写法与 eng 同形。"
+    },
+    {
+      "pack": "HextechRunes",
       "language": "esp",
       "table": "relics.json",
       "key": "EUREKA_RUNE.title",
@@ -196,6 +203,34 @@
       "table": "modifiers.json",
       "key": "HEXTECH_MAYHEM.title",
       "reason": "模组名品牌名：创意工坊该语言没有单独标题、显示英文 ARAM: Mayhem，游戏内与工坊保持一致。"
+    },
+    {
+      "pack": "HextechRunes",
+      "language": "esp",
+      "table": "relic_collection.json",
+      "key": "HEXTECH_TAG.TAROT",
+      "reason": "0.113.0 esp 官方译名同形：static_hover_tips TAROT.title 为 Tarot。"
+    },
+    {
+      "pack": "HextechRunes",
+      "language": "spa",
+      "table": "relic_collection.json",
+      "key": "HEXTECH_TAG.TAROT",
+      "reason": "0.113.0 spa 官方译名同形：static_hover_tips TAROT.title 为 Tarot。"
+    },
+    {
+      "pack": "HextechRunes",
+      "language": "ptb",
+      "table": "relic_collection.json",
+      "key": "HEXTECH_TAG.TAROT",
+      "reason": "0.113.0 ptb 官方译名同形：static_hover_tips TAROT.title 为 Tarot。"
+    },
+    {
+      "pack": "HextechRunes",
+      "language": "ptb",
+      "table": "relics.json",
+      "key": "TRIO_RUNE.title",
+      "reason": "葡萄牙语“三重唱”本就写作 Trio，与英文同形。"
     }
   ]
 }

@@ -1,6 +1,8 @@
 {
   "HEXTECH_RUNES_SUBCATEGORY": "[gold]Хекстек:[/gold] Особые реликвии из пула рун Хекстека.",
   "HEXTECH_FORGES_SUBCATEGORY": "[gold]Наковальни показателей:[/gold] Особые реликвии получаемые в начале акта.",
+  "HEXTECH_INSPECT_RELIC_RARITY": "Реликвия Хекстека",
+  "HEXTECH_RUN_HISTORY_RELICS": "{StarterRelics:cond:>0? |}Реликвии Хекстека: {HextechRelics}.",
   "HEXTECH_CHARACTER.IRONCLAD": "[gold]Руны Латоносца:[/gold] Руны Хекстека, доступные только Латоносцу.",
   "HEXTECH_CHARACTER.SILENT": "[gold]Руны Безмолвной:[/gold] Руны Хекстека, доступные только Безмолвной.",
   "HEXTECH_CHARACTER.REGENT": "[gold]Руны Наследника:[/gold] Руны Хекстека, доступные только Наследнику.",
@@ -178,5 +180,11 @@
   "HEXTECH_GODSLAYER_FINALE_3": "Этот удар не может меня ранить. Но он пришёлся туда, где не бывало моего пера.",
   "HEXTECH_GODSLAYER_FINALE_4": "Каждая линия этого Шпиля — дело моих рук… кроме того, что у тебя в руке.",
   "HEXTECH_GODSLAYER_FINALE_5": "Значит, на этом чертеже рисовала не только моя рука.",
-  "HEXTECH_GODSLAYER_FINALE_6": "[jitter]…Кто?[/jitter]"
+  "HEXTECH_GODSLAYER_FINALE_6": "[jitter]…Кто?[/jitter]",
+  "HEXTECH_CHARACTER.FOOL": "[gold]Руны Шута:[/gold] Руны Хекстека, доступные только Шуту.",
+  "HEXTECH_POOL.FOOL": "Шут",
+  "HEXTECH_TAG.ARROW": "Стрелы",
+  "HEXTECH_TAG.MELODY": "Мелодия",
+  "HEXTECH_TAG.EMOTION": "Эмоции",
+  "HEXTECH_TAG.TAROT": "Таро"
 }
