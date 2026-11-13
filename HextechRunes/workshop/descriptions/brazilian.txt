@@ -3,21 +3,40 @@ English
 简体中文
 한국어 (Colaboradores: 我有幸福症, oatone, Nark)
 Español
-日本語
+日本語 (Colaborador: RainBreath7th)
 Português do Brasil (Colaborador: floca)
 ภาษาไทย
-Русский、(Colaborador: Dragon enjoyer)
+Русский (Colaborador: Dragon enjoyer)
 
 [h1] Introdução [/h1]
 Este mod adiciona ao Slay the Spire 2 um sistema de Runas Hextech inspirado em League of Legends. É um popular mod de expansão em grande escala para Slay the Spire 2.
 
-Atualmente há mais de 300 Runas Hextech com os mais variados efeitos. No início de cada ato, você escolhe uma Runa Hextech aleatória, enquanto os monstros também recebem aleatoriamente uma Hextech da mesma raridade — e os dois lados lutam sob regras em constante mudança.
+No início de cada ato, você escolhe uma Runa Hextech entre algumas oferecidas aleatoriamente, enquanto os inimigos daquele ato recebem Hextechs inimigas da mesma raridade. Os dois lados então lutam sob regras em constante mudança.
 
-O mod também adiciona Hextechs exclusivas de cada personagem, forjadores de atributos, cartas inéditas e estatísticas de feedback, dando a cada jornada direções de build e ritmos de desafio diferentes.
+[h1] Conteúdo [/h1]
+[list]
+[*]Mais de 350 Hextechs do jogador, incluindo as Hextechs exclusivas dos seis personagens: Rígido, Sorrateira, Regente, Defeituoso, Necroartífice e O Bufão;
+[*]Mais de 140 Hextechs inimigas;
+[*]Forjadores de Atributos e cartas inéditas;
+[*]Suporte a multijogador;
+[*]Configuração dentro do jogo: quantas Hextechs cada lado recebe por ato, limite de rerrolagens, ativar ou desativar qualquer Hextech ou Forjador, pesos de raridade e mais. A configuração pode ser exportada como um código para compartilhar com amigos, e as configurações da comunidade podem ser aplicadas diretamente;
+[*]Estatísticas de partida, usadas para futuros ajustes de balanceamento.
+[/list]
+
+[h1] Sobre o balanceamento [/h1]
+Todos os ajustes de balanceamento das Hextechs têm como base a configuração padrão: a cada ato, os jogadores escolhem 1 Hextech (1-1-1) e os inimigos recebem 2 Hextechs (2-2-2).
+
+A configuração personalizada existe para que você possa combinar livremente este mod com outros mods e montar diferentes ambientes de jogo. Se você aumentar o número de Hextechs do jogador, reduzir o número de Hextechs inimigas ou desativar uma grande quantidade de Hextechs inimigas, as partidas naturalmente ficarão muito mais fáceis — isso é resultado da configuração escolhida e não reflete a força do mod no ambiente padrão.
+
+Ao avaliar a dificuldade do mod ou relatar problemas de balanceamento, baseie-se na sua experiência com a configuração padrão ou informe a configuração que você usou.
+
+[h1] Observações [/h1]
+ARAM: Mayhem não requer nenhum mod pré-requisito.
+No multijogador, garanta que todos os jogadores tenham exatamente os mesmos mods e versões ativados (incluindo mods de biblioteca como RitsuLib e BaseLib: ou todos ativam, ou ninguém ativa). Caso contrário, pode não ser possível conectar ou podem ocorrer dessincronizações.
 
 [img]https://i.mji.rip/2026/06/19/7459c0449d26c3e1a35bd5b020bd3961.png[/img]
 [img]https://i.mji.rip/2026/06/19/a7431d3a5ca25b7c5fa80026a0ba2496.webp[/img]
 
 Se você gosta do meu mod, pode me apoiar no Afdian: https://ifdian.net/a/Lu-Ran
-Github: https://github.com/s1f102500012/HextechRunes
+GitHub: https://github.com/s1f102500012/HextechRunes
 Grupo do QQ: 1077728669
