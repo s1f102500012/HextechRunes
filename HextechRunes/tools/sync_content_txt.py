@@ -58,6 +58,7 @@ POOL_SECTION = {
     "Regent": "[我方 / 储君]",
     "Defect": "[我方 / 故障机器人]",
     "Necrobinder": "[我方 / 亡灵契约师]",
+    "Fool": "[我方 / 愚者]",
 }
 TAG_SECTION_ORDER = [
     "[我方 / 通用]",
@@ -66,6 +67,7 @@ TAG_SECTION_ORDER = [
     "[我方 / 储君]",
     "[我方 / 故障机器人]",
     "[我方 / 亡灵契约师]",
+    "[我方 / 愚者]",
 ]
 
 # 拓展包锻造器/新增拓展包符文条目在 flavors 属性锻造器区使用的后缀约定,
@@ -97,7 +99,9 @@ def class_sources(roots: tuple[Path, ...]) -> dict[str, str]:
                 while end < len(masked) and depth:
                     depth += (masked[end] == "{") - (masked[end] == "}")
                     end += 1
-                result.setdefault(match.group(1).replace("_", "").casefold(), source[match.start():end])
+                # 分部类（愚者海克斯的共享文件 + .V113.cs）按文件顺序拼接，CanonicalVars 与基类声明可在任一部分。
+                key = match.group(1).replace("_", "").casefold()
+                result[key] = result.get(key, "") + source[match.start():end]
     return result
 
 

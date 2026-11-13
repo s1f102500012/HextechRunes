@@ -385,3 +385,23 @@
 #我方	AutoPatrolRune	自动巡逻	标签=召唤
 我方	NeurosurgeUpgradeRune	升级：精神过载	标签=灾厄
 我方	ReaperFormUpgradeRune	升级：死神形态	标签=综合
+
+[我方 / 愚者]
+我方	FullQuiverRune	箭袋满满	标签=箭矢
+我方	SureShotRune	箭无虚发	标签=箭矢
+我方	LoyaltyRune	忠诚	标签=箭矢
+我方	CloudPiercerRune	穿云箭	标签=箭矢
+我方	DeadeyeRune	百步穿杨	标签=箭矢
+我方	PartingShotRune	回马枪	标签=箭矢
+我方	OpeningNoteRune	开嗓	标签=旋律
+我方	SingOutRune	引吭高歌	标签=旋律
+我方	OvertoneRune	弦外之音	标签=旋律
+我方	TrioRune	三重唱	标签=旋律
+我方	LimberUpRune	热身	标签=生存
+我方	FlexibilityRune	柔韧	标签=生存
+我方	BittersweetRune	苦中作乐	标签=悲喜
+我方	TearsToLaughterRune	破涕为笑	标签=悲喜
+我方	MixedFeelingsRune	悲喜交加	标签=悲喜
+我方	CrystalBallRune	水晶球	标签=塔罗
+我方	TarotClothRune	塔罗牌桌布	标签=塔罗
+我方	MythicFormUpgradeRune	升级：神话形态	标签=塔罗

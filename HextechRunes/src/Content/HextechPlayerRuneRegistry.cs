@@ -377,7 +377,26 @@ internal static class HextechPlayerRuneRegistry
 		Rune<DiveBomberRune>(HextechRarityTier.Silver, flags: PlayerRuneFlags.Disabled, tagKey: "MULTIPLAYER"),
 		Rune<AllForYouRune>(HextechRarityTier.Gold, tagKey: "MULTIPLAYER"),
 		Rune<BlossomBladeRune>(HextechRarityTier.Prismatic, tagKey: "MULTIPLAYER"),
-		Rune<GodslayerRune>(HextechRarityTier.Prismatic, flags: PlayerRuneFlags.Hidden)
+		Rune<GodslayerRune>(HextechRarityTier.Prismatic, flags: PlayerRuneFlags.Hidden),
+		// 愚者专属（0.113.0 起才有愚者）：三个变体都登记（注册顺序、配置 ID、存档身份一致），旧变体上不可获得、界面不列出。
+		Rune<FullQuiverRune>(HextechRarityTier.Silver, characterPool: PlayerRuneCharacterPool.Fool, characterOrder: 1, tagKey: "ARROW"),
+		Rune<SureShotRune>(HextechRarityTier.Silver, characterPool: PlayerRuneCharacterPool.Fool, characterOrder: 2, tagKey: "ARROW"),
+		Rune<LoyaltyRune>(HextechRarityTier.Gold, characterPool: PlayerRuneCharacterPool.Fool, characterOrder: 3, tagKey: "ARROW"),
+		Rune<CloudPiercerRune>(HextechRarityTier.Gold, characterPool: PlayerRuneCharacterPool.Fool, characterOrder: 4, tagKey: "ARROW"),
+		Rune<DeadeyeRune>(HextechRarityTier.Gold, characterPool: PlayerRuneCharacterPool.Fool, characterOrder: 5, tagKey: "ARROW"),
+		Rune<PartingShotRune>(HextechRarityTier.Prismatic, characterPool: PlayerRuneCharacterPool.Fool, characterOrder: 6, tagKey: "ARROW"),
+		Rune<OpeningNoteRune>(HextechRarityTier.Silver, characterPool: PlayerRuneCharacterPool.Fool, characterOrder: 7, tagKey: "MELODY"),
+		Rune<SingOutRune>(HextechRarityTier.Gold, characterPool: PlayerRuneCharacterPool.Fool, characterOrder: 8, tagKey: "MELODY"),
+		Rune<OvertoneRune>(HextechRarityTier.Gold, characterPool: PlayerRuneCharacterPool.Fool, characterOrder: 9, tagKey: "MELODY"),
+		Rune<TrioRune>(HextechRarityTier.Prismatic, characterPool: PlayerRuneCharacterPool.Fool, characterOrder: 10, tagKey: "MELODY"),
+		Rune<LimberUpRune>(HextechRarityTier.Silver, characterPool: PlayerRuneCharacterPool.Fool, characterOrder: 11, tagKey: "SURVIVAL"),
+		Rune<FlexibilityRune>(HextechRarityTier.Gold, characterPool: PlayerRuneCharacterPool.Fool, characterOrder: 12, tagKey: "SURVIVAL"),
+		Rune<BittersweetRune>(HextechRarityTier.Silver, characterPool: PlayerRuneCharacterPool.Fool, characterOrder: 13, tagKey: "EMOTION"),
+		Rune<TearsToLaughterRune>(HextechRarityTier.Gold, characterPool: PlayerRuneCharacterPool.Fool, characterOrder: 14, tagKey: "EMOTION"),
+		Rune<MixedFeelingsRune>(HextechRarityTier.Prismatic, characterPool: PlayerRuneCharacterPool.Fool, characterOrder: 15, tagKey: "EMOTION"),
+		Rune<CrystalBallRune>(HextechRarityTier.Gold, characterPool: PlayerRuneCharacterPool.Fool, characterOrder: 16, tagKey: "TAROT"),
+		Rune<TarotClothRune>(HextechRarityTier.Prismatic, characterPool: PlayerRuneCharacterPool.Fool, characterOrder: 17, tagKey: "TAROT"),
+		Rune<MythicFormUpgradeRune>(HextechRarityTier.Prismatic, characterPool: PlayerRuneCharacterPool.Fool, characterOrder: 18, tagKey: "TAROT")
 	];
 
 	private static PlayerRuneRegistration Rune<TRune>(

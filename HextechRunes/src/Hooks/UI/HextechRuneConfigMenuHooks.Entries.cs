@@ -10,8 +10,9 @@ internal static partial class HextechRuneConfigMenuHooks
 		foreach (Type runeType in HextechCatalog.GetAllConfigurableRuneTypes())
 		{
 			RelicModel relic = ModelDb.GetById<RelicModel>(ModelDb.GetId(runeType));
-			// 生成型符文(由其它符文当场生成)不进池,也不在配置界面列出。
-			if (relic is IHextechGeneratedRune)
+			// 生成型符文(由其它符文当场生成)不进池,也不在配置界面列出;本变体没有对应角色的专属符文(旧变体的愚者池)同样不列出,
+			// 它们的启用状态仍按 ID 保留在配置里。
+			if (relic is IHextechGeneratedRune || !HextechCatalog.IsPlayerRuneTypeShownInUi(runeType))
 			{
 				continue;
 			}

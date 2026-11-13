@@ -25,6 +25,7 @@ internal static partial class HextechCatalog
 	public static IReadOnlyList<RuneSeriesGroup> GetCharacterRuneGroups()
 	{
 		return CharacterRunePools
+			.Where(static pool => HextechPlayerContextHelper.IsCharacterPoolPresentInGame(pool.Pool))
 			.Select(static pool => new RuneSeriesGroup(
 				$"CHARACTER.{pool.LocalizationKey}",
 				pool.RuneTypes

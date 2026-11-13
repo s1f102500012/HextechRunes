@@ -16,6 +16,7 @@ internal static partial class HextechRuneConfigMenuHooks
 		"REGENT",
 		"DEFECT",
 		"NECROBINDER",
+		"FOOL",
 		"SPONSOR_PACK"
 	];
 
