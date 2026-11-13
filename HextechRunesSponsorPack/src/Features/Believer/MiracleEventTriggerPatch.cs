@@ -13,8 +13,16 @@ namespace HextechRunesSponsorPack;
 // 不能在胜利 Hook 中直接换房，也不能跳过原方法的 UI 收尾，否则会丢奖励或留下拦截输入的界面。
 // 仅单人、单层战斗房且并非末幕 Boss 时消费待触发计数；计数晚于战后存档在内存中消费，
 // 读回那份存档后可再次触发。事件完成走 NEventRoom.Proceed，不重入本补丁。
+// 0.113.0 起 ProceedFromTerminalRewardsScreen 是 void 包装（TaskHelper.RunSafely 调 ...Async），
+// 领奖界面与宝箱房调包装，无奖励的战斗（NCombatUi.ProceedWithoutRewards）直接调 ...Async；
+// 补丁挂在 ...Async 上，每次领奖结束恰好经过一次。0.111.0 及以前只有返回 Task 的同名方法，所有入口都调它。
+// 极速模式的对局本体不启用，这里同样不触发：那里离开奖励界面直接推进到下一节点，不开地图。
 [SponsorPatch("believer.miracle-trigger", "信徒·神迹事件")]
+#if STS2_113_OR_NEWER
+[HarmonyPatch(typeof(RunManager), nameof(RunManager.ProceedFromTerminalRewardsScreenAsync))]
+#else
 [HarmonyPatch(typeof(RunManager), nameof(RunManager.ProceedFromTerminalRewardsScreen))]
+#endif
 internal static class MiracleEventTriggerPatch
 {
 	private const string LogTag = "Believer";
@@ -37,7 +45,7 @@ internal static class MiracleEventTriggerPatch
 			}
 
 			RunState? state = runManager.DebugOnlyGetState();
-			if (state == null || state.CurrentRoomCount != 1)
+			if (state == null || state.CurrentRoomCount != 1 || SponsorV113ApiCompat.IsGameModeUnsupported(state))
 			{
 				return;
 			}

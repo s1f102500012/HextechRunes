@@ -136,6 +136,9 @@ public sealed class DesperateFinaleRune : HextechRelicBase, IHextechHealingMulti
 	public override Task AfterDeath(
 		PlayerChoiceContext choiceContext,
 		Creature target,
+#if STS2_113_OR_NEWER
+		CardModel? source,
+#endif
 		bool wasRemovalPrevented,
 		float deathAnimLength)
 	{

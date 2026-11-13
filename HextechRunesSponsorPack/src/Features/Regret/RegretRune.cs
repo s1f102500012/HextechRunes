@@ -111,7 +111,11 @@ public sealed class RegretRune : HextechRelicBase
 		return creature != Owner.Creature || !_pendingPlayerRevive;
 	}
 
+#if STS2_113_OR_NEWER
+	public override async Task AfterDeath(PlayerChoiceContext choiceContext, Creature target, CardModel? source, bool wasRemovalPrevented, float deathAnimLength)
+#else
 	public override async Task AfterDeath(PlayerChoiceContext choiceContext, Creature target, bool wasRemovalPrevented, float deathAnimLength)
+#endif
 	{
 		if (target != Owner.Creature || !wasRemovalPrevented || !_pendingPlayerRevive)
 		{

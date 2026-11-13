@@ -56,6 +56,38 @@ internal static partial class Program
 		Expect(MainLoader.IsCompatibleTarget(new Version(0, 111, 0), new Version(0, 111, 0), declaredNewest), "a declared 0.111 target serves 0.111 even when its file is unusable, so the failure is not reported as an unsupported game");
 	}
 
+	// 发布清单为 0.107.1 / 0.111.0 / 0.113.0 三个目标时:0.111.0 降为较旧目标,只服务 0.111.x;
+	// 0.112.x 没有对应目标,按同一规则判为不支持;0.113.0 及更新(或未知)的宿主用 0.113.0。
+	[HextechTest]
+	private static void LoaderSelectVariantWithThreeTargets()
+	{
+		MainLoader.VariantCandidate[] main =
+		[
+			new("0.107.1", new Version(0, 107, 1), "a"),
+			new("0.111.0", new Version(0, 111, 0), "b"),
+			new("0.113.0", new Version(0, 113, 0), "c")
+		];
+		Equal("0.107.1", MainLoader.SelectVariant(main, new Version(0, 107, 1))?.CompatTarget, "0.107.1 host");
+		Expect(MainLoader.SelectVariant(main, new Version(0, 110, 0)) == null, "retired 0.110 host refuses");
+		Equal("0.111.0", MainLoader.SelectVariant(main, new Version(0, 111, 0))?.CompatTarget, "0.111.0 host uses the now-older 0.111.0 variant");
+		Equal("0.111.0", MainLoader.SelectVariant(main, new Version(0, 111, 2))?.CompatTarget, "0.111.x patch host stays on 0.111.0");
+		Expect(MainLoader.SelectVariant(main, new Version(0, 112, 0)) == null, "0.112.0 has no target and refuses");
+		Expect(MainLoader.SelectVariant(main, new Version(0, 112, 5)) == null, "0.112.x patch has no target and refuses");
+		Equal("0.113.0", MainLoader.SelectVariant(main, new Version(0, 113, 0))?.CompatTarget, "exact newest 0.113.0 host");
+		Equal("0.113.0", MainLoader.SelectVariant(main, new Version(0, 113, 1))?.CompatTarget, "0.113.x patch host");
+		Equal("0.113.0", MainLoader.SelectVariant(main, new Version(0, 114, 0))?.CompatTarget, "newer host picks 0.113.0");
+		Equal("0.113.0", MainLoader.SelectVariant(main, null)?.CompatTarget, "unknown host picks 0.113.0");
+
+		// 0.113.0 的 DLL 不可用被剔除后,0.111.0 不能顶上去服务 0.113 宿主,但仍服务 0.111.x。
+		MainLoader.VariantCandidate[] withoutNewest = [main[0], main[1]];
+		Version declaredNewest = new(0, 113, 0);
+		Expect(MainLoader.SelectVariant(withoutNewest, new Version(0, 113, 0), declaredNewest) == null, "missing 0.113.0: 0.113 host does not fall back to 0.111.0");
+		Expect(MainLoader.SelectVariant(withoutNewest, null, declaredNewest) == null, "missing 0.113.0: unknown host does not fall back");
+		Expect(MainLoader.SelectVariant(withoutNewest, new Version(0, 112, 0), declaredNewest) == null, "missing 0.113.0: 0.112 host still refuses");
+		Equal("0.111.0", MainLoader.SelectVariant(withoutNewest, new Version(0, 111, 0), declaredNewest)?.CompatTarget, "missing 0.113.0: 0.111 host still loads its own variant");
+		Expect(!MainLoader.IsCompatibleTarget(new Version(0, 111, 0), new Version(0, 112, 0), declaredNewest), "0.111.0 never serves a 0.112 host once 0.113.0 is declared");
+	}
+
 	// 智能应用控制拦截时 LoadFromAssemblyPath 抛带 0x800711C7 的 FileLoadException;
 	// 初始化器经反射调用时还会被 TargetInvocationException 包一层,两种都要认出来。
 	[HextechTest]
