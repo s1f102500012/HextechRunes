@@ -4,11 +4,6 @@ internal sealed class QueenEnemyHex : HextechEnemyHexEffect
 {
 	internal override MonsterHexKind Kind => MonsterHexKind.Queen;
 
-	internal override async Task ApplyCombatStartPlayerDebuffs(HextechEnemyHexContext context, CombatRoom room, IReadOnlyList<Creature> players)
-	{
-		await PowerCmd.Apply<ChainsOfBindingPower>(players, 1m, null, null);
-	}
-
 	internal override async Task BeforeEnemySideTurnStart(HextechEnemyHexContext context, HextechCombatState combatState, IReadOnlyList<Creature> players, IReadOnlyList<Creature> enemies)
 	{
 		if (!context.TryConsumeRoundInterval(Kind, combatState, everyNRounds: 2))
