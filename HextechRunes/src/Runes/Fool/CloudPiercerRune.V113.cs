@@ -5,52 +5,38 @@ namespace HextechRunes;
 
 public sealed partial class CloudPiercerRune
 {
-	// ImpaledPower 改了 HitCounter 后要通知界面刷新计数；原版的刷新方法是 protected。
-	private static readonly MethodInfo? PowerDisplayAmountChangedMethod = AccessTools.Method(typeof(PowerModel), "InvokeDisplayAmountChanged", Type.EmptyTypes);
-
 	protected override IEnumerable<IHoverTip> ExtraHoverTips =>
 	[
 		HoverTipFactory.ForArrow(null),
-		HoverTipFactory.FromPower<ImpaledPower>()
+		HoverTipFactory.FromPower<ImpaledPower>(),
+		HoverTipFactory.FromPower<VulnerablePower>()
 	];
 
-	// 原版计数只在两处取到初值：新施加的 ImpaledPower 用 CanonicalVars 的 3；AfterDamageReceived 数到 0 时写死重置为 3 再松脱。
-	// 前者之后紧接 AfterArrowImpaled，后者在松脱里触发 AfterArrowDislodged，所以在这两个钩子里把持有者的计数压到
-	// 原版初值 − HitReduction（至少 1）。只降不升：已经数过的计数、卡牌效果松脱时没被重置的计数保持原样。
-	public override Task AfterArrowImpaled(ImpaledPower power, ArrowSlot arrow, PlayerChoiceContext context, CardModel? source)
+	// 时机与归属同原版爆炸箭矢（ExplosiveArrowsPower）：AfterArrowImpaled，且箭属于持有者（看箭的 owner）；每支箭扎穿各结算一次，
+	// 包括随后被摧毁的箭（寂灭/Quietus 的箭也先派发该钩子再摧毁）。
+	// 原版 ArrowCmd.ImpaleTarget 先结算这一箭的攻击再派发该钩子，所以这一箭自己吃不到这次易伤，之后的命中才吃到。
+	// 箭命中直接击杀时原版对已死目标施加扎穿不生效，传进来的能力没有持有者（Owner 为 null），随后原版把箭松脱取回；
+	// 这里什么都不做，也不能抛异常，否则原版的取回不执行。
+	public override async Task AfterArrowImpaled(ImpaledPower power, ArrowSlot arrow, PlayerChoiceContext context, CardModel? source)
 	{
-		CapHitCounter(power);
-		return Task.CompletedTask;
-	}
-
-	public override Task AfterArrowDislodged(ImpaledPower power, ArrowSlot arrow, PlayerChoiceContext context, CardModel? source)
-	{
-		// 钩子触发时这支箭已从能力上取下；没有剩余的箭时能力随后会被移除，不必调整。
-		if (power.Arrows.Count > 0)
-		{
-			CapHitCounter(power);
-		}
-
-		return Task.CompletedTask;
-	}
-
-	private void CapHitCounter(ImpaledPower power)
-	{
-		if (power.Applier != Owner.Creature || !IsFoolPlayer(Owner))
+		Creature? target = power.Owner;
+		if (target == null
+			|| target.IsDead
+			|| arrow.owner != Owner
+			|| Owner.Creature.IsDead
+			|| !IsFoolPlayer(Owner))
 		{
 			return;
 		}
 
-		int vanillaHits = ModelDb.Power<ImpaledPower>().HitCounter;
-		int hits = Math.Max(1, vanillaHits - DynamicVars["HitReduction"].IntValue);
-		if (power.HitCounter <= hits)
+		decimal vulnerable = DynamicVars.Vulnerable.BaseValue;
+		if (vulnerable <= 0m)
 		{
 			return;
 		}
 
-		power.HitCounter = hits;
-		HextechPresentation.TryRun("PowerVisual", "Impaled counter refresh failed", () => PowerDisplayAmountChangedMethod?.Invoke(power, null));
 		Flash();
+		await PowerCmd.Apply<VulnerablePower>(context, target, vulnerable, Owner.Creature, null);
 	}
 }
 #endif

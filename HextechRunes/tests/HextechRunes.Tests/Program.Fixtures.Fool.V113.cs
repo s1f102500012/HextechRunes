@@ -16,6 +16,7 @@ using MegaCrit.Sts2.Core.Models.Characters;
 using MegaCrit.Sts2.Core.Models.Monsters;
 using MegaCrit.Sts2.Core.Models.Powers;
 using MegaCrit.Sts2.Core.Runs;
+using MegaCrit.Sts2.Core.Saves;
 using MegaCrit.Sts2.Core.TestSupport;
 
 namespace HextechRunes.Tests;
@@ -336,6 +337,115 @@ internal static partial class Program
 			CombatManager.Instance.History.Clear();
 			TestMode.IsOn = _wasTestMode;
 		}
+	}
+
+	/// <summary>
+	/// 测试期间把出牌外的牌组编辑命令换成只改测试牌组、记录调用的前缀：移除卡组牌、加牌入堆、RunState 造牌（跳过 RunState 登记）、
+	/// 标记已见（不触达存档）；开测试模式让加牌预览直接返回。释放时卸下补丁并还原。
+	/// </summary>
+	private sealed class FoolDeckEditTestScope : IDisposable
+	{
+		internal static readonly List<CardModel> Removed = [];
+		internal static readonly List<CardModel> Added = [];
+
+		private readonly Harmony _harmony = new("Natsuki.HextechRunes.Tests.FoolDeckEdit");
+		private readonly bool _wasTestMode = TestMode.IsOn;
+		private readonly FieldInfo _saveManagerMock = AccessTools.Field(typeof(SaveManager), "_mockInstance");
+		private readonly object? _previousSaveManagerMock;
+
+		public FoolDeckEditTestScope()
+		{
+			_previousSaveManagerMock = _saveManagerMock.GetValue(null);
+			try
+			{
+				TestMode.IsOn = true;
+				_harmony.Patch(
+					AccessTools.Method(typeof(CardPileCmd), nameof(CardPileCmd.RemoveFromDeck), [typeof(CardModel), typeof(bool)]),
+					prefix: new HarmonyMethod(typeof(FoolDeckEditTestScope), nameof(CaptureRemove)));
+				_harmony.Patch(
+					AccessTools.Method(typeof(CardPileCmd), nameof(CardPileCmd.Add), [typeof(CardModel), typeof(PileType), typeof(CardPilePosition), typeof(AbstractModel), typeof(bool)]),
+					prefix: new HarmonyMethod(typeof(FoolDeckEditTestScope), nameof(CaptureAdd)));
+				_harmony.Patch(
+					AccessTools.Method(typeof(RunState), nameof(RunState.CreateCard), [typeof(CardModel), typeof(Player)]),
+					prefix: new HarmonyMethod(typeof(FoolDeckEditTestScope), nameof(CreateUnregisteredCard)));
+				_harmony.Patch(
+					AccessTools.Method(typeof(SaveManager), nameof(SaveManager.MarkCardAsSeen)),
+					prefix: new HarmonyMethod(typeof(FoolDeckEditTestScope), nameof(SkipOriginal)));
+				SaveManager.MockInstanceForTesting((SaveManager)RuntimeHelpers.GetUninitializedObject(typeof(SaveManager)));
+			}
+			catch
+			{
+				Dispose();
+				throw;
+			}
+		}
+
+		public void Dispose()
+		{
+			_harmony.UnpatchAll(_harmony.Id);
+			_saveManagerMock.SetValue(null, _previousSaveManagerMock);
+			TestMode.IsOn = _wasTestMode;
+			Removed.Clear();
+			Added.Clear();
+		}
+
+		private static bool CaptureRemove(CardModel card, ref Task __result)
+		{
+			Removed.Add(card);
+			card.Owner.Deck.RemoveInternal(card, silent: true);
+			__result = Task.CompletedTask;
+			return false;
+		}
+
+		private static bool CaptureAdd(CardModel card, PileType newPileType, ref Task<CardPileAddResult> __result)
+		{
+			Added.Add(card);
+			newPileType.GetPile(card.Owner).AddInternal(card, silent: true);
+			__result = Task.FromResult(default(CardPileAddResult));
+			return false;
+		}
+
+		private static bool CreateUnregisteredCard(CardModel canonicalCard, Player owner, ref CardModel __result)
+		{
+			__result = canonicalCard.ToMutable();
+			__result.Owner = owner;
+			return false;
+		}
+
+		private static bool SkipOriginal()
+		{
+			return false;
+		}
+	}
+
+	/// <summary>
+	/// 把旋律夹具里的玩家生物按给定顺序加入战斗（夹具默认不加入，<c>CombatState.Players</c> 为空），
+	/// 需要更多队友时用 <paramref name="extraNetIds"/> 追加同样结构的愚者玩家（存活生物带能力列表、空遗物列表）。
+	/// 返回按加入顺序排列的全部玩家。
+	/// </summary>
+	private static List<Player> JoinFoolMelodyPlayersToCombat(CombatState combat, IEnumerable<Player> players, params ulong[] extraNetIds)
+	{
+		List<Player> joined = players.ToList();
+		RunState run = (RunState)joined[0].RunState;
+		foreach (ulong netId in extraNetIds)
+		{
+			Player extra = CreateCharacterTestPlayer(typeof(Fool), netId);
+			AccessTools.Field(typeof(Player), "_runState").SetValue(extra, run);
+			AccessTools.Field(typeof(Player), "_relics").SetValue(extra, new List<RelicModel>());
+			Creature creature = CreatePrismaticTestCreature(CombatSide.Player, combat);
+			SetAutoProperty(creature, nameof(Creature.Player), extra);
+			AccessTools.Field(typeof(Creature), "_powers").SetValue(creature, new List<PowerModel>());
+			SetAutoProperty(extra, nameof(Player.Creature), creature);
+			((List<Player>)AccessTools.Field(typeof(RunState), "_players").GetValue(run)!).Add(extra);
+			joined.Add(extra);
+		}
+
+		foreach (Player player in joined)
+		{
+			combat.AddCreature(player.Creature);
+		}
+
+		return joined;
 	}
 }
 #endif

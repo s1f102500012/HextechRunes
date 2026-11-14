@@ -1,5 +1,5 @@
 {
-  "source": "STS2 0.111.0 PCK localization/zhs; titles only, exported 2026-09-21; plus 0.113.0 Fool terms (cards SADNESS/JOY/MYTHIC_FORM, powers AIM/STRETCH, static ARROW/TAROT/TRANSFORM) added 2026-11-13",
+  "source": "STS2 0.111.0 PCK localization/zhs; titles only, exported 2026-09-21; plus 0.113.0 Fool terms (cards SADNESS/JOY/MYTHIC_FORM, powers AIM/STRETCH, static ARROW/TAROT/TRANSFORM) added 2026-11-13; card WAH_CHO_KI added 2026-11-14",
   "cards": {
     "ABRASIVE": "磨蚀",
     "ABUNDANCE": "富足",
@@ -627,7 +627,8 @@
     "ZAP": "电击",
     "SADNESS": "悲伤",
     "JOY": "喜悦",
-    "MYTHIC_FORM": "神话形态"
+    "MYTHIC_FORM": "神话形态",
+    "WAH_CHO_KI": "哇 啾 叽"
   },
   "powers": {
     "ACCELERANT_POWER": "触媒",

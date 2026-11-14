@@ -11,7 +11,7 @@ using MegaCrit.Sts2.Core.Models.Powers;
 
 namespace HextechRunes.Tests;
 
-// 旋律组：开嗓、引吭高歌（直接拥有旋律）、弦外之音、三重唱。
+// 旋律组：开嗓、引吭高歌（直接拥有旋律）、弦外之音、三重唱、呱！（换成哇 啾 叽）。
 // 原版旋律判定走真实的 MelodyCmd + 战斗历史 + 本模组的 PlayedThisTurn 后缀；获得能量 / 抽牌只记录调用（见 FoolMelodyTestScope）。
 internal static partial class Program
 {
@@ -131,11 +131,11 @@ internal static partial class Program
 	}
 
 	/// <summary>
-	/// 弦外之音：本回合种类数首次达到 1 时获得 {Energy} 点能量，每回合一次、下一回合重置；
-	/// 非旋律牌、队友出牌、敌方回合不触发；引吭高歌给予的旋律在回合开始检查时即触发。
+	/// 弦外之音：本回合每种旋律首次获得时各给 {Energy} 点能量（每回合最多三次）；一张牌同时带来多种新旋律时一次给多份；
+	/// 同种旋律再打出、非旋律牌、队友出牌、敌方回合都不给；下一回合重置；引吭高歌给予的旋律在回合开始检查时即算一种。
 	/// </summary>
 	[HextechTest]
-	private static void FoolOvertoneGainsEnergyOnFirstMelodyEachTurn()
+	private static void FoolOvertoneGainsEnergyForEachNewMelodyEachTurn()
 	{
 		using FoolMelodyTestScope scope = new();
 		(CombatState combat, Player fool, Player teammate) = CreateFoolMelodyCombatFixture();
@@ -150,75 +150,149 @@ internal static partial class Program
 		Equal(0, FoolMelodyTestScope.EnergyGains.Count, "a teammate's melody is not the holder's");
 
 		rune.AfterCardPlayed(null!, RecordFoolTestCardPlay(combat, CreateFoolTestCard<WahTouch>(fool))).GetAwaiter().GetResult();
-		SequenceEqual(new[] { (fool, energy) }, FoolMelodyTestScope.EnergyGains, "first melody of the turn grants energy");
+		SequenceEqual(new[] { (fool, energy) }, FoolMelodyTestScope.EnergyGains, "first Wah of the turn grants energy");
+		rune.AfterCardPlayed(null!, RecordFoolTestCardPlay(combat, CreateFoolTestCard<WahTouch>(fool))).GetAwaiter().GetResult();
+		Equal(1, FoolMelodyTestScope.EnergyGains.Count, "a second Wah is not a new melody");
 		rune.AfterCardPlayed(null!, RecordFoolTestCardPlay(combat, CreateFoolTestCard<ChoChorus>(fool))).GetAwaiter().GetResult();
-		Equal(1, FoolMelodyTestScope.EnergyGains.Count, "only once per turn");
+		SequenceEqual(new[] { (fool, energy), (fool, energy) }, FoolMelodyTestScope.EnergyGains, "first Cho of the turn grants energy again");
 
 		combat.CurrentSide = CombatSide.Enemy;
 		rune.AfterCardPlayed(null!, RecordFoolTestCardPlay(combat, CreateFoolTestCard<KiVerse>(fool))).GetAwaiter().GetResult();
-		Equal(1, FoolMelodyTestScope.EnergyGains.Count, "melodies on the enemy turn do not count");
+		Equal(2, FoolMelodyTestScope.EnergyGains.Count, "melodies on the enemy turn do not count");
+
+		AdvanceFoolTestRound(combat, fool, teammate);
+		rune.AfterCardPlayed(null!, RecordFoolTestCardPlay(combat, CreateFoolTestCard<WahChoKi>(fool))).GetAwaiter().GetResult();
+		Equal((fool, energy * 3), FoolMelodyTestScope.EnergyGains[^1], "next turn resets; one card bringing all three new melodies grants three at once");
+		rune.AfterCardPlayed(null!, RecordFoolTestCardPlay(combat, CreateFoolTestCard<KiVerse>(fool))).GetAwaiter().GetResult();
+		Equal(3, FoolMelodyTestScope.EnergyGains.Count, "at most three per turn");
 
 		AdvanceFoolTestRound(combat, fool, teammate);
 		SingOutRune singOut = AttachFoolTestRune<SingOutRune>(fool);
 		singOut.BeforeHandDraw(fool, null!, combat).GetAwaiter().GetResult();
 		rune.AfterPlayerTurnStart(null!, fool).GetAwaiter().GetResult();
-		Equal(2, FoolMelodyTestScope.EnergyGains.Count, "next turn resets; a granted melody triggers at turn start");
-		rune.AfterCardPlayed(null!, RecordFoolTestCardPlay(combat, CreateFoolTestCard<WahTouch>(fool))).GetAwaiter().GetResult();
-		Equal(2, FoolMelodyTestScope.EnergyGains.Count, "a played melody after the granted one does not trigger again");
+		Equal((fool, energy), FoolMelodyTestScope.EnergyGains[^1], "a granted melody counts as one at turn start");
+		rune.AfterCardPlayed(null!, RecordFoolTestCardPlay(combat, CreateFoolTestCard<WahChoKi>(fool))).GetAwaiter().GetResult();
+		Equal((fool, energy * 2), FoolMelodyTestScope.EnergyGains[^1], "Wah Cho Ki after a granted melody grants only the two missing ones");
+		Equal(5, FoolMelodyTestScope.EnergyGains.Count, "granted plus played melodies are rewarded once each");
 	}
 
 	/// <summary>
-	/// 三重唱：本回合首次拥有全部三种旋律时获得 {Energy} 点能量并抽 {Cards} 张牌，每回合一次；
-	/// 与开嗓同持时第一回合开始即触发（弦外之音同时触发一次），之后出牌不重复；引吭高歌给予的一种与打出的两种合计也算。
+	/// 弦外之音与开嗓同持：第一回合开始检查时三种旋律都已拥有，一次获得 3 × {Energy} 点能量，之后本回合出牌不再给；
+	/// 第二回合开嗓失效，按打出的旋律重新逐种给。
 	/// </summary>
 	[HextechTest]
-	private static void FoolTrioRewardsFirstTimeAllMelodies()
+	private static void FoolOvertoneWithOpeningNoteGainsThreeOnFirstTurn()
+	{
+		using FoolMelodyTestScope scope = new();
+		(CombatState combat, Player fool, Player teammate) = CreateFoolMelodyCombatFixture();
+		AttachFoolTestRune<OpeningNoteRune>(fool);
+		OvertoneRune rune = AttachFoolTestRune<OvertoneRune>(fool);
+		decimal energy = rune.DynamicVars.Energy.BaseValue;
+
+		rune.AfterPlayerTurnStart(null!, fool).GetAwaiter().GetResult();
+		SequenceEqual(new[] { (fool, energy * 3) }, FoolMelodyTestScope.EnergyGains, "Opening Note owns all three melodies at turn start");
+		rune.AfterCardPlayed(null!, RecordFoolTestCardPlay(combat, CreateFoolTestCard<WahTouch>(fool))).GetAwaiter().GetResult();
+		rune.AfterPlayerTurnStart(null!, fool).GetAwaiter().GetResult();
+		Equal(1, FoolMelodyTestScope.EnergyGains.Count, "nothing more on the first turn");
+
+		AdvanceFoolTestRound(combat, fool, teammate);
+		rune.AfterPlayerTurnStart(null!, fool).GetAwaiter().GetResult();
+		Equal(1, FoolMelodyTestScope.EnergyGains.Count, "Opening Note no longer grants on the second turn");
+		rune.AfterCardPlayed(null!, RecordFoolTestCardPlay(combat, CreateFoolTestCard<KiVerse>(fool))).GetAwaiter().GetResult();
+		SequenceEqual(new[] { (fool, energy * 3), (fool, energy) }, FoolMelodyTestScope.EnergyGains, "the second turn rewards played melodies again");
+	}
+
+	/// <summary>
+	/// 三重唱：打出时（原版求打出次数那一刻，这张牌还不在出牌历史里）持有者本回合已拥有全部三种旋律，才加 {Replays} 次；
+	/// 凑齐第三种旋律的那张牌自己不重放，之后本回合每张牌都重放；加法叠加、重复求值不变（原版每次出牌只求一次，重放不再求值，不会连锁）；
+	/// 队友的牌、敌方回合、下一回合都不重放；开嗓给予的旋律也算。
+	/// </summary>
+	[HextechTest]
+	private static void FoolTrioReplaysCardsWhileOwningAllMelodies()
 	{
 		using FoolMelodyTestScope scope = new();
 		(CombatState combat, Player fool, Player teammate) = CreateFoolMelodyCombatFixture();
 		TrioRune rune = AttachFoolTestRune<TrioRune>(fool);
-		decimal energy = rune.DynamicVars.Energy.BaseValue;
-		decimal cards = rune.DynamicVars.Cards.BaseValue;
+		int replays = rune.DynamicVars["Replays"].IntValue;
 
-		rune.AfterCardPlayed(null!, RecordFoolTestCardPlay(combat, CreateFoolTestCard<WahTouch>(fool))).GetAwaiter().GetResult();
-		rune.AfterCardPlayed(null!, RecordFoolTestCardPlay(combat, CreateFoolTestCard<ChoChorus>(fool))).GetAwaiter().GetResult();
-		rune.AfterCardPlayed(null!, RecordFoolTestCardPlay(combat, CreateFoolTestCard<KiVerse>(teammate))).GetAwaiter().GetResult();
-		Equal(0, FoolMelodyTestScope.EnergyGains.Count, "two melodies and a teammate's Ki are not all melodies");
+		CardModel wah = CreateFoolTestCard<WahTouch>(fool);
+		Equal(1, rune.ModifyCardPlayCount(wah, null, 1), "no melodies yet");
+		RecordFoolTestCardPlay(combat, wah);
+		RecordFoolTestCardPlay(combat, CreateFoolTestCard<ChoChorus>(fool));
+		RecordFoolTestCardPlay(combat, CreateFoolTestCard<KiVerse>(teammate));
+		CardModel ki = CreateFoolTestCard<KiVerse>(fool);
+		Equal(1, rune.ModifyCardPlayCount(ki, null, 1), "the card completing the set is not replayed itself");
+		RecordFoolTestCardPlay(combat, ki);
 
-		rune.AfterCardPlayed(null!, RecordFoolTestCardPlay(combat, CreateFoolTestCard<KiVerse>(fool))).GetAwaiter().GetResult();
-		SequenceEqual(new[] { (fool, energy) }, FoolMelodyTestScope.EnergyGains, "all three melodies grant energy");
-		SequenceEqual(new[] { (fool, cards) }, FoolMelodyTestScope.Draws, "and draw cards");
-		rune.AfterCardPlayed(null!, RecordFoolTestCardPlay(combat, CreateFoolTestCard<WahTouch>(fool))).GetAwaiter().GetResult();
-		Equal(1, FoolMelodyTestScope.Draws.Count, "only once per turn");
+		CardModel strike = CreateFoolTestCard<StrikeIronclad>(fool);
+		Equal(1 + replays, rune.ModifyCardPlayCount(strike, null, 1), "after owning all melodies every card is replayed");
+		Equal(1 + replays, rune.ModifyCardPlayCount(strike, null, 1), "repeated evaluation is stable");
+		Equal(2 + replays, rune.ModifyCardPlayCount(strike, null, 2), "replays add on top of other modifiers, not multiply");
+		Equal(1 + replays, rune.ModifyCardPlayCount(CreateFoolTestCard<WahTouch>(fool), null, 1), "melody cards are replayed too");
+		Equal(1, rune.ModifyCardPlayCount(CreateFoolTestCard<StrikeIronclad>(teammate), null, 1), "a teammate's card is not replayed");
 
+		combat.CurrentSide = CombatSide.Enemy;
+		Equal(1, rune.ModifyCardPlayCount(strike, null, 1), "no melodies on the enemy turn");
 		AdvanceFoolTestRound(combat, fool, teammate);
-		SingOutRune singOut = AttachFoolTestRune<SingOutRune>(fool);
-		singOut.BeforeHandDraw(fool, null!, combat).GetAwaiter().GetResult();
-		rune.AfterPlayerTurnStart(null!, fool).GetAwaiter().GetResult();
-		Equal(1, FoolMelodyTestScope.Draws.Count, "one granted melody is not all melodies");
-		foreach (CardModel card in new CardModel[] { CreateFoolTestCard<WahTouch>(fool), CreateFoolTestCard<ChoChorus>(fool), CreateFoolTestCard<KiVerse>(fool) })
-		{
-			if (!MelodyCmd.PlayedThisTurn(fool, card.Tags.Single()))
-			{
-				rune.AfterCardPlayed(null!, RecordFoolTestCardPlay(combat, card)).GetAwaiter().GetResult();
-			}
-		}
-		Equal(2, FoolMelodyTestScope.Draws.Count, "the granted melody plus two played ones completes the set on a new turn");
+		Equal(1, rune.ModifyCardPlayCount(strike, null, 1), "the next turn starts without melodies");
 
-		FoolMelodyTestScope.EnergyGains.Clear();
-		FoolMelodyTestScope.Draws.Clear();
-		(CombatState combat2, Player both, Player _) = CreateFoolMelodyCombatFixture();
+		(CombatState _, Player both, Player _) = CreateFoolMelodyCombatFixture();
 		AttachFoolTestRune<OpeningNoteRune>(both);
-		OvertoneRune overtone = AttachFoolTestRune<OvertoneRune>(both);
-		TrioRune trio = AttachFoolTestRune<TrioRune>(both);
-		overtone.AfterPlayerTurnStart(null!, both).GetAwaiter().GetResult();
-		trio.AfterPlayerTurnStart(null!, both).GetAwaiter().GetResult();
-		Equal(overtone.DynamicVars.Energy.BaseValue + trio.DynamicVars.Energy.BaseValue, FoolMelodyTestScope.EnergyGains.Sum(static gain => gain.Amount), "Opening Note triggers Overtone and Trio once each at turn start");
-		Equal(1, FoolMelodyTestScope.Draws.Count, "Trio draws once");
-		CardPlay play = RecordFoolTestCardPlay(combat2, CreateFoolTestCard<WahTouch>(both));
-		overtone.AfterCardPlayed(null!, play).GetAwaiter().GetResult();
-		trio.AfterCardPlayed(null!, play).GetAwaiter().GetResult();
-		Equal(2, FoolMelodyTestScope.EnergyGains.Count, "later plays on the same turn do not repeat either reward");
+		TrioRune withOpening = AttachFoolTestRune<TrioRune>(both);
+		Equal(1 + replays, withOpening.ModifyCardPlayCount(CreateFoolTestCard<StrikeIronclad>(both), null, 1), "with Opening Note the first card of the first turn is replayed");
+	}
+
+	/// <summary>
+	/// 三重唱与塔罗牌桌布同持：原版 ModifyCardPlayCount 依次累加，两者各加自己的次数（塔罗牌共重放 2 次，其他牌 1 次）。
+	/// </summary>
+	[HextechTest]
+	private static void FoolTrioStacksWithTarotCloth()
+	{
+		using FoolMelodyTestScope scope = new();
+		using IDisposable models = InjectMissingModels(VanillaTarotCardTypes);
+		(CombatState _, Player fool, Player _) = CreateFoolMelodyCombatFixture();
+		AttachFoolTestRune<OpeningNoteRune>(fool);
+		TrioRune trio = AttachFoolTestRune<TrioRune>(fool);
+		TarotClothRune cloth = AttachFoolTestRune<TarotClothRune>(fool);
+		int trioReplays = trio.DynamicVars["Replays"].IntValue;
+		int clothReplays = cloth.DynamicVars["Replays"].IntValue;
+
+		CardModel tarot = CreateOwnedTarotCard(ModelDb.Card<TheSun>(), fool);
+		Equal(1 + trioReplays + clothReplays, cloth.ModifyCardPlayCount(tarot, null, trio.ModifyCardPlayCount(tarot, null, 1)), "tarot card: both replays add up");
+		Equal(1 + trioReplays + clothReplays, trio.ModifyCardPlayCount(tarot, null, cloth.ModifyCardPlayCount(tarot, null, 1)), "order does not matter");
+		CardModel strike = CreateFoolTestCard<StrikeIronclad>(fool);
+		Equal(1 + trioReplays, cloth.ModifyCardPlayCount(strike, null, trio.ModifyCardPlayCount(strike, null, 1)), "non-tarot card: only Trio replays");
+	}
+
+	/// <summary>
+	/// 呱！：获得时按牌组顺序把基础打击与基础防御两两配对，每对换成 {Cards} 张哇 啾 叽；落单的基础牌和非基础牌不动；
+	/// 没有成对时什么都不做。原版移除 / 加牌命令换成只记录调用的前缀（测试进程没有真实存档与牌堆界面）。
+	/// </summary>
+	[HextechTest]
+	private static void FoolRibbitReplacesBasicStrikeDefendPairs()
+	{
+		using IDisposable models = InjectMissingModels(typeof(WahChoKi));
+		using FoolDeckEditTestScope scope = new();
+		Player fool = CreateFoolPileTestPlayers(1)[0];
+		RibbitRune rune = CreateMutableTestModel<RibbitRune>();
+		rune.Owner = fool;
+		CardModel[] strikes = [AddFoolTestCard<StrikeFool>(fool, PileType.Deck), AddFoolTestCard<StrikeFool>(fool, PileType.Deck), AddFoolTestCard<StrikeFool>(fool, PileType.Deck)];
+		CardModel[] defends = [AddFoolTestCard<DefendFool>(fool, PileType.Deck), AddFoolTestCard<DefendFool>(fool, PileType.Deck)];
+		CardModel other = AddFoolTestCard<WahTouch>(fool, PileType.Deck);
+
+		rune.AfterObtained().GetAwaiter().GetResult();
+		SequenceEqual(new[] { strikes[0], defends[0], strikes[1], defends[1] }, FoolDeckEditTestScope.Removed, "two pairs are removed in deck order");
+		Equal(2 * rune.DynamicVars.Cards.IntValue, FoolDeckEditTestScope.Added.Count, "each pair becomes Cards Wah Cho Ki");
+		Expect(FoolDeckEditTestScope.Added.All(card => card is WahChoKi && card.Owner == fool), "added cards are the holder's Wah Cho Ki");
+		Expect(fool.Deck.Cards.Contains(strikes[2]) && fool.Deck.Cards.Contains(other), "the unpaired Strike and non-basic cards stay");
+		Equal(4, fool.Deck.Cards.Count, "deck: leftover Strike, Wah Touch and two Wah Cho Ki");
+
+		FoolDeckEditTestScope.Removed.Clear();
+		FoolDeckEditTestScope.Added.Clear();
+		RibbitRune again = CreateMutableTestModel<RibbitRune>();
+		again.Owner = fool;
+		again.AfterObtained().GetAwaiter().GetResult();
+		Equal(0, FoolDeckEditTestScope.Removed.Count + FoolDeckEditTestScope.Added.Count, "no pairs left, nothing changes");
 	}
 }
 #endif

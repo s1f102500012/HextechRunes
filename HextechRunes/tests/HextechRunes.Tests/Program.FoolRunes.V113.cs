@@ -13,7 +13,7 @@ namespace HextechRunes.Tests;
 // 后续各组的测试各放一个新文件 Program.FoolRunes.<组名>.V113.cs（整文件 #if STS2_113_OR_NEWER），不改本文件。
 internal static partial class Program
 {
-	/// <summary>共享代码按名字找到的愚者角色就是原版 Fool；愚者玩家映射到愚者池并能拿到全部 18 个。</summary>
+	/// <summary>共享代码按名字找到的愚者角色就是原版 Fool；愚者玩家映射到愚者池并能拿到全部愚者海克斯。</summary>
 	[HextechTest]
 	private static void FoolCompatResolvesVanillaFoolOn113()
 	{
@@ -28,7 +28,8 @@ internal static partial class Program
 		foreach ((Type type, _, _) in FoolRuneRegistrations)
 		{
 			HextechRelicBase rune = (HextechRelicBase)Activator.CreateInstance(type)!;
-			Expect(rune.IsAvailableForPlayer(fool), $"{type.Name} is available to the Fool");
+			// 柔韧还要求联机局（见 FoolFlexibilityIsMultiplayerOnlyAndFoolOnly），这里的单机夹具里拿不到。
+			Equal(type != typeof(FlexibilityRune), rune.IsAvailableForPlayer(fool), $"{type.Name} availability to a singleplayer Fool");
 		}
 	}
 

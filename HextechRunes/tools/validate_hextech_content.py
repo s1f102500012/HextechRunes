@@ -505,8 +505,9 @@ def validate_official_name_references(errors: list[str]) -> None:
         "临时力量", "闪电充能球", "灼热攻击+1", "牌组", "附魔",
         "海克斯：", "属性锻造器：", "铁甲战士海克斯：", "静默猎手海克斯：",
         "储君海克斯：", "故障机器人海克斯：", "亡灵契约师海克斯：", "愚者海克斯：",
-        # 0.113.0 原版描述里以金色高亮、但没有独立标题键的愚者术语（见 static_hover_tips:ARROW.missing.description、LOST_LUTE_POWER）。
-        "松脱", "旋律",
+        # 0.113.0 原版描述里以金色高亮、但没有独立标题键的愚者术语
+        # （见 static_hover_tips:ARROW.missing.description、LOST_LUTE_POWER、cards:HEAVY_SHOT/COVERING_FIRE 的“发射”）。
+        "松脱", "旋律", "发射",
     }
     enchantment_titles = {value for key, value in snapshot["other_official_terms"].items() if key.startswith("enchantments:")}
     enchantment_titles.update(value for key, value in tables.get("enchantments", {}).items() if key.endswith(".title"))
