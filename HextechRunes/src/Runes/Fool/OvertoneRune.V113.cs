@@ -3,7 +3,9 @@ namespace HextechRunes;
 
 public sealed partial class OvertoneRune
 {
-	private bool _triggeredThisTurn;
+	// 本回合已经给过能量的旋律种类数（0~3）。按持有者回合号懒清零（基类按战斗状态与持有者 TurnNumber 判断，
+	// 持有者自己的额外回合重置、队友的不重置）。只在钩子里推进，各端一致；战斗内状态，不存档。
+	private int _rewardedMelodiesThisTurn;
 
 	protected override IEnumerable<IHoverTip> ExtraHoverTips =>
 	[
@@ -12,40 +14,44 @@ public sealed partial class OvertoneRune
 		HoverTipFactory.Static(StaticHoverTip.KiMelody)
 	];
 
-	// 每回合一次的标记按持有者回合号懒清零（基类按战斗状态与持有者 TurnNumber 判断，持有者自己的额外回合重置、队友的不重置）。
-	// 只在钩子里推进，各端一致；战斗内状态，不存档。
-	private void ResetTriggeredThisTurn()
+	private void ResetRewardedMelodiesThisTurn()
 	{
-		_triggeredThisTurn = false;
+		_rewardedMelodiesThisTurn = 0;
 	}
 
 	// "获得旋律"按持有者本回合旋律种类数增加计：种类数只会在出牌结算完（历史先记 CardPlayFinished 再调 AfterCardPlayed）
-	// 或开嗓 / 引吭高歌直接给予（抽起手牌之前已生效）时增加，所以在这两处检查种类数是否已达 1 即等价于"首次从 0 变为 ≥1"。
+	// 或开嗓 / 引吭高歌直接给予（抽起手牌之前已生效）时增加，所以在这两处把种类数与本回合已奖励数比较，
+	// 差多少种就给多少次能量。本回合种类数不会减少，每种旋律每回合至多奖励一次。
 	public override Task AfterPlayerTurnStart(PlayerChoiceContext choiceContext, Player player)
 	{
-		return player == Owner ? TryGainEnergyOnFirstMelody() : Task.CompletedTask;
+		return player == Owner ? TryGainEnergyForNewMelodies() : Task.CompletedTask;
 	}
 
 	public override Task AfterCardPlayed(PlayerChoiceContext choiceContext, CardPlay cardPlay)
 	{
-		return cardPlay.Player == Owner ? TryGainEnergyOnFirstMelody() : Task.CompletedTask;
+		return cardPlay.Player == Owner ? TryGainEnergyForNewMelodies() : Task.CompletedTask;
 	}
 
-	private async Task TryGainEnergyOnFirstMelody()
+	private async Task TryGainEnergyForNewMelodies()
 	{
-		EnsureTurnScopedStateCurrent(ResetTriggeredThisTurn);
-		if (_triggeredThisTurn
-			|| Owner.Creature.IsDead
+		EnsureTurnScopedStateCurrent(ResetRewardedMelodiesThisTurn);
+		if (Owner.Creature.IsDead
 			|| !HextechGrantedMelodies.IsOwnersSideTurn(Owner)
-			|| !IsFoolPlayer(Owner)
-			|| MelodyCmd.MelodiesThisTurn(Owner) < 1
-			|| !TryConsumeTurnProc(ref _triggeredThisTurn))
+			|| !IsFoolPlayer(Owner))
 		{
 			return;
 		}
 
+		int newMelodies = MelodyCmd.MelodiesThisTurn(Owner) - _rewardedMelodiesThisTurn;
+		if (newMelodies <= 0)
+		{
+			return;
+		}
+
+		// 先记账再结算：获得能量的钩子链里即使再次进入本方法，也不会重复奖励同一种旋律。
+		_rewardedMelodiesThisTurn += newMelodies;
 		Flash();
-		await PlayerCmd.GainEnergy(DynamicVars.Energy.BaseValue, Owner);
+		await PlayerCmd.GainEnergy(DynamicVars.Energy.BaseValue * newMelodies, Owner);
 	}
 }
 #endif

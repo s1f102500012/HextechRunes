@@ -62,7 +62,14 @@ public sealed partial class PartingShotRune
 			return Task.CompletedTask;
 		}
 
-		_impaleDamageByArrow[arrow] = (power.Owner, _inFlightDamageByTarget.GetValueOrDefault(power.Owner));
+		// 箭命中直接击杀时，原版对已死目标施加扎穿不生效，这里拿到的能力没有持有者（Owner 为 null），
+		// 随后原版立刻把箭松脱取回。没有可结算的目标，只清掉在途记录；这里抛异常会让原版的取回不执行。
+		Creature? impaled = power.Owner;
+		if (impaled != null)
+		{
+			_impaleDamageByArrow[arrow] = (impaled, _inFlightDamageByTarget.GetValueOrDefault(impaled));
+		}
+
 		_arrowInFlight = null;
 		_inFlightDamageByTarget.Clear();
 		return Task.CompletedTask;

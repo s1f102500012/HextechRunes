@@ -37,7 +37,7 @@ public sealed partial class SingOutRune
 		return Task.CompletedTask;
 	}
 
-	// 抽起手牌之前给予，同回合的抽牌、AfterPlayerTurnStart（弦外之音、三重唱的回合开始检查）都已能看到。
+	// 抽起手牌之前给予，同回合的抽牌、AfterPlayerTurnStart（弦外之音的回合开始检查）与之后出牌时三重唱的打出次数判断都已能看到。
 	// 优先从尚未拥有的旋律里选（回合开始时通常三选一）；与开嗓同持的第一回合三种都已拥有，不再给予。
 	public override Task BeforeHandDraw(Player player, PlayerChoiceContext choiceContext, HextechCombatState combatState)
 	{

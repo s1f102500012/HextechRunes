@@ -56,7 +56,9 @@ internal static partial class HextechRuneConfiguration
 		// 物法皆修（只我方）重做为“力量与敏捷同时作用于伤害和格挡，开局各 +1”，转为默认启用。
 		new(45, [ typeof(MasterOfDualityRune) ], []),
 		// 升级：暴露、感受燃烧转为默认禁用。
-		new(47, [], [ typeof(ExposeUpgradeRune), typeof(FeelTheBurnRune) ])
+		new(47, [], [ typeof(ExposeUpgradeRune), typeof(FeelTheBurnRune) ]),
+		// 引吭高歌转为默认禁用。
+		new(48, [], [ typeof(SingOutRune) ])
 	];
 
 	/// <summary>敌方海克斯默认禁用迁移:只迁移一次,之后尊重玩家手动开启。</summary>

@@ -3,8 +3,6 @@ namespace HextechRunes;
 
 public sealed partial class TrioRune
 {
-	private bool _triggeredThisTurn;
-
 	protected override IEnumerable<IHoverTip> ExtraHoverTips =>
 	[
 		HoverTipFactory.Static(StaticHoverTip.WahMelody),
@@ -12,41 +10,32 @@ public sealed partial class TrioRune
 		HoverTipFactory.Static(StaticHoverTip.KiMelody)
 	];
 
-	// 每回合一次的标记按持有者回合号懒清零（基类按战斗状态与持有者 TurnNumber 判断，持有者自己的额外回合重置、队友的不重置）。
-	// 只在钩子里推进，各端一致；战斗内状态，不存档。
-	private void ResetTriggeredThisTurn()
+	// 重放口径同塔罗牌桌布：持有者的牌在原版 GeneratePlayCount 里加次数，自动打出同样经过这里。
+	// 原版每次出牌只在开始时求一次打出次数（此时这张牌还没进出牌历史），重放出来的几次共用这个次数，不再求值，
+	// 所以凑齐第三种旋律的那张牌自己不重放、重放也不会连锁。旋律种类数口径同弦外之音（含开嗓 / 引吭高歌直接给予的）。
+	// 本钩子可能被同一次出牌重复求值，只读不改状态。
+	public override int ModifyCardPlayCount(CardModel card, Creature? target, int playCount)
 	{
-		_triggeredThisTurn = false;
+		return ShouldReplay(card) ? playCount + DynamicVars["Replays"].IntValue : playCount;
 	}
 
-	// 与弦外之音同一口径：在回合开始（直接给予的旋律已生效）与持有者每次出牌结算后检查种类数是否已达 3，每回合一次。
-	// 与开嗓同持时第一回合抽完起手牌即触发。
-	public override Task AfterPlayerTurnStart(PlayerChoiceContext choiceContext, Player player)
+	public override Task AfterModifyingCardPlayCount(CardModel card)
 	{
-		return player == Owner ? TryRewardAllMelodies(choiceContext) : Task.CompletedTask;
-	}
-
-	public override Task AfterCardPlayed(PlayerChoiceContext choiceContext, CardPlay cardPlay)
-	{
-		return cardPlay.Player == Owner ? TryRewardAllMelodies(choiceContext) : Task.CompletedTask;
-	}
-
-	private async Task TryRewardAllMelodies(PlayerChoiceContext choiceContext)
-	{
-		EnsureTurnScopedStateCurrent(ResetTriggeredThisTurn);
-		if (_triggeredThisTurn
-			|| Owner.Creature.IsDead
-			|| !HextechGrantedMelodies.IsOwnersSideTurn(Owner)
-			|| !IsFoolPlayer(Owner)
-			|| MelodyCmd.MelodiesThisTurn(Owner) < HextechGrantedMelodies.MelodyTags.Length
-			|| !TryConsumeTurnProc(ref _triggeredThisTurn))
+		if (ShouldReplay(card))
 		{
-			return;
+			Flash();
 		}
 
-		Flash();
-		await PlayerCmd.GainEnergy(DynamicVars.Energy.BaseValue, Owner);
-		await CardPileCmd.Draw(choiceContext, DynamicVars.Cards.BaseValue, Owner);
+		return Task.CompletedTask;
+	}
+
+	private bool ShouldReplay(CardModel card)
+	{
+		return card.Owner == Owner
+			&& !Owner.Creature.IsDead
+			&& IsFoolPlayer(Owner)
+			&& HextechGrantedMelodies.IsOwnersSideTurn(Owner)
+			&& MelodyCmd.MelodiesThisTurn(Owner) >= HextechGrantedMelodies.MelodyTags.Length;
 	}
 }
 #endif
