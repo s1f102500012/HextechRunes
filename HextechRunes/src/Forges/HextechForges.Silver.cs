@@ -372,3 +372,22 @@ public sealed class SilverRecoveryForge : HextechForgeBase
 		return CreatureCmd.Heal(Owner.Creature, Stacked(DynamicVars.Heal.BaseValue));
 	}
 }
+
+/// <summary>冲势锻造器（白银，通用）：描述写结果“每当你获得格挡时，对随机敌人造成2点伤害”，实现是战斗开始时给持有者2层原版势不可当。</summary>
+public sealed class JuggernautForge : HextechForgeBase
+{
+	protected override IEnumerable<DynamicVar> CanonicalVars =>
+	[
+		new PowerVar<JuggernautPower>(2m)
+	];
+
+	protected override IEnumerable<IHoverTip> ExtraHoverTips =>
+	[
+		HoverTipFactory.Static(StaticHoverTip.Block)
+	];
+
+	public override Task BeforeCombatStart()
+	{
+		return ApplyStackedPowerAtCombatStart<JuggernautPower>(DynamicVars["JuggernautPower"].BaseValue);
+	}
+}

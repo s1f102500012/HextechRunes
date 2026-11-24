@@ -588,7 +588,7 @@ internal static partial class Program
 		FieldInfo actIndexField = AccessTools.Field(typeof(MegaCrit.Sts2.Core.Runs.RunState), "_currentActIndex");
 		AccessTools.Property(typeof(MegaCrit.Sts2.Core.Runs.RunState), "Acts").SetValue(run, new MegaCrit.Sts2.Core.Models.ActModel[3]);
 		HextechMayhemRunContext runContext = (HextechMayhemRunContext)AccessTools.Field(typeof(HextechMayhemModifier), "_runContext").GetValue(modifier)!;
-		var allEffects = (IReadOnlyList<HextechEnemyHexEffect>)AccessTools.Field(typeof(HextechEnemyHexEffects), "OrderedEffects").GetValue(null)!;
+		var allEffects = (IReadOnlyList<HextechEnemyHexEffect>)AccessTools.Property(typeof(HextechEnemyHexEffects), "OrderedEffects").GetValue(null)!;
 		MegaCrit.Sts2.Core.Rooms.CombatRoom combatRoom = (MegaCrit.Sts2.Core.Rooms.CombatRoom)RuntimeHelpers.GetUninitializedObject(typeof(MegaCrit.Sts2.Core.Rooms.CombatRoom));
 
 		void Check(string label)

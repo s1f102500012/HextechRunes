@@ -156,6 +156,20 @@ public sealed class FortuneForge : HextechForgeBase
 	}
 }
 
+/// <summary>回响锻造器（棱彩，通用）：描述写结果“你每回合打出的第一张牌会多打出一次”，实现是战斗开始时给持有者1层原版回响形态；叠层时每层多覆盖一张牌。</summary>
+public sealed class EchoForge : HextechForgeBase
+{
+	protected override IEnumerable<DynamicVar> CanonicalVars =>
+	[
+		new PowerVar<EchoFormPower>(1m)
+	];
+
+	public override Task BeforeCombatStart()
+	{
+		return ApplyStackedPowerAtCombatStart<EchoFormPower>(DynamicVars["EchoFormPower"].BaseValue);
+	}
+}
+
 public sealed class VoidForge : HextechForgeBase
 {
 	protected override IEnumerable<DynamicVar> CanonicalVars =>

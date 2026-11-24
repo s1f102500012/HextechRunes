@@ -111,7 +111,6 @@ internal static partial class Program
 		typeof(MasterOfDualityRune),
 		typeof(NeowsGrudgeRune),
 		typeof(OkBoomerangRune),
-		typeof(PrimitiveMadnessRune),
 		typeof(RegenerationSuppressionRune),
 		typeof(SuperBrainRune),
 		typeof(SwordFlightRune),

@@ -6,6 +6,8 @@ using MegaCrit.Sts2.Core.Context;
 using MegaCrit.Sts2.Core.Entities.Creatures;
 using MegaCrit.Sts2.Core.Entities.Players;
 using MegaCrit.Sts2.Core.Models;
+using MegaCrit.Sts2.Core.Models.Cards;
+using MegaCrit.Sts2.Core.Models.Characters;
 using MegaCrit.Sts2.Core.Models.Powers;
 using MegaCrit.Sts2.Core.Rooms;
 using MegaCrit.Sts2.Core.Runs;
@@ -158,4 +160,35 @@ internal static partial class Program
 			Equal(296, owner.Gold, "guard clears even when a downstream callback throws");
 		});
 	}
+
+#if STS2_113_OR_NEWER
+	/// <summary>升级：我的小钱钱：只在持有者自己的我的小钱钱命中敌人时，按这一段实际扣掉的生命立即发金币。</summary>
+	[HextechTest]
+	private static void MyShiniesUpgradePaysUnblockedHpLossPerHit()
+	{
+		Expect(CreateMutableTestModel<MyShiniesUpgradeRune>().IsAvailableForPlayer(CreateUpgradeAvailabilityTestPlayer(typeof(Silent))),
+			"Upgrade: My Shinies is not character-limited");
+		WithImmediateGoldFixture((owner, other, enemy, listener) =>
+		{
+			MyShiniesUpgradeRune rune = CreateMutableTestModel<MyShiniesUpgradeRune>(); rune.Owner = owner;
+			MyShinies shinies = CreateMutableTestModel<MyShinies>(); shinies.Owner = owner;
+			MyShinies foreign = CreateMutableTestModel<MyShinies>(); foreign.Owner = other;
+			int before = owner.Gold;
+			DamageResult hit = new(enemy, ValueProp.Move) { BlockedDamage = 2, UnblockedDamage = 4, OverkillDamage = 7 };
+			rune.AfterDamageGiven(null!, owner.Creature, hit, hit.Props, enemy, shinies).GetAwaiter().GetResult();
+			Equal(before + 4, owner.Gold, "gold equals HP actually lost; blocked and overkill damage do not count");
+			rune.AfterDamageGiven(null!, owner.Creature, hit, hit.Props, enemy, shinies).GetAwaiter().GetResult();
+			Equal(before + 8, owner.Gold, "each hit pays separately");
+			DamageResult blocked = new(enemy, ValueProp.Move) { BlockedDamage = 5 };
+			rune.AfterDamageGiven(null!, owner.Creature, blocked, blocked.Props, enemy, shinies).GetAwaiter().GetResult();
+			rune.AfterDamageGiven(null!, other.Creature, hit, hit.Props, enemy, foreign).GetAwaiter().GetResult();
+			rune.AfterDamageGiven(null!, owner.Creature, hit, hit.Props, enemy, null).GetAwaiter().GetResult();
+			DamageResult self = new(other.Creature, ValueProp.Move) { UnblockedDamage = 4 };
+			rune.AfterDamageGiven(null!, owner.Creature, self, self.Props, other.Creature, shinies).GetAwaiter().GetResult();
+			Equal(before + 8, owner.Gold, "fully blocked hits, teammates' My Shinies, other damage and non-enemy targets pay nothing");
+			Equal(2, listener.Calls, "native gold hooks run once per paying hit");
+			Equal(0, other.Gold, "teammate gold is unchanged");
+		});
+	}
+#endif
 }

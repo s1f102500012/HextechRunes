@@ -95,12 +95,12 @@ internal static partial class HextechChoiceCodec
 				continue;
 			}
 
-			if (!Enum.IsDefined(typeof(MonsterHexKind), rawHex))
+			if (!MonsterHexCatalog.TryGetRegisteredMonsterHex(rawHex, out MonsterHexKind hex))
 			{
 				return false;
 			}
 
-			monsterHexes.Add((MonsterHexKind)rawHex);
+			monsterHexes.Add(hex);
 		}
 
 		cursor += hexCount;

@@ -26,6 +26,9 @@ internal static class HextechForgeRegistry
 		Forge<ScissorsForge>(HextechRarityTier.Silver),
 		Forge<SteadyForge>(HextechRarityTier.Silver),
 		Forge<SilverRecoveryForge>(HextechRarityTier.Silver),
+		Forge<AimForge>(HextechRarityTier.Silver),
+		Forge<StretchForge>(HextechRarityTier.Silver),
+		Forge<JuggernautForge>(HextechRarityTier.Silver),
 
 		Forge<ConstitutionForge>(HextechRarityTier.Gold),
 		Forge<DisasterForge>(HextechRarityTier.Gold),
@@ -52,6 +55,9 @@ internal static class HextechForgeRegistry
 		Forge<VenomForge>(HextechRarityTier.Gold),
 		Forge<ShrinkForge>(HextechRarityTier.Gold),
 		Forge<GoldScissorsForge>(HextechRarityTier.Gold),
+		Forge<NoxiousFumesForge>(HextechRarityTier.Gold),
+		Forge<ArrowForge>(HextechRarityTier.Gold),
+		Forge<DarkEmbraceForge>(HextechRarityTier.Gold),
 
 		Forge<PrismaticLifeForge>(HextechRarityTier.Prismatic),
 		Forge<AttackForge>(HextechRarityTier.Prismatic),
@@ -65,8 +71,17 @@ internal static class HextechForgeRegistry
 		Forge<FocusForge>(HextechRarityTier.Prismatic),
 		Forge<FortuneForge>(HextechRarityTier.Prismatic),
 		Forge<SpiralForge>(HextechRarityTier.Prismatic),
-		Forge<VoidForge>(HextechRarityTier.Prismatic)
+		Forge<VoidForge>(HextechRarityTier.Prismatic),
+		Forge<EchoForge>(HextechRarityTier.Prismatic)
 	];
+
+	// 愚者专属锻造器：没有愚者的游戏版本上不在界面列出（见 HextechCatalog.IsForgeTypeShownInUi），发放由各自的 IsAvailableForPlayer 拦下。
+	internal static IReadOnlySet<Type> FoolOnlyForgeTypes { get; } = new HashSet<Type>
+	{
+		typeof(AimForge),
+		typeof(StretchForge),
+		typeof(ArrowForge)
+	};
 
 	private static ForgeRegistration Forge<TForge>(HextechRarityTier rarity)
 	{

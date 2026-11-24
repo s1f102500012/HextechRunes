@@ -1,4 +1,3 @@
-using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using MegaCrit.Sts2.Core.Hooks;
 using MegaCrit.Sts2.Core.Models.Monsters;
@@ -30,40 +29,70 @@ internal static partial class HextechCombatHooks
 		&& MonsterIsPerformingMoveField != null
 		&& KnowledgeDemonCurseCounterField != null;
 
-	// 在原版 MonsterModel.PerformMove（0.107.1/0.111.0）完成后按同一顺序再执行一次行动：
-	// 等待 → 置 _isPerformingMove → MoveState.PerformMove → 记战斗历史 → 清标志 → 死亡移除 → 等待。
-	// 原版没有"重复执行本回合行动"的 Hook；刻意省略 MoveStateMachine.OnMovePerformed，状态机只前进一次。
-	// 这段复制写在 Postfix 里而非跳过型前缀，因此由 HextechPatch.CopiesVanillaLogic 把 PerformMove 纳入原版拷贝守卫。
-	private static async Task RepeatJeweledGauntletMoveAfterOriginal(
+	// 原版 MonsterModel.PerformMove（0.107.1/0.111.0/0.113.0）完成后，本回合的额外行动按固定顺序执行：
+	//   本回合行动 A（原版）→ 珠光护手重复 A → 连拨击锤推进出来的 B → 珠光护手重复 B。
+	// 珠光护手对 A、B 各自判定（键含行动 ID，同名行动结果相同），重复出来的行动不再判定，连拨击锤只在
+	// RollMove 时推进一步，所以一回合最多 4 次行动，不会连锁膨胀。头顶意图按同一顺序列出。
+	private static async Task PerformMonsterTurnExtraMoves(
 		Task originalTask,
-		JeweledGauntletMoveRepeatState repeatState)
+		MonsterTurnExtraMoves plan)
 	{
 		await originalTask;
 
-		MonsterModel monster = repeatState.Monster;
-		Creature creature = monster.Creature;
-		HextechCombatState? combatState = creature.CombatState;
-		if (!CanPerformJeweledGauntletRepeat(monster, repeatState.Move, combatState))
+		MonsterModel monster = plan.Monster;
+		if (plan.RepeatCurrent)
+		{
+			await PerformExtraMonsterMove(monster, plan.Current, "enemy Jeweled Gauntlet");
+		}
+
+		// 前面的行动可能让怪物死亡、离场或被强制改招（不变量恢复后 B 作废）；B 只在仍然有效时接着执行。
+		if (plan.FollowUp is not { } followUp
+			|| !ReferenceEquals(GetFanTheHammerFollowUpForThisTurn(monster), followUp)
+			|| !CanPerformJeweledGauntletRepeat(monster, plan.Current, monster.Creature.CombatState))
 		{
 			return;
+		}
+
+		bool repeatFollowUp = ShouldRepeatJeweledGauntletMove(monster, followUp);
+		BeginFanTheHammerFollowUp(monster, followUp);
+		if (await PerformExtraMonsterMove(monster, followUp, "enemy Fan the Hammer") && repeatFollowUp)
+		{
+			await PerformExtraMonsterMove(monster, followUp, "enemy Jeweled Gauntlet");
+		}
+	}
+
+	// 按原版 PerformMove 的同一顺序执行一次 NextMove：
+	// 等待 → 置 _isPerformingMove → MoveState.PerformMove → 记战斗历史 → 清标志 → 死亡移除 → 等待。
+	// 原版没有"本回合额外执行一次行动"的 Hook；刻意省略 MoveStateMachine.OnMovePerformed，状态机不因此前进。
+	// 这段复制写在 Postfix 里而非跳过型前缀，因此由 HextechPatch.CopiesVanillaLogic 把 PerformMove 纳入原版拷贝守卫。
+	private static async Task<bool> PerformExtraMonsterMove(
+		MonsterModel monster,
+		MoveState move,
+		string reason)
+	{
+		Creature creature = monster.Creature;
+		HextechCombatState? combatState = creature.CombatState;
+		if (!CanPerformJeweledGauntletRepeat(monster, move, combatState))
+		{
+			return false;
 		}
 
 		await Cmd.CustomScaledWait(0.1f, 0.2f);
 		// 等待期间第三方延迟伤害、阶段切换或遭遇销毁都可能改写怪物状态;写入执行态前按当前状态再核一次。
 		// 战斗容器换了(生物被移入另一场战斗)也取消:后面的目标、历史与移除都要与检查用的是同一个 combatState。
 		if (!ReferenceEquals(creature.CombatState, combatState)
-			|| !CanPerformJeweledGauntletRepeat(monster, repeatState.Move, combatState))
+			|| !CanPerformJeweledGauntletRepeat(monster, move, combatState))
 		{
-			return;
+			return false;
 		}
 
 		MonsterIsPerformingMoveField.SetValue(monster, true);
 		IReadOnlyList<Creature> targets = combatState!.PlayerCreatures.ToArray();
 		try
 		{
-			HextechLog.Info("JeweledGauntlet", $"Monster {monster.Id.Entry} repeating move {repeatState.Move.Id} via enemy Jeweled Gauntlet");
-			await repeatState.Move.PerformMove(targets);
-			CombatManager.Instance.History.MonsterPerformedMove(combatState, monster, repeatState.Move, targets);
+			HextechLog.Info("JeweledGauntlet", $"Monster {monster.Id.Entry} performing extra move {move.Id} via {reason}");
+			await move.PerformMove(targets);
+			CombatManager.Instance.History.MonsterPerformedMove(combatState, monster, move, targets);
 		}
 		finally
 		{
@@ -76,6 +105,7 @@ internal static partial class HextechCombatHooks
 		}
 
 		await Cmd.CustomScaledWait(0.1f, 0.4f);
+		return true;
 	}
 
 	private static bool CanPerformJeweledGauntletRepeat(
@@ -117,11 +147,8 @@ internal static partial class HextechCombatHooks
 		}
 	}
 
-	private static bool ShouldRepeatJeweledGauntletMove(
-		MonsterModel monster,
-		[NotNullWhen(true)] out MoveState? move)
+	private static bool ShouldRepeatJeweledGauntletMove(MonsterModel monster, MoveState move)
 	{
-		move = null;
 		Creature creature = monster.Creature;
 		// 稳定随机数需要具体 RunState 作为种子来源。
 		if (creature.CombatId is not uint combatId
@@ -132,7 +159,6 @@ internal static partial class HextechCombatHooks
 			return false;
 		}
 
-		move = monster.NextMove;
 		if (ShouldSuppressJeweledGauntletRepeat(monster, move))
 		{
 			return false;
@@ -211,14 +237,30 @@ internal static partial class HextechCombatHooks
 	internal static IReadOnlyList<AbstractIntent> DuplicateJeweledGauntletIntentGroup(
 		IReadOnlyList<AbstractIntent> intents)
 	{
-		AbstractIntent[] duplicated = new AbstractIntent[intents.Count * 2];
-		for (int i = 0; i < intents.Count; i++)
+		return ComposeMonsterTurnIntents(intents, repeatCurrent: true, followUp: [], repeatFollowUp: false);
+	}
+
+	/// <summary>本回合将要执行的行动按执行顺序排成一组意图：A（珠光护手时 A 两遍）再接连拨击锤的 B（同理）。</summary>
+	internal static IReadOnlyList<AbstractIntent> ComposeMonsterTurnIntents(
+		IReadOnlyList<AbstractIntent> current,
+		bool repeatCurrent,
+		IReadOnlyList<AbstractIntent> followUp,
+		bool repeatFollowUp)
+	{
+		List<AbstractIntent> composed = new(current.Count * 2 + followUp.Count * 2);
+		composed.AddRange(current);
+		if (repeatCurrent)
 		{
-			duplicated[i] = intents[i];
-			duplicated[i + intents.Count] = intents[i];
+			composed.AddRange(current);
 		}
 
-		return duplicated;
+		composed.AddRange(followUp);
+		if (repeatFollowUp)
+		{
+			composed.AddRange(followUp);
+		}
+
+		return composed.ToArray();
 	}
 
 	private static void LogJeweledGauntletFailure(string hook, Exception ex)
@@ -229,7 +271,11 @@ internal static partial class HextechCombatHooks
 		}
 	}
 
-	private sealed record JeweledGauntletMoveRepeatState(MonsterModel Monster, MoveState Move);
+	private sealed record MonsterTurnExtraMoves(
+		MonsterModel Monster,
+		MoveState Current,
+		bool RepeatCurrent,
+		MoveState? FollowUp);
 
 	private sealed record JeweledGauntletIntentPatchState(
 		MoveState Move,
@@ -237,7 +283,11 @@ internal static partial class HextechCombatHooks
 		IReadOnlyList<AbstractIntent> DisplayedIntents);
 
 	[HarmonyPatch(typeof(MonsterModel), nameof(MonsterModel.PerformMove), new Type[0])]
-	[HextechPatch("combat.jeweled-gauntlet.perform-move", "珠光护手", CopiesVanillaLogic = true)]
+	[HextechPatch(
+		"combat.jeweled-gauntlet.perform-move",
+		"珠光护手、连拨击锤",
+		MonsterHexes = [MonsterHexKind.JeweledGauntlet, MonsterHexKind.FanTheHammer],
+		CopiesVanillaLogic = true)]
 	private static class JeweledGauntletPerformMovePatch
 	{
 		[HarmonyPrepare]
@@ -246,14 +296,17 @@ internal static partial class HextechCombatHooks
 		[HarmonyPrefix]
 		private static void Prefix(
 			MonsterModel __instance,
-			out JeweledGauntletMoveRepeatState? __state)
+			out MonsterTurnExtraMoves? __state)
 		{
 			__state = null;
 			try
 			{
-				if (ShouldRepeatJeweledGauntletMove(__instance, out MoveState? move))
+				MoveState current = __instance.NextMove;
+				bool repeatCurrent = ShouldRepeatJeweledGauntletMove(__instance, current);
+				MoveState? followUp = GetFanTheHammerFollowUpForThisTurn(__instance);
+				if (repeatCurrent || followUp != null)
 				{
-					__state = new JeweledGauntletMoveRepeatState(__instance, move);
+					__state = new MonsterTurnExtraMoves(__instance, current, repeatCurrent, followUp);
 				}
 			}
 			catch (Exception ex)
@@ -265,22 +318,26 @@ internal static partial class HextechCombatHooks
 		[HarmonyPostfix]
 		private static void Postfix(
 			ref Task __result,
-			JeweledGauntletMoveRepeatState? __state)
+			MonsterTurnExtraMoves? __state)
 		{
 			if (__state != null)
 			{
-				__result = RepeatJeweledGauntletMoveAfterOriginal(__result, __state);
+				__result = PerformMonsterTurnExtraMoves(__result, __state);
 			}
 		}
 	}
 
 	[HarmonyPatch(typeof(NCreature), nameof(NCreature.UpdateIntent), typeof(IEnumerable<Creature>))]
-	[HextechPatch("combat.jeweled-gauntlet.update-intent", "珠光护手")]
+	[HextechPatch(
+		"combat.jeweled-gauntlet.update-intent",
+		"珠光护手、连拨击锤",
+		MonsterHexes = [MonsterHexKind.JeweledGauntlet, MonsterHexKind.FanTheHammer])]
 	private static class JeweledGauntletUpdateIntentPatch
 	{
 		[HarmonyPrepare]
 		private static bool Prepare() => JeweledGauntletHooksAvailable;
 
+		// 只读：判定与 PerformMove 前缀同源（稳定随机 + 连拨击锤登记表），不写任何共享状态。
 		[HarmonyPrefix]
 		private static void Prefix(
 			NCreature __instance,
@@ -290,14 +347,26 @@ internal static partial class HextechCombatHooks
 			try
 			{
 				MonsterModel? monster = __instance.Entity?.Monster;
-				if (monster == null
-					|| !ShouldRepeatJeweledGauntletMove(monster, out MoveState? move))
+				if (monster == null)
 				{
 					return;
 				}
 
+				MoveState move = monster.NextMove;
+				bool repeatCurrent = ShouldRepeatJeweledGauntletMove(monster, move);
+				MoveState? followUp = GetFanTheHammerFollowUpForThisTurn(monster);
+				if (!repeatCurrent && followUp == null)
+				{
+					return;
+				}
+
+				bool repeatFollowUp = followUp != null && ShouldRepeatJeweledGauntletMove(monster, followUp);
 				IReadOnlyList<AbstractIntent> originalIntents = move.Intents;
-				IReadOnlyList<AbstractIntent> displayedIntents = DuplicateJeweledGauntletIntentGroup(originalIntents);
+				IReadOnlyList<AbstractIntent> displayedIntents = ComposeMonsterTurnIntents(
+					originalIntents,
+					repeatCurrent,
+					followUp?.Intents ?? [],
+					repeatFollowUp);
 				MoveStateIntentsField.SetValue(move, displayedIntents);
 				__state = new JeweledGauntletIntentPatchState(move, originalIntents, displayedIntents);
 			}

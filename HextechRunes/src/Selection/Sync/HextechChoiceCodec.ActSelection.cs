@@ -86,12 +86,12 @@ internal static partial class HextechChoiceCodec
 
 		if (payload[4] >= 0)
 		{
-			if (!Enum.IsDefined(typeof(MonsterHexKind), payload[4]))
+			if (!MonsterHexCatalog.TryGetRegisteredMonsterHex(payload[4], out MonsterHexKind decodedHex))
 			{
 				return false;
 			}
 
-			monsterHex = (MonsterHexKind)payload[4];
+			monsterHex = decodedHex;
 		}
 
 		rarity = (HextechRarityTier)payload[3];

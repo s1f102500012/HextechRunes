@@ -88,7 +88,8 @@ internal static partial class HextechTelemetry
 
 			foreach (MonsterHexKind hex in modifier.GetMonsterHexesForAct(actIndex))
 			{
-				payloads.Add(new MonsterHexTelemetry(actIndex, rarity.Value.ToString(), hex.ToString()));
+				// 与配置同一 ID：内置是枚举名，外部登记的是展示遗物的 ModelId.Entry（外部我方符文同样按模型 ID 上报）。
+				payloads.Add(new MonsterHexTelemetry(actIndex, rarity.Value.ToString(), MonsterHexCatalog.GetConfigId(hex)));
 			}
 		}
 

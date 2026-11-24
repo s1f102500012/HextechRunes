@@ -19,10 +19,12 @@ internal static partial class HextechRuneSelectionCoordinator
 	// 同一时刻只处理一幕的选择:非空表示正在处理,值是所属的局。换局后残留的标记在下次进入时清掉,
 	// 不能挡住新局的选择;处理结束时只释放属于本局的标记。
 	private static RunState? _actSelectionRun;
+	// 与 _actSelectionRun 同生同灭：处理结束（含中止/异常）时完成，供进房关口等待进行中的选择收尾。
+	private static TaskCompletionSource? _actSelectionCompletion;
 
 	public static void ResetActSelectionState()
 	{
-		_actSelectionRun = null;
+		ReleaseStageSelectionSlot();
 		HextechSelectionProgress.Reset([]);
 	}
 
@@ -33,8 +35,65 @@ internal static partial class HextechRuneSelectionCoordinator
 			return false;
 		}
 
-		_actSelectionRun = null;
+		ReleaseStageSelectionSlot();
 		return true;
+	}
+
+	/// <summary>占用"正在处理一幕选择"的名额；已被占用时返回 false（调用方跳过，不并发开第二个选择）。</summary>
+	internal static bool TryBeginStageSelection(RunState runState)
+	{
+		if (_actSelectionRun != null)
+		{
+			return false;
+		}
+
+		_actSelectionRun = runState;
+		_actSelectionCompletion = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
+		return true;
+	}
+
+	/// <summary>释放本局占用的名额并唤醒等待者；名额已属于别的局（换局后被清掉重占）时不动。</summary>
+	internal static void EndStageSelection(RunState runState)
+	{
+		if (ReferenceEquals(_actSelectionRun, runState))
+		{
+			ReleaseStageSelectionSlot();
+		}
+	}
+
+	/// <summary>本局正在进行的选择在结束时完成的任务；没有进行中的选择（或属于别的局）时返回 null。</summary>
+	internal static Task? GetInFlightStageSelection(RunState runState)
+	{
+		return ReferenceEquals(_actSelectionRun, runState) ? _actSelectionCompletion?.Task : null;
+	}
+
+	private static void ReleaseStageSelectionSlot()
+	{
+		TaskCompletionSource? completion = _actSelectionCompletion;
+		_actSelectionRun = null;
+		_actSelectionCompletion = null;
+		completion?.TrySetResult();
+	}
+
+	/// <summary>
+	/// 多个触发点共用的入口：本端已有本局的选择在进行时先等它结束（不并发、不跳过），结束后本阶段仍未决才开始新的选择。
+	/// 去重靠选择名额本身；这里只把"已在进行就跳过"换成"等它收尾再看是否已决"，给必须保证选完才能继续的调用方用。
+	/// </summary>
+	internal static async Task HandleStageSelectionAfterInFlightAsync(RunState runState, HextechMayhemModifier modifier, int actIndex, string caller)
+	{
+		if (GetInFlightStageSelection(runState) is Task inFlight)
+		{
+			HextechLog.Info("Mayhem", $"{caller}: waiting for in-flight selection to finish before stage={actIndex}");
+			await inFlight;
+		}
+
+		if (!IsCurrentRunInProgress(runState) || modifier.IsStageResolved(actIndex))
+		{
+			HextechLog.Info("Mayhem", $"{caller}: stage={actIndex} already resolved or run no longer in progress; no new selection");
+			return;
+		}
+
+		await HandleStageSelection(runState, modifier, actIndex);
 	}
 
 	public static Task HandleActSelection(RunState runState, HextechMayhemModifier modifier)
@@ -62,13 +121,13 @@ internal static partial class HextechRuneSelectionCoordinator
 		}
 
 		HextechLog.Info("Mayhem", $"HandleHextechActSelection enter: room={runState.CurrentRoom?.GetType().Name ?? "null"} actIndex={actIndex} resolved={modifier.IsStageResolved(actIndex)} handling={_actSelectionRun != null}");
-		if (_actSelectionRun != null || !IsCurrentRun(runState) || actIndex < 0 || modifier.IsStageResolved(actIndex))
+		if (_actSelectionRun != null || !IsCurrentRun(runState) || actIndex < 0 || modifier.IsStageResolved(actIndex)
+			|| !TryBeginStageSelection(runState))
 		{
 			HextechLog.Info("Mayhem", $"HandleHextechActSelection skip");
 			return;
 		}
 
-		_actSelectionRun = runState;
 		bool reopenMapAfterSelection = false;
 		// 表现层要求保持地图打开时，本体界面会在显示前自行关闭地图（见 CloseMapBeforeOwnScreen），结束时同样要重新打开。
 		bool mapOpenBeforeSelection = NMapScreen.Instance?.IsOpen == true;
@@ -166,10 +225,7 @@ internal static partial class HextechRuneSelectionCoordinator
 			}
 			finally
 			{
-				if (ReferenceEquals(_actSelectionRun, runState))
-				{
-					_actSelectionRun = null;
-				}
+				EndStageSelection(runState);
 			}
 
 			HextechLog.Info("Mayhem", $"HandleHextechActSelection exit: act={actIndex}");
@@ -499,7 +555,7 @@ internal static partial class HextechRuneSelectionCoordinator
 	/// 先置 ShouldSave=false、IsCleaningUp=true，再清覆盖层，最后才清 State；清覆盖层会取消等待中的选择界面，
 	/// 让本局任务链在 State 仍指向本局时同步续跑。只比较 State 引用会把正在拆除的对局当成当前局继续推进本幕。
 	/// </summary>
-	private static bool IsCurrentRunInProgress(RunState runState)
+	internal static bool IsCurrentRunInProgress(RunState runState)
 	{
 		RunManager runManager = RunManager.Instance;
 		return IsRunInProgress(runManager.DebugOnlyGetState(), runState, runManager.IsCleaningUp);

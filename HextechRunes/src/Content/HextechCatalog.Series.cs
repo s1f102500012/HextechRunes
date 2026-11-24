@@ -42,6 +42,7 @@ internal static partial class HextechCatalog
 	public static IReadOnlyList<RelicModel> GetCanonicalForges()
 	{
 		return AllForgeTypes
+			.Where(IsForgeTypeShownInUi)
 			.Select(static type => ModelDb.GetById<RelicModel>(ModelDb.GetId(type)))
 			.ToArray();
 	}
@@ -50,6 +51,7 @@ internal static partial class HextechCatalog
 	{
 		return AllCustomRelicTypes
 			.Where(static type => !PlayerRuneMetadata.AllTypes.Contains(type) || IsPlayerRuneTypeVisibleInCollection(type))
+			.Where(IsForgeTypeShownInUi)
 			.Select(static type => TryGetCanonicalVisibleCustomRelic(type, out RelicModel? relic) ? relic : null)
 			.OfType<RelicModel>()
 			.ToArray();

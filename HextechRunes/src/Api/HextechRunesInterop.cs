@@ -10,9 +10,10 @@ public static class HextechRunesInterop
 
 	/// <summary>
 	/// 本类公开契约的版本。1 = RegisterPlayerRune、SetPlayerRunePoolLabel、RegisterConfigSectionTitle、RegisterExtraActProvider；
-	/// 2 = RegisterPlayerRune 的 flags 新增 GuaranteedFirstPick，新增 SetPlayerRuneCharacter。
+	/// 2 = RegisterPlayerRune 的 flags 新增 GuaranteedFirstPick，新增 SetPlayerRuneCharacter；
+	/// 3 = 新增 RegisterEnemyHex。
 	/// </summary>
-	public static int ApiVersion => 2;
+	public static int ApiVersion => 3;
 
 	/// <summary>
 	/// 注册外部玩家符文，符文类型只需继承 RelicModel，且 Rarity 必须是 RelicRarity.Starter。
@@ -56,6 +57,47 @@ public static class HextechRunesInterop
 	}
 
 	/// <summary>
+	/// 注册外部敌方海克斯。需要 ApiVersion ≥ 3。必须在模组初始化阶段、共享遗物池首次枚举前调用。
+	/// 展示遗物只承载标题、图标与 relics 表的 &lt;图片文件名词干&gt;.enemyDescription，其 Rarity 必须是 RelicRarity.Starter；
+	/// 效果是对每个敌人（开战时、战斗中加入、首领转阶段）施加一次 powerType，层数按强度档位取对应的 amount。
+	/// </summary>
+	/// <param name="displayRelicType">具体、封闭的 RelicModel 子类，只作展示载体，不进任何玩家池。</param>
+	/// <param name="powerType">具体、封闭的 PowerModel 子类；效果完全由能力自己的原版钩子实现。</param>
+	/// <param name="rarity">海克斯品级名：Silver / Gold / Prismatic（不区分大小写）。</param>
+	/// <param name="amountAct1">强度档位 1（第一幕）施加的层数；不大于 0 表示该档不施加。</param>
+	/// <param name="amountAct2">强度档位 2（第二幕）施加的层数。</param>
+	/// <param name="amountAct3">强度档位 3（第三幕及之后、无尽循环）施加的层数。</param>
+	/// <param name="flags">EnemyHexFlags 名称，逗号分隔；目前只有 Disabled（新配置里默认关闭）；null 或空串为 None。</param>
+	/// <param name="assetModId">图标路径与配置菜单来源分组用的模组 ID；null 视为本体。</param>
+	/// <param name="isAvailable">可选的抽取过滤；联机各端必须对同一局给出相同结果。</param>
+	/// <exception cref="ArgumentException">类型、品级或标志名无效；此时不产生任何登记。</exception>
+	/// <exception cref="InvalidOperationException">身份与已有敌方海克斯冲突，或模型池注册窗口已经关闭。</exception>
+	public static void RegisterEnemyHex(
+		Type displayRelicType,
+		Type powerType,
+		string rarity,
+		int amountAct1,
+		int amountAct2,
+		int amountAct3,
+		string? flags,
+		string? assetModId,
+		Func<IRunState, bool>? isAvailable)
+	{
+		HextechRarityTier parsedRarity = ParseEnumName<HextechRarityTier>(rarity, nameof(rarity));
+		EnemyHexFlags parsedFlags = ParseFlagNames<EnemyHexFlags>(flags, nameof(flags));
+		HextechRunesApi.RegisterEnemyHexCore(
+			displayRelicType,
+			powerType,
+			parsedRarity,
+			amountAct1,
+			amountAct2,
+			amountAct3,
+			parsedFlags,
+			assetModId,
+			isAvailable);
+	}
+
+	/// <summary>
 	/// 指定符文在选择界面和配置菜单上显示的来源标签，文字取 relic_collection 表的 HEXTECH_POOL.&lt;poolKey&gt;。
 	/// 可以选已有的键（GENERIC、IRONCLAD 等），也可以在自己模组的 relic_collection.json 里新增。
 	/// 未指定时，带角色池的符文显示角色名，其余显示“通用”。只影响界面文字，不影响发放。
@@ -81,7 +123,7 @@ public static class HextechRunesInterop
 	}
 
 	/// <summary>
-	/// 指定配置菜单里该模组内容（符文与锻造器）的分组标题，文字取 relic_collection 表的 titleKey。
+	/// 指定配置菜单里该模组内容（符文、锻造器与敌方海克斯）的分组标题，文字取 relic_collection 表的 titleKey。
 	/// assetModId 与注册内容时传入的一致。未指定时显示“外部模组：&lt;assetModId&gt;”。只影响界面文字。
 	/// </summary>
 	/// <exception cref="ArgumentException">assetModId 或 titleKey 为空白。</exception>
@@ -122,18 +164,25 @@ public static class HextechRunesInterop
 
 	internal static PlayerRuneFlags ParsePlayerRuneFlags(string? flags)
 	{
-		PlayerRuneFlags result = PlayerRuneFlags.None;
+		return ParseFlagNames<PlayerRuneFlags>(flags, nameof(flags));
+	}
+
+	// 逗号分隔的标志名；None 本身也是合法名字，结果等于不传。
+	private static TFlags ParseFlagNames<TFlags>(string? flags, string parameterName)
+		where TFlags : struct, Enum
+	{
+		ulong result = 0;
 		if (string.IsNullOrWhiteSpace(flags))
 		{
-			return result;
+			return default;
 		}
 
 		foreach (string part in flags.Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries))
 		{
-			result |= ParseEnumName<PlayerRuneFlags>(part, nameof(flags));
+			result |= Convert.ToUInt64(ParseEnumName<TFlags>(part, parameterName));
 		}
 
-		return result;
+		return (TFlags)Enum.ToObject(typeof(TFlags), result);
 	}
 
 	public static void RegisterExtraActProvider(Func<IRunState, string?> provider)

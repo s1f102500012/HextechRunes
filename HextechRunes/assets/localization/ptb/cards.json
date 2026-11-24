@@ -29,9 +29,6 @@
   "WHITE_HOLE_CARD.title": "Buraco Branco",
   "WHITE_HOLE_CARD.description": "Sempre que você comprar esta carta, ganhe {Energy:energyIcons()}.\nCompra {Cards} cartas.",
   "WHITE_HOLE_CARD.flavor": "Ele não engole escolhas. Ele as cospe de volta na sua mão.",
-  "SEARING_ATTACK_CARD.title": "Ataque Chamuscante",
-  "SEARING_ATTACK_CARD.description": "Cause {Damage:diff()} de dano.\nPode ser aprimorado qualquer número de vezes.",
-  "SEARING_ATTACK_CARD.flavor": "Mais quente a cada gume.",
   "OSTY_WISH_CARD.title": "Desejo de Osty",
   "OSTY_WISH_CARD.description": "Ganhe {WishBlock} de Defesa.\nCause {WishDamage} de dano a todos os inimigos.",
   "OSTY_WISH_CARD.hoverTip": "Habilidade de custo [blue]0[/blue]. Ganhe [blue]X[/blue] de Defesa e cause [blue]X[/blue] de dano a todos os inimigos. [blue]X[/blue] é o PV Máx de Osty quando ele morreu. Exaustão. Cópias aprimoradas possuem Reter.",
@@ -49,8 +46,5 @@
   "FEEL_THE_BURN_CARD.flavor": "Apague o fogo deles, depois acenda o seu.",
   "OK_BOOMERANG_CARD.title": "Bumerangue OK",
   "OK_BOOMERANG_CARD.description": "Causa {Damage:diff()} de dano a TODOS os inimigos [blue]{Hits}[/blue] vezes.\nDevolva esta carta à sua mão.",
-  "OK_BOOMERANG_CARD.flavor": "Parte como uma piada e volta como um cobrador.",
-  "QUANTUM_COMPUTING_CARD.title": "Computação Quântica",
-  "QUANTUM_COMPUTING_CARD.description": "Cause dano a todos os inimigos igual a {DamagePercent:diff()}% de seus PV máximos, e então cure-se em {HealPercent:diff()}% do dano causado.",
-  "QUANTUM_COMPUTING_CARD.flavor": "Antes que a resposta apareça, os PV do inimigo já colapsaram."
+  "OK_BOOMERANG_CARD.flavor": "Parte como uma piada e volta como um cobrador."
 }

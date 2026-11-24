@@ -431,6 +431,7 @@
     "SOULS_POWER_FORGE": "灵魂锻造器",
     "ETERNAL_ARMOR_UPGRADE_RUNE": "升级：永恒铠甲",
     "JACKPOT_UPGRADE_RUNE": "升级：大奖",
+    "MY_SHINIES_UPGRADE_RUNE": "升级：我的小钱钱",
     "THE_LOST_HEX": "升级：失落之物",
     "THE_FORGOTTEN_HEX": "升级：遗忘之物",
     "SLIMED_BERSERKER_HEX": "升级：史莱姆狂战士",
@@ -505,9 +506,11 @@
     "CLAW_UPGRADE_RUNE": "升级：爪击",
     "INFERNO_UPGRADE_RUNE": "升级：狱火",
     "FLAME_BARRIER_UPGRADE_RUNE": "升级：火焰屏障",
+    "OUTRAGE_UPGRADE_RUNE": "升级：群情激愤",
     "REBOOT_UPGRADE_RUNE": "升级：重启",
     "SMOKESTACK_UPGRADE_RUNE": "升级：烟囱",
     "ROYALTIES_UPGRADE_RUNE": "升级：王国资产",
+    "LARGESSE_UPGRADE_RUNE": "升级：慷慨捐助",
     "VAKUU_MOCKERY_RUNE": "瓦库的嘲弄",
     "DIVE_BOMBER_RUNE": "俯冲轰炸",
     "ALL_FOR_YOU_RUNE": "全心为你",
@@ -533,7 +536,14 @@
     "MIXED_FEELINGS_RUNE": "悲喜交加",
     "CRYSTAL_BALL_RUNE": "水晶球",
     "TAROT_CLOTH_RUNE": "塔罗牌桌布",
-    "MYTHIC_FORM_UPGRADE_RUNE": "升级：神话形态"
+    "MYTHIC_FORM_UPGRADE_RUNE": "升级：神话形态",
+    "HITTING_STRIDE_RUNE": "渐入佳境",
+    "HELD_SHOT_RUNE": "引而不发",
+    "ELEGY_RUNE": "悲歌",
+    "QUICK_SHOT_UPGRADE_RUNE": "升级：快速射击",
+    "SONG_PATH_UPGRADE_RUNE": "升级：歌之道",
+    "VIOLENT_CHORD_UPGRADE_RUNE": "升级：暴力和弦",
+    "UNBROKEN_SONG_RUNE": "弦歌不辍"
   },
   "monsterHexes": {
     "Slap": "扇巴掌",
@@ -695,7 +705,10 @@
     "SpinyToad": "升级：棘刺蟾蜍",
     "ScrollOfBiting": "升级：咬人卷轴",
     "SpectralKnight": "升级：幽灵骑士",
-    "OwlMagistrate": "升级：猫头鹰法官"
+    "OwlMagistrate": "升级：猫头鹰法官",
+    "FanTheHammer": "连拨击锤",
+    "BrokenGoldenCrown": "破碎金冠",
+    "RedEnvelope": "红包"
   },
   "characters": {
     "IRONCLAD": "战士",

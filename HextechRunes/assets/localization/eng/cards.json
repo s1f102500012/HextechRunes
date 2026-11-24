@@ -29,9 +29,6 @@
   "WHITE_HOLE_CARD.title": "White Hole",
   "WHITE_HOLE_CARD.description": "Whenever you draw this, gain {Energy:energyIcons()}.\nDraw {Cards} cards.",
   "WHITE_HOLE_CARD.flavor": "It does not swallow choices. It spits them back into your hand.",
-  "SEARING_ATTACK_CARD.title": "Searing Attack",
-  "SEARING_ATTACK_CARD.description": "Deal {Damage:diff()} damage.\nCan be upgraded any number of times.",
-  "SEARING_ATTACK_CARD.flavor": "Hotter with each edge.",
   "OSTY_WISH_CARD.title": "Osty's Wish",
   "OSTY_WISH_CARD.description": "Gain {WishBlock} Block.\nDeal {WishDamage} damage to all enemies.",
   "OSTY_WISH_CARD.hoverTip": "[blue]0[/blue]-cost Skill. Gain [blue]X[/blue] Block and deal [blue]X[/blue] damage to all enemies. [blue]X[/blue] is Osty's Max HP when it died. Exhaust. Upgraded copies retain.",
@@ -49,8 +46,5 @@
   "FEEL_THE_BURN_CARD.flavor": "Snuff out their fire, then light your own.",
   "OK_BOOMERANG_CARD.title": "OK Boomerang",
   "OK_BOOMERANG_CARD.description": "Deal {Damage:diff()} damage to ALL enemies [blue]{Hits}[/blue] times.\nReturn this card to your hand.",
-  "OK_BOOMERANG_CARD.flavor": "It leaves like a joke and returns like a debt collector.",
-  "QUANTUM_COMPUTING_CARD.title": "Quantum Computing",
-  "QUANTUM_COMPUTING_CARD.description": "Deal damage to all enemies equal to {DamagePercent:diff()}% of their Max HP, then heal for {HealPercent:diff()}% of the damage dealt.",
-  "QUANTUM_COMPUTING_CARD.flavor": "Before the answer appears, enemy HP has already collapsed."
+  "OK_BOOMERANG_CARD.flavor": "It leaves like a joke and returns like a debt collector."
 }

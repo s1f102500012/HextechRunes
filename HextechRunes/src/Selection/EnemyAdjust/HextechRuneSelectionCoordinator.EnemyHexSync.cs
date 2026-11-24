@@ -90,7 +90,7 @@ internal static partial class HextechRuneSelectionCoordinator
 					payload => IsValidEnemyHexAdjustment(
 						payload,
 						syncContext.InitialMonsterHexes,
-						HextechMonsterHexRoller.GetConfiguredRarityPool(rarity, modifier.DisabledMonsterHexIdsForPool),
+						HextechMonsterHexRoller.GetConfiguredRarityPool(rarity, modifier.DisabledMonsterHexIdsForPool, runState),
 						modifier.MonsterHexRerollLimit),
 					cancellationToken)
 				: null

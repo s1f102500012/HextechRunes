@@ -29,9 +29,6 @@
   "WHITE_HOLE_CARD.title": "화이트홀",
   "WHITE_HOLE_CARD.description": "이 카드를 뽑을 때마다 {Energy:energyIcons()} 을(를) 얻습니다.\n카드를 {Cards}장 뽑습니다.",
   "WHITE_HOLE_CARD.flavor": "이것은 선택을 삼키지 않습니다. 다시 당신의 손에 뱉어냅니다.",
-  "SEARING_ATTACK_CARD.title": "불태우는 일격",
-  "SEARING_ATTACK_CARD.description": "피해를 {Damage:diff()} 줍니다.\n강화 횟수에 제한이 없습니다.",
-  "SEARING_ATTACK_CARD.flavor": "날을 세울수록 뜨거워집니다.",
   "OSTY_WISH_CARD.title": "골골이의 소원",
   "OSTY_WISH_CARD.description": "방어도를 {WishBlock} 얻습니다.\n모든 적에게 {WishDamage}의 피해를 줍니다.",
   "OSTY_WISH_CARD.hoverTip": "[blue]0[/blue] 비용 스킬. 방어도를 [blue]X[/blue] 얻고 모든 적에게 [blue]X[/blue]의 피해를 줍니다. [blue]X[/blue]는 골골이가 죽었을 때의 최대 체력입니다. [gold]소멸[/gold]. 강화된 카드는 [gold]보존[/gold]됩니다.",
@@ -49,8 +46,5 @@
   "FEEL_THE_BURN_CARD.flavor": "그들의 불을 꺼뜨린 뒤, 당신의 불을 지펴라.",
   "OK_BOOMERANG_CARD.title": "부메랑 투척",
   "OK_BOOMERANG_CARD.description": "모든 적에게 {Damage:diff()}의 피해를 [blue]{Hits}[/blue]번 줍니다.\n이 카드를 다시 손으로 가져옵니다.",
-  "OK_BOOMERANG_CARD.flavor": "농담처럼 날아가서, 빚쟁이처럼 돌아온다.",
-  "QUANTUM_COMPUTING_CARD.title": "양자 컴퓨팅",
-  "QUANTUM_COMPUTING_CARD.description": "모든 적에게 적의 최대 체력의 {DamagePercent:diff()}%만큼 피해를 주고, 준 피해량의 {HealPercent:diff()}%만큼 체력을 회복합니다.",
-  "QUANTUM_COMPUTING_CARD.flavor": "답이 나타나기도 전에 적의 체력은 이미 붕괴되었습니다."
+  "OK_BOOMERANG_CARD.flavor": "농담처럼 날아가서, 빚쟁이처럼 돌아온다."
 }

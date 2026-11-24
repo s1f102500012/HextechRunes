@@ -54,20 +54,24 @@ internal static partial class HextechRuneConfigMenuHooks
 			RelicModel relic = MonsterHexCatalog.GetIconRelicForMonsterHex(kind);
 			HextechRarityTier rarity = MonsterHexCatalog.GetMonsterHexRarity(kind);
 			string rarityKey = rarity.ToString().ToUpperInvariant();
+			string configId = MonsterHexCatalog.GetConfigId(kind);
+			// 来源分组与外部我方符文同口径：按展示遗物登记的 assetModId，内置条目都是本体。
+			ModelId id = relic.CanonicalId();
 			entries.Add(new RuneConfigEntry(
-				kind.ToString(),
+				configId,
 				relic,
 				relic.Title.GetFormattedText(),
 				new LocString(HextechRuneLabels.LocTable, "HEXTECH_SERIES." + rarityKey).GetRawText(),
 				(int)rarity,
 				EnemyPoolKey,
-				kind.ToString(),
-				BaseConfigSourceKey,
-				L("HEXTECH_CONFIG_SOURCE_BASE")));
+				configId,
+				GetConfigSourceKey(id),
+				GetConfigSourceText(id)));
 		}
 
 		return entries
 			.OrderBy(static entry => entry.RarityOrder)
+			.ThenBy(static entry => entry.SourceKey, StringComparer.Ordinal)
 			.ThenBy(static entry => entry.Title, StringComparer.CurrentCulture)
 			.ToList();
 	}
@@ -77,6 +81,11 @@ internal static partial class HextechRuneConfigMenuHooks
 		List<RuneConfigEntry> entries = [];
 		foreach (Type forgeType in HextechCatalog.GetAllForgeTypes())
 		{
+			if (!HextechCatalog.IsForgeTypeShownInUi(forgeType))
+			{
+				continue;
+			}
+
 			RelicModel relic = ModelDb.GetById<RelicModel>(ModelDb.GetId(forgeType));
 			ModelId id = relic.CanonicalId();
 			HextechRarityTier rarity = HextechCatalog.TryGetForgeRarity(relic, out HextechRarityTier resolvedRarity)
@@ -163,7 +172,7 @@ internal static partial class HextechRuneConfigMenuHooks
 
 	private static MonsterHexKind? GetEnemyHexKind(RuneConfigEntry entry)
 	{
-		return entry.PoolKey == EnemyPoolKey && Enum.TryParse(entry.Id, out MonsterHexKind monsterHex)
+		return entry.PoolKey == EnemyPoolKey && MonsterHexCatalog.TryGetMonsterHexByConfigId(entry.Id, out MonsterHexKind monsterHex)
 			? monsterHex
 			: null;
 	}

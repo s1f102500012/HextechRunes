@@ -34,6 +34,16 @@ internal static partial class HextechCatalog
 			|| HextechPlayerContextHelper.IsCharacterPoolPresentInGame(characterPool);
 	}
 
+	/// <summary>
+	/// 锻造器是否在界面(配置菜单、图鉴)列出。口径同 <see cref="IsPlayerRuneTypeShownInUi"/>:愚者专属锻造器在没有愚者的
+	/// 游戏版本上仍然注册(配置 ID 一致),只是不列出。
+	/// </summary>
+	public static bool IsForgeTypeShownInUi(Type forgeType)
+	{
+		return !HextechForgeRegistry.FoolOnlyForgeTypes.Contains(forgeType)
+			|| HextechPlayerContextHelper.IsCharacterPoolPresentInGame(PlayerRuneCharacterPool.Fool);
+	}
+
 	public static IReadOnlyList<Type> GetAllConfigurableRuneTypes()
 	{
 		return Enum.GetValues<HextechRarityTier>()

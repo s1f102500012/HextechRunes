@@ -161,3 +161,6 @@ SpinyToad=157
 ScrollOfBiting=158
 SpectralKnight=159
 OwlMagistrate=160
+FanTheHammer=161
+BrokenGoldenCrown=162
+RedEnvelope=163

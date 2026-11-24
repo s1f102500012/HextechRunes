@@ -98,7 +98,6 @@ internal static class HextechCustomModelRegistry
 		typeof(BladeWaltzCard),
 		typeof(CatalystCard),
 		typeof(WhiteHoleCard),
-		typeof(SearingAttackCard),
 		typeof(FeelTheBurnCard),
 		typeof(OkBoomerangCard),
 		typeof(ReprogramCard),
@@ -109,7 +108,6 @@ internal static class HextechCustomModelRegistry
 		typeof(HextechDragonSoulCard),
 		typeof(MountainDragonSoulCard),
 		typeof(ChemtechDragonSoulCard),
-		typeof(CloudDragonSoulCard),
-		typeof(QuantumComputingCard)
+		typeof(CloudDragonSoulCard)
 	];
 }

@@ -157,7 +157,10 @@ internal static class HextechMonsterHexRegistry
 		Monster<SpinyToadHex>(MonsterHexKind.SpinyToad, HextechRarityTier.Prismatic),
 		Monster<ScrollOfBitingHex>(MonsterHexKind.ScrollOfBiting, HextechRarityTier.Prismatic),
 		Monster<SpectralKnightHex>(MonsterHexKind.SpectralKnight, HextechRarityTier.Gold),
-		Monster<OwlMagistrateHex>(MonsterHexKind.OwlMagistrate, HextechRarityTier.Gold)
+		Monster<OwlMagistrateHex>(MonsterHexKind.OwlMagistrate, HextechRarityTier.Gold),
+		Monster<FanTheHammerRune>(MonsterHexKind.FanTheHammer, HextechRarityTier.Prismatic),
+		Monster<BrokenGoldenCrownRune>(MonsterHexKind.BrokenGoldenCrown, HextechRarityTier.Silver),
+		Monster<RedEnvelopeRune>(MonsterHexKind.RedEnvelope, HextechRarityTier.Gold)
 	];
 
 	private static MonsterHexRegistration Monster<TRelic>(

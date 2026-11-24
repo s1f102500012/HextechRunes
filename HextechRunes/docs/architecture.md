@@ -75,7 +75,7 @@ Platform/Hooks/Config/Localization/Telemetry
 - 缓慢 `PowerModel.GetTypeForAmount`（`Combat/HextechCombatHooks.SlowPower.cs`）：非虚方法，原版把 Counter+AllowNegative 的负层数判为 Debuff；只对本模组两种缓慢能力返回 None。
 - 形态批次 `PlayerCmd.EndTurn`（`Combat/HextechFormAutoPlayHooks.cs`）：虚空形态 OnPlay 自带结束回合，开局批量自动打出会吃掉首回合；只在本模组形态批次的 AsyncLocal 作用域内跳过。
 - 形态特效容器 `NCreatureVisuals.AddFormVfx/RemoveFormVfx`（`Compat/HextechFormVfxSafetyHooks.Official.cs`，0.110+）：自定义角色缺 `%FormVfx` 容器时原版空引用；优先级已从 `Priority.First` 改为默认 `Priority.Low`（没有必须抢先执行的理由）。
-- 珠光护手 `MonsterModel.PerformMove` Postfix（`Combat/HextechCombatHooks.JeweledGauntlet.cs`）：不跳过原方法，但在原版行动完成后按原版步骤再执行一次行动（刻意不推进 `MoveStateMachine`）；声明 `CopiesVanillaLogic = true` 纳入原版拷贝守卫。
+- 珠光护手 / 连拨击锤 `MonsterModel.PerformMove` Postfix（`Combat/HextechCombatHooks.JeweledGauntlet.cs`）：不跳过原方法，但在原版行动完成后按原版步骤再执行额外行动（重复本回合行动、接着执行连拨击锤推进出来的下一步；额外执行本身不调 `OnMovePerformed`）；声明 `CopiesVanillaLogic = true` 纳入原版拷贝守卫。连拨击锤另在 `MonsterModel.RollMove`（`Combat/HextechCombatHooks.FanTheHammer.cs`，`combat.fan-the-hammer.roll-move`）的后缀里用原版公开的 `MonsterMoveStateMachine.RollMove` 提前推进一步，前缀在推进出来的那步没执行时把私有 `_performedFirstMove` 置回 false，让原版这次 RollMove 原样交出它；依赖原版 `FindNextMoveState` 的这条早退分支，三个维护版本相同，目标方法本身不复制原版逻辑、未进拷贝守卫。
 - 敌方能力联机缩放 `GetScaledAmountForMultiplayer` 跳过前缀（`combat.enemy-power-scaling`）**保留 `Priority.First`**：只在本模组 `HextechEnemyPowerScalingHooks.Apply/ApplyExact` 的 AsyncLocal 窗口内、目标为敌人时生效，窗口外恒 `return true` 对其他模组透明；窗口内层数已按最终口径算好，排在第三方缩放前缀之后会被重复缩放或被其跳过。亮出你的剑的 `OrbModel.Evoke` 跳过前缀（`Runes/DrawYourSwordRune.cs`）已改为 `Priority.Low`：本模组没有其他 Evoke 前缀，别的模组若已跳过原方法就让给对方。
 
 - 符文专属跳过前缀（均只对持有者生效、`Priority.Low`、进原版拷贝守卫）：科学狂人 `OrbCmd.AddSlots`（上限 10 写死，没有 Hook）；升级循环 `LoopPower.AfterPlayerTurnStart`（原版只触发 `Orbs[0]`；替换体未保留原版每次触发后的 0.25 秒等待，已在注释写明）；升级狂怒/升级遗忘 `RagePower/OblivionPower.AfterSideTurnEnd`（`PowerCmd.Remove` 不经过任何 Hook）；升级倒映 `ReflectPower.AfterSideTurnStart`（`Decrement` 虽经过 `ModifyPowerAmountReceived`，但区分不出衰减来源且会写历史）。
@@ -94,7 +94,7 @@ Platform/Hooks/Config/Localization/Telemetry
 - **加载器单源码**：`HextechRunes/loader/` 是两个包唯一的加载器源码，拓展包 loader 以链接方式编译并用 `HEXTECH_SPONSOR_LOADER` 保持命名空间；宿主版本已知却没有对应变体时两个包都停止加载并提示更新游戏：只有最新变体向后兼容更新的游戏，较旧的变体只服务同一小版本（0.107.x 用 0.107.1、0.111.x 用 0.111.0），已退役的 0.108–0.110 与没有目标的 0.112.x 不会套用更旧的变体。兼容范围按清单声明的全部目标算，与文件是否可用分开：最新目标的 DLL 缺失或哈希不符时停止加载，不让旧变体顶替它去服务更新的游戏。变体没能加载（含 Windows 智能应用控制拦截 `0x800711C7`）时，加载器在主菜单用原版 `NErrorPopup` 弹一次说明；文字按九种语言写死在加载器里（其余语言回退英文），因为变体的本地化同样不可用；游戏版本早于所有变体时单独提示更新游戏。拓展包变体引用本体程序集、注册时用本体的登记表，所以等本体加载器公布“初始化成功”后才交给游戏（`RequiredAssemblyName`）：本体加载器在 AppDomain 数据 `HextechRunes.Loader.Result` 里写结果，拓展包排在本体前面时把回调放进 `HextechRunes.Loader.Waiters`，由本体初始化结束后同步调用；不能用 `AssemblyLoad` 事件，它在本体 `LoadFromAssemblyPath` 时就触发，早于本体初始化。不公布结果的旧版本体加载器按“程序集已加载即已初始化”兼容。本体失败或始终没加载时拓展包不加载并提示，本体已弹窗则不再重复。
 - **拓展包只走公开 API**：售价修正（`RegisterForgeShopPriceModifier`）、归属判定（`IsHextechRelic`）、稳定哈希（`StableIndex`）都经 `HextechRunesApi`，不反射 internal 类型、不复制实现。`SponsorPatcher` 仍独立实现（公开 `HextechPatcher` 会把大量内部类型带进 API 面），约定对齐本体，由声明完整性测试守护。
 - **选择同步**：锻造选择与遗物选项选择共用 `HextechSyncedRelicChoice` 事务和 `HextechChoiceCodec.RelicChoice`（消息类型 5/7，线格式不变）；远端核对候选 ID 后返回本端同位置的候选实例。远端载荷先做内容校验：符文候选必须是已登记的玩家符文；敌方调整校验槽位数、海克斯来源与每槽重掷上限。任何一项不通过都走 `CreateProtocolFailure`——协议失败的唯一出口，只记录一次。
-- **外部扩展点**：`HextechRuneGeneration` 对第三方混沌变换的结果做校验（同条数、全部是已登记玩家符文），异常或不合法时回退原候选并告警；外部 API 登记本体内置的符文/锻造在任何副作用之前被拒绝。
+- **外部扩展点**：`HextechRuneGeneration` 对第三方混沌变换的结果做校验（同条数、全部是已登记玩家符文），异常或不合法时回退原候选并告警；外部 API 登记本体内置的符文/锻造/敌方海克斯展示遗物在任何副作用之前被拒绝。外部敌方海克斯只开放“展示遗物 + 能力”（`ExternalPowerEnemyHex`），过滤委托在 `HextechMonsterHexRoller.GetConfiguredRarityPool` 这一处生效（抽取、重随、远端校验与质变共用）。
 - **敌方海克斯分发**：`AfterShuffle`、`AfterCardDrawn`、`ShouldPlay` 只对本局战斗中的玩家侧分发；`ShouldDraw` 与其余钩子在分发层不过滤，玩家侧与本局归属由各效果自己判断（不少效果里的同类判断与分发层重复，统一收口要逐个核对钩子语义，暂不做）。Power 基类的回合钩子走 `*ForParticipants` 入口，兼容桥不吞 participants；Modifier 直接覆写原版回合钩子（签名本身就带 participants）。
 - **Modifier 不承载单项内容**：白洞由牌自己监听 `AfterCardDrawn`；雷暴升级的算法与按牌层数在 `StormUpgradeRune` 里，只有调用时机仍由 Modifier 分发（保证补发闪电排在所有监听者之后）。
 
@@ -104,6 +104,7 @@ Platform/Hooks/Config/Localization/Telemetry
 
 - 三张注册表（`HextechPlayerRuneRegistry`、`HextechForgeRegistry`、`HextechMonsterHexRegistry`）加外部 API 登记，经 `HextechContentRegistry` 按注册表版本派生 `PlayerRuneMetadataCatalog`、锻造器稀有度分组和 `MonsterHexMetadataCatalog`；稀有度、角色池、标签、默认禁用、是否进入图鉴、是否进入抽选池都从这里取，不另建名单。
 - 类型层面的派生不调用 `ModelDb`；按 ModelId 的查表在 `HextechCatalog.ModelIdLookups` 单独缓存，两个缓存不能合并（合并会提前 ModelId 的捕获时机，RitsuLib 前缀尚未生效时会缓存错误的 ID）。
+- 唯一的例外是外部敌方海克斯：它的身份（`MonsterHexKind` 数值与配置 ID）就是展示遗物 ModelId.Entry 的函数（`ExternalEnemyHexIdentity`），所以 `HextechContentRegistry` 有外部敌方海克斯时按 `HextechModelDbState` 收录状态重建目录，收录前建的目录只用一次。依赖目录的派生缓存（`HextechEnemyHexEffects.OrderedEffects`、`MonsterHexCatalog` 的展示遗物反查表）按目录实例失效，不再是静态初始化：其他模组晚于本体初始化，外部条目接在内置条目之后、按数值排序。存档、联机载荷与配置一律经 `MonsterHexCatalog.TryGetRegisteredMonsterHex` / `GetConfigId` / `TryGetMonsterHexByConfigId` 转换，不直接写 `Enum.IsDefined` / `ToString()` / `Enum.TryParse`。
 - 本地化、配置界面、统计中文名、图鉴可见性不应各自维护重复名单。
 
 ## 高风险规则

@@ -1,5 +1,5 @@
 {
-  "source": "STS2 0.111.0 PCK localization/zhs; titles only, exported 2026-09-21; plus 0.113.0 Fool terms (cards SADNESS/JOY/MYTHIC_FORM, powers AIM/STRETCH, static ARROW/TAROT/TRANSFORM) added 2026-11-13; card WAH_CHO_KI added 2026-11-14",
+  "source": "STS2 0.111.0 PCK localization/zhs; titles only, exported 2026-09-21; plus 0.113.0 Fool terms (cards SADNESS/JOY/MYTHIC_FORM, powers AIM/STRETCH, static ARROW/TAROT/TRANSFORM) added 2026-11-13; card WAH_CHO_KI added 2026-11-14; cards MY_SHINIES/QUICK_SHOT/SONG_PATH/VIOLENT_CHORD added 2026-11-23 from 0.113.1 PCK",
   "cards": {
     "ABRASIVE": "磨蚀",
     "ABUNDANCE": "富足",
@@ -364,6 +364,7 @@
     "MONOLOGUE": "独白",
     "MULTI_CAST": "多重释放",
     "MURDER": "谋杀",
+    "MY_SHINIES": "我的小钱钱",
     "NECRO_MASTERY": "亡灵精通",
     "NEGATIVE_PULSE": "负能量脉冲",
     "NEOWS_FURY": "涅奥之怒",
@@ -430,6 +431,7 @@
     "PYRE": "薪火之源",
     "QUADCAST": "四重释放",
     "QUASAR": "类星体",
+    "QUICK_SHOT": "快速射击",
     "QUICK_SLASH": "快斩",
     "RADIATE": "辐射",
     "RAGE": "狂怒",
@@ -505,6 +507,7 @@
     "SNAP": "响指",
     "SNEAKY": "鬼祟",
     "SOLAR_STRIKE": "太阳打击",
+    "SONG_PATH": "歌之道",
     "SOOT": "煤灰",
     "SOUL": "灵魂",
     "SOULBOUND": "灵魂绑定",
@@ -606,6 +609,7 @@
     "VENERATE": "崇拜",
     "VETERAN": "老兵",
     "VICIOUS": "凶恶",
+    "VIOLENT_CHORD": "暴力和弦",
     "VISIONS_OF_GRANDEUR": "伟大愿景",
     "VOID": "虚空",
     "VOID_FORM": "虚空形态",

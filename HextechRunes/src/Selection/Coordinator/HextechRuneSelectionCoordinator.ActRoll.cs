@@ -330,7 +330,7 @@ internal static partial class HextechRuneSelectionCoordinator
 		bool deterministic,
 		int ordinal = 0)
 	{
-		IReadOnlyList<MonsterHexKind> pool = HextechMonsterHexRoller.BuildActPool(rarity, modifier.GetKnownMonsterHexes(), extraExcludedHexes, modifier.DisabledMonsterHexIdsForPool);
+		IReadOnlyList<MonsterHexKind> pool = HextechMonsterHexRoller.BuildActPool(rarity, modifier.GetKnownMonsterHexes(), extraExcludedHexes, modifier.DisabledMonsterHexIdsForPool, runState);
 		if (pool.Count == 0)
 		{
 			return null;
@@ -402,7 +402,8 @@ internal static partial class HextechRuneSelectionCoordinator
 			currentHex,
 			excludedIconRelicIds,
 			GetMonsterHexIconRelicId,
-			modifier.DisabledMonsterHexIdsForPool);
+			modifier.DisabledMonsterHexIdsForPool,
+			runState);
 		if (pool.Count == 0)
 		{
 			return currentHex;

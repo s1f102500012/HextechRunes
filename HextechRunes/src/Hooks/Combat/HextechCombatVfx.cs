@@ -288,16 +288,6 @@ internal static partial class HextechCombatVfx
 		Callable.From(() => RunCorpseBloomBurst(sourcePos, snapshot)).CallDeferred();
 	}
 
-	/// <summary>
-	/// 量子计算:蓝紫预警环后量子光柱依次贯穿每个敌人(节拍与逐敌伤害结算对齐),
-	/// 随后每个敌人放出一缕青绿数据流汇回施法者(对应吸血治疗)。
-	/// </summary>
-	internal static void QuantumPulse(Creature owner, IReadOnlyList<Creature> targets)
-	{
-		Creature[] snapshot = [.. targets];
-		Callable.From(() => RunQuantumPulse(owner, snapshot)).CallDeferred();
-	}
-
 	// 原版小鬼佣兵偷钱时的金币爆炸场景;根节点是 NVfxParticleSystem,进树即播放、到时自行销毁。
 	private const string CoinExplosionScenePath = "res://scenes/vfx/vfx_coin_explosion_regular.tscn";
 

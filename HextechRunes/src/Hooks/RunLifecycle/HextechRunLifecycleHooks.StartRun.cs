@@ -58,7 +58,8 @@ internal static partial class HextechRunLifecycleHooks
 			{
 				if (ShouldDeferActSelectionUntilAfterCurrentEvent(runState))
 				{
-					HextechLog.Info("Mayhem", $"StartRun: deferring act{runState.CurrentActIndex} selection until ancient event finishes {DescribeCurrentEventState(runState)}");
+					HextechLog.Info("Mayhem", $"StartRun: deferring act{runState.CurrentActIndex} selection until the opening event is left {DescribeCurrentEventState(runState)}");
+					EnsurePostOpeningEventSelectionWatch(runState, "StartRun");
 				}
 				else
 				{

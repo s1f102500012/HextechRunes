@@ -1,6 +1,6 @@
 # 外部模组对接指南
 
-本文面向想把自己的内容接入“海克斯大乱斗”（manifest id `HextechRunes`）的模组作者。目前对外开放的是：玩家海克斯（符文）、锻造器、事件遗物、附魔图标、额外阶段提示，以及几个运行期辅助方法。
+本文面向想把自己的内容接入“海克斯大乱斗”（manifest id `HextechRunes`）的模组作者。目前对外开放的是：玩家海克斯（符文）、敌方海克斯、锻造器、事件遗物、附魔图标、额外阶段提示，以及几个运行期辅助方法。
 
 对接有两条路，按你的模组能不能硬依赖海克斯来选：
 
@@ -9,7 +9,7 @@
 | 引用 `HextechRunes.dll` | 不需要，靠反射或 RitsuLib 的 `[ModInterop]` 调用 | 需要，编译期引用 |
 | 没装海克斯时 | 你的模组照常运行 | 你的模组加载失败 |
 | 符文基类 | 任意 `RelicModel` | 必须继承 `HextechRelicBase` |
-| 能用的内容 | 玩家海克斯、来源标签、配置菜单分组标题、额外阶段提示 | 全部（海克斯、锻造器、事件遗物、附魔图标、SavedProperty 载体、发放/选择辅助）；来源标签和分组标题同样调用 `HextechRunesInterop` |
+| 能用的内容 | 玩家海克斯、敌方海克斯、来源标签、配置菜单分组标题、额外阶段提示 | 全部（海克斯、敌方海克斯、锻造器、事件遗物、附魔图标、SavedProperty 载体、发放/选择辅助）；来源标签和分组标题同样调用 `HextechRunesInterop` |
 | 签名稳定性 | 已发布的签名不再改动，新能力走新方法并递增 `ApiVersion` | 跟随海克斯版本，升级时可能需要重新编译 |
 
 `HextechCatalog` 等 `internal` 类不属于对外契约，随时可能重构，请不要对它们打 Harmony 补丁。缺少什么能力，请直接开 issue。
@@ -24,8 +24,9 @@
 | --- | --- |
 | 1 | `RegisterPlayerRune`、`SetPlayerRunePoolLabel`、`RegisterConfigSectionTitle`、`RegisterExtraActProvider` |
 | 2 | `RegisterPlayerRune` 的 `flags` 新增 `GuaranteedFirstPick`；新增 `SetPlayerRuneCharacter` |
+| 3 | 新增 `RegisterEnemyHex`（敌方海克斯，0.10.2 起） |
 
-旧版本不认识 `GuaranteedFirstPick`，传进去会抛 `ArgumentException`。用到它之前先确认 `ApiVersion >= 2`，否则不带这个标志注册。
+旧版本不认识 `GuaranteedFirstPick`，传进去会抛 `ArgumentException`。用到它之前先确认 `ApiVersion >= 2`，否则不带这个标志注册。`RegisterEnemyHex` 同理：`ApiVersion < 3` 时反射取不到这个方法，直接跳过敌方海克斯的注册。
 
 ### 注册时机
 
@@ -127,7 +128,7 @@ public static void RegisterConfigSectionTitle(string assetModId, string titleKey
 这两个方法只改界面上的文字，不影响发放，也不影响联机，调用顺序和时机没有限制，建议与 `RegisterPlayerRune` 放在一起调用。
 
 - `SetPlayerRunePoolLabel`：指定符文在三选一界面上显示的来源标签（配置菜单里同一分组内也按它排序）。文字取 `relic_collection` 表中的 `HEXTECH_POOL.<poolKey>`。
-- `RegisterConfigSectionTitle`：指定配置菜单里分组显示时，属于 `assetModId` 的内容（符文和锻造器）使用的小标题。`titleKey` 是 `relic_collection` 表里的完整键。
+- `RegisterConfigSectionTitle`：指定配置菜单里分组显示时，属于 `assetModId` 的内容（符文、锻造器和敌方海克斯）使用的小标题。`titleKey` 是 `relic_collection` 表里的完整键。
 
 两者都以第一次登记为准，之后的登记只在日志里警告。空白参数、以及不是 `RelicModel` 的类型会抛 `ArgumentException`。文字和默认值见下方“界面文字”一节。
 
@@ -218,6 +219,112 @@ internal static class HextechBridge
 
 用 RitsuLib `[ModInterop]` 时，代理方法的参数列表要与上面的签名完全一致。
 
+### RegisterEnemyHex（敌方海克斯，需要 ApiVersion ≥ 3）
+
+```csharp
+public static void RegisterEnemyHex(
+	Type displayRelicType,
+	Type powerType,
+	string rarity,
+	int amountAct1,
+	int amountAct2,
+	int amountAct3,
+	string? flags,
+	string? assetModId,
+	Func<IRunState, bool>? isAvailable);
+```
+
+外部敌方海克斯由两部分组成：一个**展示遗物**（只负责标题、图标和描述，敌人和玩家都不会真的持有它），和一个**能力**（真正的效果）。被抽到之后，海克斯在每场战斗里给每个敌人施加一次这个能力。
+
+| 参数 | 取值 |
+| --- | --- |
+| `displayRelicType` | 展示遗物：具体、非泛型的 `RelicModel` 子类，`Rarity` 必须是 `RelicRarity.Starter`（原因同上方符文类的要求；不是 Starter 的条目永远不会被抽到，并在日志里警告）。它会进入原版 `SharedRelicPool` 以取得模型身份，但原版的自然遗物生成会把它过滤掉，玩家拿不到它 |
+| `powerType` | 能力：具体、非泛型的 `PowerModel` 子类，效果完全写在它自己的原版钩子里 |
+| `rarity` | 海克斯品级：`Silver` / `Gold` / `Prismatic`（不区分大小写，不接受数字） |
+| `amountAct1` / `amountAct2` / `amountAct3` | 强度档位 1 / 2 / 3 施加的层数。档位就是当前幕：第一幕 1、第二幕 2、第三幕及之后（含无尽循环）3；在第一幕拿到的海克斯到了第二幕按 2 档施加。不大于 0 表示这一档不施加 |
+| `flags` | 逗号分隔的标志名，可以为 `null`。目前只有 `Disabled`（新配置里默认关闭），其他名字抛 `ArgumentException` |
+| `assetModId` | 你的模组 id，用于图标路径约定和配置菜单的来源分组；建议填写 |
+| `isAvailable` | 可选的抽取过滤，见下文 |
+
+参数无效时抛 `ArgumentException`；身份冲突（见下文）或注册窗口已关闭时抛 `InvalidOperationException`。所有校验都在产生任何副作用之前完成，失败不会留下半登记的状态。同一个展示遗物类型重复注册时，以第一次登记为准，之后的登记只在日志里警告。本体内置的展示遗物不能被重新登记（只告警，不抛异常）。
+
+**展示遗物需要的文字和图标**（都放在你自己的模组里）：
+
+- 标题：`relics.json` 的 `<ENTRY>.title`，`<ENTRY>` 是游戏为展示遗物生成的 ModelId 条目（类名 `MyEnemyHex` 对应 `MY_ENEMY_HEX`）。
+- 描述：`relics.json` 的 `<词干>.enemyDescription`，词干是条目的小驼峰写法（`MY_ENEMY_HEX` → `myEnemyHex`）。这个键必须提供，敌方海克斯界面显示的是它，不是 `<ENTRY>.description`。描述里写清楚各幕的层数，海克斯不会替你填数字。
+- 图标：照原版规则覆写 `PackedIconPath` / `PackedIconOutlinePath` / `BigIconPath`。悬停提示会先找 `res://<assetModId>/images/relics/<词干>.png`（与外部符文同一约定），找不到再用 `PackedIconPath`，所以最省事的做法是把图放在这个路径并让 `PackedIconPath` 也指向它。
+- 悬停提示里会自动附上 `powerType` 自己的提示。
+
+**能力怎么写**：照常写一个原版 `PowerModel`。海克斯用原版 `PowerCmd.Apply` 施加（施加者是敌人自己），不会额外按联机人数放大层数；如果你的能力覆写了原版的 `ShouldScaleInMultiplayer`，原版会照它的规则缩放。施加时机：
+
+- 每场战斗开始时，给所有敌人各施加一次；
+- 战斗中召唤、分裂等新加入的敌人，各施加一次；
+- 首领转阶段（例如复活进入下一阶段）时，对该首领重新施加一次，与本体的同类海克斯一致。
+
+同一个敌人在同一场战斗里不会因为其他原因被重复施加，中途存档读档也不会。能力本身的回合钩子请照上方符文一节的提醒处理 `participants`。
+
+**身份、存档与联机**：
+
+- 海克斯内部用一个整数标识每个敌方海克斯。外部条目的数值由展示遗物的 ModelId 条目经固定的哈希算出，落在本体不会使用的保留区间里，与模组加载顺序无关，所以两端、每次启动都相同。存档和联机消息的格式不变。
+- 配置菜单的禁用列表、配置分享码、控制台命令 `enemyhex` 和遥测都用 ModelId 条目（如 `MY_ENEMY_HEX`）作为这个海克斯的 ID。
+- 条目与本体敌方海克斯的枚举名只差大小写，或两个外部条目算出了相同的数值时，注册抛 `InvalidOperationException`，换一个展示遗物的类名即可。
+- 抽取池里，外部条目排在所有本体条目之后，按数值排序，联机各端一致。
+- 两端的模组列表必须一致。
+- **卸载你的模组之后**：旧存档里这个敌方海克斯的记录在读档时被丢弃，其余敌方海克斯照常；配置里它的禁用状态会保留，重新安装后仍然有效。
+
+**`isAvailable`**：抽取、重随、质变（敌方“质变”海克斯）以及联机时对对方重随结果的校验都会经过这个委托，返回 `false` 的条目这一局不会出现。它必须在联机各端对同一局给出相同结果，只能读同步状态（RunState 的角色、幕数、遗物等），不要读本地设置、UI 或随机数。委托抛异常时，该条目按不可用处理并记一条警告。
+
+**配置菜单**：外部条目和本体敌方海克斯一起列在敌方海克斯池页，可以单独开关；同一品级里有多个来源时按 `assetModId` 分组，小标题同样可以用 `RegisterConfigSectionTitle` 指定。带 `Disabled` 的条目只在新建配置时默认关闭，已有配置文件的玩家看到的是开启状态（与外部符文的 `Disabled` 相同）。
+
+单人专属、按人数缩放描述数字等本体条目自己的特性不对外开放，外部条目一律按默认处理：单人和联机都会出现，描述原样显示。
+
+**最小示例**（接在上面 `TryRegister` 的反射写法后面）：
+
+```csharp
+public sealed class MyEnemyHex : RelicModel
+{
+	public override RelicRarity Rarity => RelicRarity.Starter;
+	public override string PackedIconPath => "res://MyMod/images/relics/myEnemyHex.png";
+	protected override string PackedIconOutlinePath => "res://MyMod/images/relics/myEnemyHex.png";
+	protected override string BigIconPath => "res://MyMod/images/relics/myEnemyHex.png";
+}
+
+// MyEnemyPower 是你自己的 PowerModel。
+if (apiVersion >= 3)
+{
+	MethodInfo? registerEnemyHex = interop.GetMethod(
+		"RegisterEnemyHex",
+		BindingFlags.Public | BindingFlags.Static,
+		[typeof(Type), typeof(Type), typeof(string), typeof(int), typeof(int), typeof(int), typeof(string), typeof(string), typeof(Func<IRunState, bool>)]);
+	try
+	{
+		registerEnemyHex?.Invoke(null,
+		[
+			typeof(MyEnemyHex),
+			typeof(MyEnemyPower),
+			"Gold",
+			1, 2, 3,
+			null,
+			"MyMod",
+			null
+		]);
+	}
+	catch (TargetInvocationException ex)
+	{
+		Log.Warn($"[MyMod] Hextech enemy hex registration failed: {ex.InnerException?.Message}");
+	}
+}
+```
+
+```json
+{
+  "MY_ENEMY_HEX.title": "我的敌方海克斯",
+  "myEnemyHex.enemyDescription": "敌人获得 1/2/3 层……"
+}
+```
+
+`IRunState` 在 `MegaCrit.Sts2.Core.Runs` 命名空间。用 RitsuLib `[ModInterop]` 时，代理方法的参数列表要与上面的签名完全一致。
+
 ### RegisterExtraActProvider
 
 ```csharp
@@ -234,6 +341,7 @@ public static void RegisterExtraActProvider(Func<IRunState, string?> provider);
 - 在图鉴中，符文列在“海克斯”分类下。
 - 海克斯“复视”不会复制它。
 - 需要持久数据时，照常在符文上写 `[SavedProperty]`。注册时海克斯会一并登记载体，前提是在上面说的注册窗口内。
+- 敌方海克斯注册之后的行为见上方 `RegisterEnemyHex` 一节：进入敌方海克斯的抽取、重随和质变池，在选择界面的敌方预览、顶栏与折叠面板、悬停提示和配置菜单里自动显示（都取自展示遗物）。展示遗物不需要也不应该带 `[SavedProperty]`。
 
 ## 三、界面文字
 
@@ -271,6 +379,7 @@ public static void RegisterExtraActProvider(Func<IRunState, string?> provider);
 - 两端的模组列表必须一致，包括你的模组和海克斯的版本。
 - 新增、改名或删除 `[SavedProperty]` 会改变存档同步的字段布局，新旧版本之间无法联机。请随版本号发布，并在更新日志里写明。
 - 过滤委托和额外阶段委托只能依赖同步状态。
+- 外部敌方海克斯在存档和联机消息里按整数传输（见 `RegisterEnemyHex` 一节），一端缺少你的模组时，对方发来的该敌方海克斯会被当作无效数据拒收，所以模组列表不一致时无法正常联机。
 
 ## 五、硬依赖接入（HextechRunesApi）
 
@@ -280,6 +389,7 @@ public static void RegisterExtraActProvider(Func<IRunState, string?> provider);
 | --- | --- |
 | `RegisterPlayerRune<T>(rarity, flags, characterPool, characterOrder, tagKey, assetModId)` | 注册继承 `HextechRelicBase` 的符文。若把图标放在 `res://<assetModId>/images/relics/<id 的小驼峰>.png`（例如 `MY_RUNE` 对应 `myRune.png`），会自动使用它 |
 | `RegisterForge<T>(rarity, assetModId)` | 注册继承 `HextechForgeBase` 的锻造器 |
+| `RegisterEnemyHex<TDisplayRelic, TPower>(rarity, amountAct1, amountAct2, amountAct3, flags, assetModId, isAvailable)` | 注册敌方海克斯，语义与 `HextechRunesInterop.RegisterEnemyHex` 相同；`flags` 是 `EnemyHexFlags`（`None` / `Disabled`），另有接受 `Type` 的重载 |
 | `RegisterEventRelic<T>(assetModId)` | 注册事件遗物，加入原版事件遗物池 |
 | `RegisterSavedPropertyCarrier<T>()` | 为不经上述方法注册、却带 `[SavedProperty]` 的模型登记载体 |
 | `RegisterEnchantmentIcon<T>(iconPath)` | 为附魔登记图标 |
@@ -332,6 +442,7 @@ sealed class MyPresenter : IHextechSelectionPresenter
 - 日志前缀 `[HextechRunes][ExternalContent]`：包括重复注册冲突、非 Starter 外部符文被拒、过滤委托抛出异常。
 - 注册窗口已关闭时抛出的异常信息中，会带上类型名和 SavedProperty 名称。
 - 符文没有出现时，先确认：配置菜单里是否已开启，品级和标志是否把它排除在当前幕之外，过滤委托是否返回了 `true`。
+- 敌方海克斯没有出现时，先确认：展示遗物的 `Rarity` 是否是 `Starter`，配置菜单里是否已开启，`isAvailable` 是否返回了 `true`。控制台 `enemyhex add <ID>` 可以直接给敌方加上它，`<ID>` 就是展示遗物的 ModelId 条目，命令补全里能看到。
 
 ---
 
@@ -347,4 +458,6 @@ sealed class MyPresenter : IHextechSelectionPresenter
 - `isAvailableForPlayer` runs on every client and must be deterministic over synchronized state; a throwing predicate excludes the rune.
 - Hard-dependency helpers on `HextechRunesApi` also include `RegisterForgeShopPriceModifier(Func<RunState, int, int>)` (random-forge shop price modifiers, applied in registration order), `IsHextechRelic(RelicModel?)` (registry-based ownership check), `StableIndex(RunState, int count, params string?[] salt)` (seed-stable index that never consumes shared RNG) and `StartWorkshopPlaytimeTracking(ulong publishedFileId)` (asks Steam to count Workshop playtime and sessions for that item; call once from your mod initializer).
 - Selection presentation (hard dependency): `HextechRunesApi.RegisterSelectionPresenter(IHextechSelectionPresenter)` lets another mod draw the player-rune selection itself while Hextech Mayhem keeps the gameplay (pools, rerolls, enemy hexes, saves, multiplayer sync). The presenter gets a `HextechSelectionSession` with the options, enemy hexes (`HextechEnemyHexInfo`), reroll/choose/remove actions that go through the same logic as the built-in buttons, `EnemyHexesChangedRemotely` for the authority's synced adjustments, `HextechSelectionProgress` for who has already chosen, golden reroll state (`IsGoldenRerollActive`, `GoldenRerollRarity`, `GetOptionRarity`) and controller focus (`SetControllerFocus`). Experimental: signatures may still change.
+- Enemy hexes (ApiVersion 3, since 0.10.2): `RegisterEnemyHex(Type displayRelicType, Type powerType, string rarity, int amountAct1, int amountAct2, int amountAct3, string? flags, string? assetModId, Func<IRunState, bool>? isAvailable)`. The display relic (a concrete `RelicModel` whose `Rarity` **must** be `Starter`) only provides the title (`relics.json` `<ENTRY>.title`), the description (`<stem>.enemyDescription`, where the stem is the lowerCamel form of the entry, e.g. `MY_ENEMY_HEX` → `myEnemyHex`; required; enemy hex UI shows this key, not `<ENTRY>.description`) and the icon (`PackedIconPath` etc.; hover tips first try `res://<assetModId>/images/relics/<stem>.png`). It is added to `SharedRelicPool` for its model identity but filtered out of natural relic generation, so players never get it. The effect is the power: every enemy receives it once per combat (combat start, enemies joining mid-combat, and again on a boss phase change), through vanilla `PowerCmd.Apply` with the enemy as applier and no extra player-count scaling (vanilla `ShouldScaleInMultiplayer` still applies if your power overrides it). The amount comes from the strength tier, which is the current act: 1 / 2 / 3 (act 3 and later, endless included); amounts `<= 0` skip that tier. `flags` accepts only `Disabled` (off by default in new configs; existing configs see it enabled, same as external runes). `isAvailable` filters drawing, rerolling, enemy Transmute and the validation of the peer's rerolls; it must be deterministic over synchronized state, and a throwing predicate excludes the hex. Validation happens before any side effect; identity collisions or a closed registration window throw `InvalidOperationException`.
+- Enemy hex identity: internally a hex is an integer; external entries use a fixed hash of the display relic's ModelId entry in a reserved range, so the value is the same on every client and every launch, and the save/network formats are unchanged. The entry (e.g. `MY_ENEMY_HEX`) is the hex's ID in the disabled list, share codes, the `enemyhex` console command and telemetry. An entry equal to a built-in enemy hex name (ignoring case), or two external entries with the same hash, is rejected — rename the display relic class. External hexes come after all built-in ones in the pools, ordered by value. If your mod is removed, saved runs drop that hex on load (everything else loads normally) and its disabled state stays in the config. The config menu groups enemy hexes by `assetModId` just like runes; `RegisterConfigSectionTitle` titles those groups too. The hard-dependency equivalent is `HextechRunesApi.RegisterEnemyHex<TDisplayRelic, TPower>(rarity, amountAct1, amountAct2, amountAct3, EnemyHexFlags flags, assetModId, isAvailable)`.
 - Published interop signatures never change; new capabilities come as new methods with a higher `ApiVersion`. Internal classes such as `HextechCatalog` are not part of the contract; please do not patch them.

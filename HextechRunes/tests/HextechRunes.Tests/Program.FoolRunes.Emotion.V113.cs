@@ -53,7 +53,7 @@ internal static partial class Program
 		Expect(!bittersweet.IsOwnSadnessGeneration(ownSadness, owner), "dead holders do not trigger");
 	}
 
-	/// <summary>不满足判定时两个钩子都不动牌堆：苦中作乐不抽牌，悲喜交加不往抽牌堆加喜悦。</summary>
+	/// <summary>不满足判定时两个钩子都不动牌堆：苦中作乐不抽牌，悲喜交加不往手牌加喜悦（加入手牌的正向路径见 FoolMixedFeelingsAddsJoyToHand）。</summary>
 	[HextechTest]
 	private static void FoolEmotionHooksLeavePilesAloneWhenNotTriggered()
 	{
@@ -73,7 +73,7 @@ internal static partial class Program
 		mixedFeelings.AfterCardGeneratedForCombat(joy, owner).GetAwaiter().GetResult();
 
 		SequenceEqual(new CardModel[] { topOfDraw, joy }, PileType.Draw.GetPile(owner).Cards, "draw pile is untouched");
-		Equal(0, PileType.Hand.GetPile(owner).Cards.Count, "nothing was drawn");
+		Equal(0, PileType.Hand.GetPile(owner).Cards.Count, "nothing was drawn or added to the hand");
 		SequenceEqual(new CardModel[] { teammateSadness }, PileType.Hand.GetPile(teammate).Cards, "teammate's hand is untouched");
 	}
 

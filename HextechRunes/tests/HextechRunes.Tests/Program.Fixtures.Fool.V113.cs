@@ -18,6 +18,7 @@ using MegaCrit.Sts2.Core.Models.Powers;
 using MegaCrit.Sts2.Core.Runs;
 using MegaCrit.Sts2.Core.Saves;
 using MegaCrit.Sts2.Core.TestSupport;
+using MegaCrit.Sts2.Core.ValueProps;
 
 namespace HextechRunes.Tests;
 
@@ -133,7 +134,7 @@ internal static partial class Program
 	}
 
 	/// <summary>
-	/// 测试期间装上"直接拥有旋律"补丁，并把获得能量、抽牌、新建能力三条原版命令换成只记录调用的前缀（跳过原方法：
+	/// 测试期间装上"直接拥有旋律"补丁，并把获得能量、抽牌、新建能力、无来源牌获得格挡、对一组目标造成伤害五条原版命令换成只记录调用的前缀（跳过原方法：
 	/// 它们需要真实战斗流程与 Godot 节点；测试里的生物身上没有拉伸，Apply&lt;StretchPower&gt; 总是走新建能力这一步）。释放时卸下补丁、清空战斗历史与记录。
 	/// </summary>
 	private sealed class FoolMelodyTestScope : IDisposable
@@ -141,6 +142,8 @@ internal static partial class Program
 		internal static readonly List<(Player Player, decimal Amount)> EnergyGains = [];
 		internal static readonly List<(Player Player, decimal Count)> Draws = [];
 		internal static readonly List<(Creature Target, decimal Amount, Creature? Applier)> StretchApplications = [];
+		internal static readonly List<(Creature Creature, decimal Amount, ValueProp Props)> BlockGains = [];
+		internal static readonly List<(Creature[] Targets, decimal Amount, ValueProp Props, Creature? Dealer)> Damages = [];
 
 		private readonly Harmony _harmony = new("Natsuki.HextechRunes.Tests.FoolMelody");
 		private IDisposable? _injectedModels;
@@ -163,6 +166,12 @@ internal static partial class Program
 					nameof(MegaCrit.Sts2.Core.Commands.PowerCmd.Apply),
 					[typeof(PlayerChoiceContext), typeof(PowerModel), typeof(Creature), typeof(decimal), typeof(Creature), typeof(CardModel), typeof(bool)]);
 				_harmony.Patch(apply, prefix: new HarmonyMethod(typeof(FoolMelodyTestScope), nameof(CaptureStretch)));
+				_harmony.Patch(
+					AccessTools.Method(typeof(CreatureCmd), nameof(CreatureCmd.GainBlock), [typeof(Creature), typeof(decimal), typeof(ValueProp), typeof(CardPlay), typeof(bool)]),
+					prefix: new HarmonyMethod(typeof(FoolMelodyTestScope), nameof(CaptureBlock)));
+				_harmony.Patch(
+					AccessTools.Method(typeof(CreatureCmd), nameof(CreatureCmd.Damage), [typeof(PlayerChoiceContext), typeof(IEnumerable<Creature>), typeof(decimal), typeof(ValueProp), typeof(Creature)]),
+					prefix: new HarmonyMethod(typeof(FoolMelodyTestScope), nameof(CaptureDamage)));
 			}
 			catch
 			{
@@ -179,6 +188,22 @@ internal static partial class Program
 			EnergyGains.Clear();
 			Draws.Clear();
 			StretchApplications.Clear();
+			BlockGains.Clear();
+			Damages.Clear();
+		}
+
+		private static bool CaptureBlock(Creature creature, decimal amount, ValueProp props, ref Task<decimal> __result)
+		{
+			BlockGains.Add((creature, amount, props));
+			__result = Task.FromResult(amount);
+			return false;
+		}
+
+		private static bool CaptureDamage(IEnumerable<Creature> targets, decimal amount, ValueProp props, Creature dealer, ref Task<IEnumerable<DamageResult>> __result)
+		{
+			Damages.Add((targets.ToArray(), amount, props, dealer));
+			__result = Task.FromResult(Enumerable.Empty<DamageResult>());
+			return false;
 		}
 
 		private static bool CaptureEnergy(decimal amount, Player player, ref Task __result)

@@ -101,7 +101,7 @@ internal static partial class Program
 		];
 		try
 		{
-			Equal(2, HextechRunesInterop.ApiVersion, "guaranteed pick and rune character raise the contract version");
+			Expect(HextechRunesInterop.ApiVersion >= 2, "guaranteed pick and rune character raise the contract version");
 			HextechExternalContentRegistry.RegisterPlayerRune(
 				new PlayerRuneRegistration(typeof(GuaranteedTestSilverRuneA), HextechRarityTier.Silver),
 				"Compatibility.Guaranteed");

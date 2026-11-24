@@ -270,10 +270,6 @@ internal static partial class HextechCombatVfx
 	}
 
 	private static readonly Color PoisonBurstColor = new(0.5f, 0.9f, 0.3f);
-	private static readonly Color QuantumWarnColor = new(0.5f, 0.55f, 1f);
-	private static readonly Color QuantumBeamColor = new(0.58f, 0.5f, 1f);
-	private static readonly Color QuantumFlashColor = new(0.78f, 0.85f, 1f);
-	private static readonly Color QuantumHealColor = new(0.45f, 0.95f, 0.6f);
 
 	private static async Task RunCorpseBloomBurst(Vector2? sourcePos, Creature[] targets)
 	{
@@ -352,72 +348,6 @@ internal static partial class HextechCombatVfx
 		catch (Exception ex)
 		{
 			HextechLog.Warn("CombatVfx", $"Corpse bloom burst failed: {ex.Message}");
-		}
-	}
-
-	private static async Task RunQuantumPulse(Creature owner, Creature[] targets)
-	{
-		try
-		{
-			List<BeamSpot> spots = CollectBeamSpots(targets);
-			if (spots.Count == 0)
-			{
-				return;
-			}
-
-			// 预警:蓝紫量子警戒环同时亮起;光柱逐敌贯穿,0.2s 间隔与逻辑侧逐敌伤害结算的标准尾巴对齐。
-			SceneTree? tree = await WarnThenResolveTree(spots, QuantumWarnColor);
-			if (tree == null)
-			{
-				return;
-			}
-
-			await StrikeBeamsInSequence(tree, spots, QuantumBeamColor, QuantumFlashColor, intervalSeconds: 0.2f);
-			SpawnQuantumHealReturn(owner, spots);
-		}
-		catch (Exception ex)
-		{
-			HextechLog.Warn("CombatVfx", $"Quantum pulse failed: {ex.Message}");
-		}
-	}
-
-	/// <summary>吸血回流:每个落点一缕青绿数据流弧线汇回施法者,到达时在施法者处闪光。</summary>
-	private static void SpawnQuantumHealReturn(Creature owner, List<BeamSpot> spots)
-	{
-		NCreature? ownerNode = HextechCreatureNodeRegistry.TryGet(owner);
-		if (ownerNode == null || !GodotObject.IsInstanceValid(ownerNode))
-		{
-			return;
-		}
-
-		Vector2 ownerPos = CreatureCenter(ownerNode);
-		int index = 0;
-		foreach (BeamSpot spot in spots)
-		{
-			if (!GodotObject.IsInstanceValid(spot.Parent))
-			{
-				continue;
-			}
-
-			Node flashParent = spot.Parent;
-			float width = spot.Width;
-			SpawnSoulWisp(
-				spot.Parent,
-				spot.Center,
-				ownerPos,
-				width * 0.3f,
-				0.5f,
-				index * 0.07f,
-				-width * 0.6f,
-				QuantumHealColor,
-				() =>
-				{
-					if (GodotObject.IsInstanceValid(flashParent))
-					{
-						SpawnFlash(flashParent, ownerPos, width * 0.9f, QuantumHealColor.Lightened(0.3f), 0.3f, 0.5f, aboveCreaturesOnly: true);
-					}
-				});
-			index++;
 		}
 	}
 

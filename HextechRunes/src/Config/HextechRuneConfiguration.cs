@@ -3,7 +3,7 @@ namespace HextechRunes;
 internal static partial class HextechRuneConfiguration
 {
 	private const string ConfigFileName = "rune_config.json";
-	private const int CurrentConfigVersion = 48;
+	private const int CurrentConfigVersion = 50;
 	// v15(0.8.4):一次性强制重置——旧版本配置载入时整体丢弃回默认(含禁用池/数量/权重/重随/价格/总开关)。
 	private const int ForceResetBelowConfigVersion = 15;
 	private const int HexActCount = 3;
@@ -127,14 +127,11 @@ internal static partial class HextechRuneConfiguration
 		return HextechPlayerRuneConfigIds.Normalize(ids);
 	}
 
+	// 与我方符文一样保留不认识的 ID：外部敌方海克斯可能晚于配置加载才登记，所在模组暂时没装时也不该丢掉玩家的选择。
+	// 抽取池按已登记的条目逐个比对配置 ID，多出的 ID 不产生作用；联机快照只编码本机注册表认识的条目。
 	internal static HashSet<string> NormalizeDisabledMonsterHexIds(IEnumerable<string>? ids)
 	{
-		HashSet<string> validIds = HextechContentRegistry.MonsterHexMetadata.EnabledKindsByRarity
-			.Values
-			.SelectMany(static kinds => kinds)
-			.Select(static kind => kind.ToString())
-			.ToHashSet(StringComparer.Ordinal);
-		return NormalizeStringIds(ids, validIds);
+		return NormalizeConfigStringIds(ids);
 	}
 
 	internal static HashSet<string> NormalizeDisabledForgeIds(IEnumerable<string>? ids)
@@ -151,15 +148,27 @@ internal static partial class HextechRuneConfiguration
 
 	public static IReadOnlySet<string> GetDefaultDisabledMonsterHexIds()
 	{
-		return new HashSet<string>(StringComparer.Ordinal)
+		HashSet<string> ids = new(StringComparer.Ordinal)
 		{
-			MonsterHexKind.StartupRoutine.ToString()
+			MonsterHexCatalog.GetConfigId(MonsterHexKind.StartupRoutine),
+			MonsterHexCatalog.GetConfigId(MonsterHexKind.HastyScribble),
+			MonsterHexCatalog.GetConfigId(MonsterHexKind.Mystery)
 		};
+		// 外部登记带 Disabled 的条目只进新配置的默认值；已有配置文件照外部我方符文的口径，新出现的条目保持开启。
+		foreach (ResolvedExternalEnemyHex external in HextechContentRegistry.MonsterHexMetadata.ExternalByKind.Values)
+		{
+			if ((external.Registration.Flags & EnemyHexFlags.Disabled) != 0)
+			{
+				ids.Add(external.ConfigId);
+			}
+		}
+
+		return ids;
 	}
 
 	public static IReadOnlySet<string> GetDefaultDisabledForgeIds()
 	{
-		return new HashSet<string>(StringComparer.Ordinal);
+		return GetForgeIds(DefaultDisabledForgeTypes);
 	}
 
 	public static void SaveSnapshot(HextechRunConfigurationSnapshot snapshot)
