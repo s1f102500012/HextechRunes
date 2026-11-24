@@ -58,7 +58,8 @@ internal static partial class HextechRunLifecycleHooks
 
 			if (ShouldDeferActSelectionUntilAfterCurrentEvent(runState))
 			{
-				HextechLog.Info("Mayhem", $"Endless loop selection deferred to ancient event proceed reason={reason} frame={frame} {DescribeCurrentEventState(runState)}");
+				HextechLog.Info("Mayhem", $"Endless loop selection deferred until the opening event is left reason={reason} frame={frame} {DescribeCurrentEventState(runState)}");
+				EnsurePostOpeningEventSelectionWatch(runState, $"EndlessLoop:{reason}");
 				return;
 			}
 

@@ -177,7 +177,7 @@ internal sealed partial class HextechRuneSelectionScreen
 	{
 		RelicModel icon = MonsterHexCatalog.GetIconRelicForMonsterHex(hex);
 		return new HextechEnemyHexInfo(
-			hex.ToString(),
+			MonsterHexCatalog.GetConfigId(hex),
 			icon.Title.GetFormattedText(),
 			MonsterHexCatalog.GetEnemyHexDescriptionFormatted(hex),
 			icon.Icon,

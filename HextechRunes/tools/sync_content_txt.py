@@ -301,16 +301,24 @@ class Truth:
 
     @staticmethod
     def _load_forges(sponsor_src: str) -> list[dict]:
-        """锻造器(本体+拓展包)。"""
+        """锻造器(本体+拓展包);配置里默认禁用的类型按禁用处理。"""
         forge_src = read(ROOT / "src" / "Content" / "HextechForgeRegistry.cs")
+        migration_src = read(ROOT / "src" / "Config" / "HextechRuneConfiguration.Migration.cs")
+        default_disabled_match = re.search(r"DefaultDisabledForgeTypes\s*=\s*\[(.*?)\]", migration_src, re.S)
+        default_disabled = set(re.findall(r"typeof\((\w+)\)", default_disabled_match.group(1))) if default_disabled_match else set()
         forge = [
-            {"class": reg["type"], "rarity": reg["rarity"], "source": "main"}
+            {
+                "class": reg["type"],
+                "rarity": reg["rarity"],
+                "source": "main",
+                "disabled": reg["type"] in default_disabled,
+            }
             for reg in extract_forge_registrations(forge_src)
         ]
         for match in re.finditer(
             r"\(\s*typeof\((\w+)\),\s*HextechRarityTier\.(\w+)\s*\)", sponsor_table(sponsor_src, "Forges")
         ):
-            forge.append({"class": match.group(1), "rarity": match.group(2), "source": "sponsor"})
+            forge.append({"class": match.group(1), "rarity": match.group(2), "source": "sponsor", "disabled": False})
         return forge
 
     def resolve_placeholders(self, cls: str, text: str) -> str:
@@ -699,7 +707,7 @@ def summary_truth(truth: Truth) -> dict[str, list[dict]]:
             {
                 "rarity": RARITY_ZH[reg["rarity"]],
                 "title": title,
-                "disabled": False,
+                "disabled": reg["disabled"],
                 "desc": truth.resolve_placeholders(
                     reg["class"], strip_markup(truth.loc.get(reg["class"], "description") or "")
                 ),

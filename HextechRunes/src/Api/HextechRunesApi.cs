@@ -3,6 +3,7 @@ namespace HextechRunes;
 public static class HextechRunesApi
 {
 	public const string PersistentInnateMarkerSavedPropertyName = "SavedCosplayInnateMarker";
+	private const EnemyHexFlags AllKnownEnemyHexFlags = EnemyHexFlags.Disabled;
 	private const PlayerRuneFlags AllKnownPlayerRuneFlags =
 		PlayerRuneFlags.Disabled
 		| PlayerRuneFlags.AttributeConversionExclusive
@@ -94,6 +95,83 @@ public static class HextechRunesApi
 		HextechModelPoolRegistrar.RegisterPlayerRuneModels([ runeType ]);
 		HextechSavedPropertyBootstrap.InjectModelType(runeType);
 		HextechExternalContentRegistry.RegisterPlayerRune(registration, assetModId, availability);
+	}
+
+	/// <summary>
+	/// 注册外部敌方海克斯：<typeparamref name="TDisplayRelic"/> 只作展示载体（标题、图标、relics 表的 <c>&lt;词干&gt;.enemyDescription</c>），
+	/// 效果是对每个敌人施加一次 <typeparamref name="TPower"/>，层数按强度档位（第一/二/三幕）取 amountAct1/2/3，不大于 0 的档位不施加。
+	/// 必须在模组初始化阶段、共享遗物池首次枚举前调用。
+	/// </summary>
+	/// <exception cref="ArgumentException">类型、品级或标志无效；此时不产生任何登记。</exception>
+	/// <exception cref="InvalidOperationException">身份与已有敌方海克斯冲突，或模型池注册窗口已经关闭。</exception>
+	public static void RegisterEnemyHex<TDisplayRelic, TPower>(
+		HextechRarityTier rarity,
+		int amountAct1,
+		int amountAct2,
+		int amountAct3,
+		EnemyHexFlags flags = EnemyHexFlags.None,
+		string? assetModId = null,
+		Func<IRunState, bool>? isAvailable = null)
+		where TDisplayRelic : RelicModel
+		where TPower : PowerModel
+	{
+		RegisterEnemyHex(typeof(TDisplayRelic), typeof(TPower), rarity, amountAct1, amountAct2, amountAct3, flags, assetModId, isAvailable);
+	}
+
+	/// <inheritdoc cref="RegisterEnemyHex{TDisplayRelic, TPower}"/>
+	public static void RegisterEnemyHex(
+		Type displayRelicType,
+		Type powerType,
+		HextechRarityTier rarity,
+		int amountAct1,
+		int amountAct2,
+		int amountAct3,
+		EnemyHexFlags flags = EnemyHexFlags.None,
+		string? assetModId = null,
+		Func<IRunState, bool>? isAvailable = null)
+	{
+		RegisterEnemyHexCore(displayRelicType, powerType, rarity, amountAct1, amountAct2, amountAct3, flags, assetModId, isAvailable);
+	}
+
+	// 强类型 API 与 HextechRunesInterop 共用。与 RegisterPlayerRuneCore 同一顺序：参数校验 → 拒绝内置类型（只告警）→
+	// 身份与 ModelId 冲突检查 → 模型池登记（窗口关闭时原版抛 InvalidOperationException）→ 注册表。
+	// 池登记之前的步骤都不产生副作用，失败的调用不会留下半登记状态。
+	internal static void RegisterEnemyHexCore(
+		Type displayRelicType,
+		Type powerType,
+		HextechRarityTier rarity,
+		int amountAct1,
+		int amountAct2,
+		int amountAct3,
+		EnemyHexFlags flags,
+		string? assetModId,
+		Func<IRunState, bool>? availability)
+	{
+		ValidateConcreteModelType(displayRelicType, typeof(RelicModel), nameof(displayRelicType), "Enemy hex display relic");
+		ValidateConcreteModelType(powerType, typeof(PowerModel), nameof(powerType), "Enemy hex power");
+		ValidateRarity(rarity);
+		EnemyHexFlags unknownFlags = flags & ~AllKnownEnemyHexFlags;
+		if (unknownFlags != EnemyHexFlags.None)
+		{
+			throw new ArgumentOutOfRangeException(nameof(flags), flags, $"Unknown enemy hex flag bits: {unknownFlags}.");
+		}
+
+		if (HextechExternalContentRegistry.RejectBuiltInType(displayRelicType, "enemy hex"))
+		{
+			return;
+		}
+
+		ExternalEnemyHexIdentity.EnsureAvailable(
+			displayRelicType,
+			HextechMonsterHexRegistry.Registrations,
+			HextechExternalContentRegistry.GetEnemyHexRegistrations(),
+			HextechExternalContentRegistry.ModelIdResolver);
+		HextechCatalog.EnsureExternalModelIdAvailable(displayRelicType);
+		HextechModelPoolRegistrar.RegisterEnemyHexDisplayRelicModels([ displayRelicType ]);
+		HextechExternalContentRegistry.RegisterEnemyHex(
+			new ExternalEnemyHexRegistration(displayRelicType, powerType, rarity, amountAct1, amountAct2, amountAct3, flags),
+			assetModId,
+			availability);
 	}
 
 	/// <summary>

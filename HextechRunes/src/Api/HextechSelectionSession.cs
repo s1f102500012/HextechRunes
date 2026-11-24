@@ -112,7 +112,7 @@ public sealed class HextechEnemyHexInfo
 		Removed = removed;
 	}
 
-	/// <summary>稳定的标识（枚举名），可用于本地化以外的映射，例如自定义图标。</summary>
+	/// <summary>稳定的标识（配置 ID：内置是枚举名，其他模组登记的是展示遗物的 ModelId.Entry），可用于本地化以外的映射，例如自定义图标。</summary>
 	public string Id { get; }
 
 	public string Title { get; }

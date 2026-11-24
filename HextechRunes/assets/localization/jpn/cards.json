@@ -29,9 +29,6 @@
   "WHITE_HOLE_CARD.title": "ホワイトホール",
   "WHITE_HOLE_CARD.description": "このカード引くたび、{Energy:energyIcons()}を得る。\nカードを{Cards}枚引く。",
   "WHITE_HOLE_CARD.flavor": "それは選択肢を飲み込みません。それは自分の手にそれらを吐き戻します。",
-  "SEARING_ATTACK_CARD.title": "灼熱の一撃",
-  "SEARING_ATTACK_CARD.description": "{Damage:diff()}ダメージを与える。\n何度でもアップグレード可能。",
-  "SEARING_ATTACK_CARD.flavor": "端に行くほど熱くなります。",
   "OSTY_WISH_CARD.title": "オスティの願い",
   "OSTY_WISH_CARD.description": "{WishBlock}ブロックを得る。\nすべての敵に{WishDamage}ダメージを与える。",
   "OSTY_WISH_CARD.hoverTip": "[blue]0[/blue]コストのスキル。 [blue]X[/blue]ブロックを獲得し、すべての敵に[blue]X[/blue]ダメージを与える。[blue]X[/blue]は、オスティが死亡したときの最大HP。廃棄。アップグレードしたら保留が付く。",
@@ -49,8 +46,5 @@
   "FEEL_THE_BURN_CARD.flavor": "相手の火を消してから、自分の火を灯せ。",
   "OK_BOOMERANG_CARD.title": "OKブーメラン",
   "OK_BOOMERANG_CARD.description": "敵全体に{Damage:diff()}ダメージを[blue]{Hits}[/blue]回与える。\nこのカードを手札に戻す。",
-  "OK_BOOMERANG_CARD.flavor": "冗談のように飛んでいき、借金取りのように帰ってくる。",
-  "QUANTUM_COMPUTING_CARD.title": "量子コンピューティング",
-  "QUANTUM_COMPUTING_CARD.description": "すべての敵に最大HPの{DamagePercent:diff()}%のダメージを与え、その後、与えたダメージの{HealPercent:diff()}%を回復する。",
-  "QUANTUM_COMPUTING_CARD.flavor": "答えが出る前にすでに敵のHPは崩壊している。"
+  "OK_BOOMERANG_CARD.flavor": "冗談のように飛んでいき、借金取りのように帰ってくる。"
 }

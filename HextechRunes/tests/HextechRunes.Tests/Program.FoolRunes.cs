@@ -35,7 +35,14 @@ internal static partial class Program
 		(typeof(MixedFeelingsRune), HextechRarityTier.Prismatic, "EMOTION"),
 		(typeof(CrystalBallRune), HextechRarityTier.Gold, "TAROT"),
 		(typeof(TarotClothRune), HextechRarityTier.Prismatic, "TAROT"),
-		(typeof(MythicFormUpgradeRune), HextechRarityTier.Prismatic, "TAROT")
+		(typeof(MythicFormUpgradeRune), HextechRarityTier.Prismatic, "TAROT"),
+		(typeof(HittingStrideRune), HextechRarityTier.Gold, "ARROW"),
+		(typeof(HeldShotRune), HextechRarityTier.Silver, "ARROW"),
+		(typeof(ElegyRune), HextechRarityTier.Silver, "EMOTION"),
+		(typeof(QuickShotUpgradeRune), HextechRarityTier.Silver, "ARROW"),
+		(typeof(SongPathUpgradeRune), HextechRarityTier.Silver, "MELODY"),
+		(typeof(ViolentChordUpgradeRune), HextechRarityTier.Gold, "MELODY"),
+		(typeof(UnbrokenSongRune), HextechRarityTier.Silver, "MELODY")
 	];
 
 	// 不按注册表顺序连续编号的 characterOrder：0.10.0 之后新增的条目注册在同流派条目旁边，图鉴里排在愚者池末尾。
@@ -44,11 +51,21 @@ internal static partial class Program
 	{
 		[typeof(PluckRune)] = 19,
 		[typeof(RibbitRune)] = 20,
-		[typeof(PreludeRune)] = 21
+		[typeof(PreludeRune)] = 21,
+		[typeof(HittingStrideRune)] = 22,
+		[typeof(HeldShotRune)] = 23,
+		[typeof(ElegyRune)] = 24,
+		[typeof(QuickShotUpgradeRune)] = 25,
+		[typeof(SongPathUpgradeRune)] = 26,
+		[typeof(ViolentChordUpgradeRune)] = 27,
+		[typeof(UnbrokenSongRune)] = 28
 	};
 
 	// 默认禁用的愚者海克斯（仍可配置）。
 	private static readonly HashSet<Type> FoolRunesDisabledByDefault = [typeof(SingOutRune)];
+
+	// 第一幕的选择里不出现的愚者海克斯：呱！在开局就把基础牌成对换掉，留到第二幕起。
+	private static readonly HashSet<Type> FoolRunesExcludedFromFirstAct = [typeof(RibbitRune)];
 
 	private static readonly string[] FoolRuneLanguages = ["zhs", "eng", "jpn", "kor", "esp", "spa", "ptb", "rus", "tha"];
 
@@ -73,7 +90,11 @@ internal static partial class Program
 			Equal(expectedOrders[type], tail[i].CharacterOrder, $"{type.Name} character order");
 			Equal(rarity, tail[i].Rarity, $"{type.Name} rarity");
 			Equal(tagKey, tail[i].TagKey, $"{type.Name} tag");
-			Equal(FoolRunesDisabledByDefault.Contains(type) ? PlayerRuneFlags.Disabled : PlayerRuneFlags.None, tail[i].Flags, $"{type.Name} flags");
+			PlayerRuneFlags expectedFlags = (FoolRunesDisabledByDefault.Contains(type) ? PlayerRuneFlags.Disabled : PlayerRuneFlags.None)
+				| (FoolRunesExcludedFromFirstAct.Contains(type) ? PlayerRuneFlags.FirstActExcluded : PlayerRuneFlags.None);
+			Equal(expectedFlags, tail[i].Flags, $"{type.Name} flags");
+			Equal(!FoolRunesExcludedFromFirstAct.Contains(type), HextechCatalog.IsPlayerRuneAllowedInAct(type, 0), $"{type.Name} in the first act's selection");
+			Expect(HextechCatalog.IsPlayerRuneAllowedInAct(type, 1), $"{type.Name} in the second act's selection");
 			Expect(configurable.Contains(ModelDb.GetId(type)), $"{type.Name} is configurable on every target");
 		}
 

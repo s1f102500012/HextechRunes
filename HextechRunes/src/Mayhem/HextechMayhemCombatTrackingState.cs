@@ -51,6 +51,9 @@ internal sealed partial class HextechMayhemCombatTrackingState
 	public readonly HashSet<uint> StatsOnStatsApplied = new();
 	public readonly HashSet<uint> StatsOnStatsOnStatsApplied = new();
 	public readonly HashSet<uint> DoormakerRealStartApplied = new();
+	// 外部敌方海克斯（ExternalPowerEnemyHex）的持久施加标记，所有外部条目共用：键为 MonsterHexKind 数值，
+	// 值为已施加过的敌人 CombatId。与其他持久标记一样随战斗开始/结束整体清空、随战斗快照保存。
+	public readonly Dictionary<int, HashSet<uint>> ExternalEnemyHexApplied = new();
 	public readonly Dictionary<uint, int> TestSubjectPhaseStartApplied = new();
 	public readonly Dictionary<uint, int> MonsterMaxHpCoefficientBase = new();
 	public readonly Dictionary<uint, int> MonsterMaxHpCoefficientProjected = new();

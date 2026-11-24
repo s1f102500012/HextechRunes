@@ -291,6 +291,47 @@ public sealed class VenomForge : HextechForgeBase
 	}
 }
 
+/// <summary>
+/// 毒雾锻造器（黄金，通用）：描述写的是结果“回合开始时，给予所有敌人2层中毒”，实现是战斗开始时给持有者2层原版毒雾，
+/// 时机、目标与联机表现全部沿用原版能力。
+/// </summary>
+public sealed class NoxiousFumesForge : HextechForgeBase
+{
+	protected override IEnumerable<DynamicVar> CanonicalVars =>
+	[
+		new PowerVar<NoxiousFumesPower>(2m)
+	];
+
+	protected override IEnumerable<IHoverTip> ExtraHoverTips =>
+	[
+		HoverTipFactory.FromPower<PoisonPower>()
+	];
+
+	public override Task BeforeCombatStart()
+	{
+		return ApplyStackedPowerAtCombatStart<NoxiousFumesPower>(DynamicVars["NoxiousFumesPower"].BaseValue);
+	}
+}
+
+/// <summary>黑暗锻造器（黄金，通用）：描述写结果“每当有一张牌被消耗时，抽1张牌”，实现是战斗开始时给持有者1层原版黑暗之拥。</summary>
+public sealed class DarkEmbraceForge : HextechForgeBase
+{
+	protected override IEnumerable<DynamicVar> CanonicalVars =>
+	[
+		new PowerVar<DarkEmbracePower>(1m)
+	];
+
+	protected override IEnumerable<IHoverTip> ExtraHoverTips =>
+	[
+		HoverTipFactory.FromKeyword(CardKeyword.Exhaust)
+	];
+
+	public override Task BeforeCombatStart()
+	{
+		return ApplyStackedPowerAtCombatStart<DarkEmbracePower>(DynamicVars["DarkEmbracePower"].BaseValue);
+	}
+}
+
 public sealed class ShrinkForge : HextechForgeBase
 {
 	protected override IEnumerable<DynamicVar> CanonicalVars =>

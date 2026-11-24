@@ -85,7 +85,7 @@ internal static partial class HextechChoiceCodec
 		payload.Add(snapshot.RandomForgeDirectGrant ? 1 : 0);
 
 		MonsterHexKind[] disabledMonsterHexes = snapshot.DisabledMonsterHexIds
-			.Select(static id => Enum.TryParse(id, out MonsterHexKind kind) ? (MonsterHexKind?)kind : null)
+			.Select(static id => MonsterHexCatalog.TryGetMonsterHexByConfigId(id, out MonsterHexKind kind) ? (MonsterHexKind?)kind : null)
 			.OfType<MonsterHexKind>()
 			.OrderBy(static kind => (int)kind)
 			.ToArray();
@@ -253,7 +253,7 @@ internal static partial class HextechChoiceCodec
 		}
 	}
 
-	/// <summary>禁用敌方海克斯列表:计数 + 枚举编号;本版本不认识的编号跳过(对端可能是更新的版本)。</summary>
+	/// <summary>禁用敌方海克斯列表:计数 + 编号(内置为枚举值,外部登记为保留区间的稳定哈希);本机注册表不认识的编号跳过(对端可能是更新的版本)。</summary>
 	private static bool TryReadDisabledMonsterHexIds(List<int> payload, ref int cursor, out HashSet<string> disabledMonsterHexIds)
 	{
 		disabledMonsterHexIds = [];
@@ -273,9 +273,9 @@ internal static partial class HextechChoiceCodec
 		for (int i = 0; i < disabledMonsterHexCount; i++)
 		{
 			int value = payload[cursor + i];
-			if (Enum.IsDefined(typeof(MonsterHexKind), value))
+			if (MonsterHexCatalog.TryGetRegisteredMonsterHex(value, out MonsterHexKind kind))
 			{
-				disabledMonsterHexIds.Add(((MonsterHexKind)value).ToString());
+				disabledMonsterHexIds.Add(MonsterHexCatalog.GetConfigId(kind));
 			}
 		}
 

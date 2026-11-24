@@ -15,7 +15,7 @@ internal static partial class Program
 		int registryVersion = HextechExternalContentRegistry.Version;
 		int playerRuneCount = HextechExternalContentRegistry.GetPlayerRuneRegistrations().Count;
 
-		Equal(2, HextechRunesInterop.ApiVersion, "interop contract version");
+		Equal(3, HextechRunesInterop.ApiVersion, "interop contract version");
 		Equal(HextechRarityTier.Gold, HextechRunesInterop.ParseEnumName<HextechRarityTier>(" gold ", "rarity"), "rarity names are case-insensitive");
 		Equal(
 			PlayerRuneFlags.FirstActExcluded | PlayerRuneFlags.ThirdActExcluded,

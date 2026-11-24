@@ -366,9 +366,8 @@ internal sealed class HextechMayhemActState
 		for (int actIndex = 0; actIndex < value.Length; actIndex++)
 		{
 			int rawHex = value[actIndex];
-			if (Enum.IsDefined(typeof(MonsterHexKind), rawHex))
+			if (MonsterHexCatalog.TryGetRegisteredMonsterHex(rawHex, out MonsterHexKind hex))
 			{
-				MonsterHexKind hex = (MonsterHexKind)rawHex;
 				if (seen.Add(hex))
 				{
 					cumulative.Add(hex);
@@ -593,12 +592,12 @@ internal sealed class HextechMayhemActState
 
 		foreach (int rawHex in value)
 		{
-			if (!Enum.IsDefined(typeof(MonsterHexKind), rawHex))
+			// 本机注册表里没有的数值（更新版本的内置条目、已卸载模组登记的外部条目）丢弃。
+			if (!MonsterHexCatalog.TryGetRegisteredMonsterHex(rawHex, out MonsterHexKind hex))
 			{
 				continue;
 			}
 
-			MonsterHexKind hex = (MonsterHexKind)rawHex;
 			if (seen.Add(hex))
 			{
 				normalized.Add(hex);

@@ -32,13 +32,11 @@ internal static class HextechAssets
 
 	public const string WhiteHoleCardPortraitPath = CardImages + "whiteHoleCard.png";
 
-	public const string SearingAttackCardPortraitPath = CardImages + "searingAttackCard.png";
 
 	public const string FeelTheBurnCardPortraitPath = CardImages + "feelTheBurnCard.png";
 
 	public const string OkBoomerangCardPortraitPath = CardImages + "okBoomerangCard.png";
 
-	public const string QuantumComputingCardPortraitPath = CardImages + "quantumComputingCard.png";
 
 	public const string ReprogramCardPortraitPath = CardImages + "reprogramCard.png";
 
@@ -152,13 +150,8 @@ internal static class HextechAssets
 			return RelicImages + "acceleratingSorceryRune.png";
 		}
 
-		if (HextechCatalog.IsHextechEnemyHexIconRelic(relic))
-		{
-			ModelId id = relic.CanonicalId();
-			return $"{RelicImages}{ToImageFileStem(id.Entry)}.png";
-		}
-
-		if (HextechCatalog.IsHextechRelic(relic))
+		// 外部敌方海克斯的展示遗物与外部符文同一约定：图标在 assetModId 模组自己的资源目录下，未登记 assetModId 时视为本体。
+		if (HextechCatalog.IsHextechEnemyHexIconRelic(relic) || HextechCatalog.IsHextechRelic(relic))
 		{
 			ModelId id = relic.CanonicalId();
 			string assetModId = HextechExternalContentRegistry.GetAssetModId(id) ?? ModInfo.Id;

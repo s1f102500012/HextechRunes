@@ -164,5 +164,8 @@ internal enum MonsterHexKind
 	SpinyToad = 157,          // 升级：棘刺蟾蜍（棱彩）
 	ScrollOfBiting = 158,     // 升级：咬人卷轴（棱彩）
 	SpectralKnight = 159,     // 升级：幽灵骑士（黄金）
-	OwlMagistrate = 160       // 升级：猫头鹰法官（黄金）
+	OwlMagistrate = 160,      // 升级：猫头鹰法官（黄金）
+	FanTheHammer = 161,       // 连拨击锤（棱彩）；与我方同名符文共用 FanTheHammerRune 作展示遗物
+	BrokenGoldenCrown = 162,  // 破碎金冠（白银）；与我方同名符文共用 BrokenGoldenCrownRune 作展示遗物
+	RedEnvelope = 163         // 红包（黄金）；与我方同名符文共用 RedEnvelopeRune 作展示遗物
 }

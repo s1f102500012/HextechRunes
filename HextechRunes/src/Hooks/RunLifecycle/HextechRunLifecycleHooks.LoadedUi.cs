@@ -10,7 +10,14 @@ internal static partial class HextechRunLifecycleHooks
 {
 	private static async Task LoadRunAfterOriginal(Task original, RunState runState)
 	{
-		await original;
+		try
+		{
+			await original;
+		}
+		finally
+		{
+			RunsInsideLoadRunOrig.Remove(runState);
+		}
 
 		// mod 延续体异常不能把原版 LoadRun 任务链打成 faulted。
 		try
@@ -160,6 +167,7 @@ internal static partial class HextechRunLifecycleHooks
 				if (ShouldDeferActSelectionUntilAfterCurrentEvent(runState))
 				{
 					HextechLog.Info("Mayhem", $"ResumePendingActSelectionAfterLoad: deferred for current event act={runState.CurrentActIndex} stage={stageIndex}");
+					EnsurePostOpeningEventSelectionWatch(runState, "ResumePendingActSelectionAfterLoad");
 					return;
 				}
 
@@ -231,6 +239,14 @@ internal static partial class HextechRunLifecycleHooks
 	[HextechPatch("run.load", "跑局生命周期")]
 	private static class LoadRunPatch
 	{
+		// 前缀登记、延续体移除：原版 LoadRun 可能同步执行到进房，后缀才登记就来不及。
+		[HarmonyPrefix]
+		private static void Prefix(RunState runState)
+		{
+			RunsInsideLoadRunOrig.Clear();
+			RunsInsideLoadRunOrig.Add(runState);
+		}
+
 		[HarmonyPostfix]
 		private static void Postfix(RunState runState, ref Task __result)
 		{

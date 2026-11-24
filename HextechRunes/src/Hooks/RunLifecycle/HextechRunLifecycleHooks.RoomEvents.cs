@@ -93,12 +93,13 @@ internal static partial class HextechRunLifecycleHooks
 		}
 
 		HextechLog.Info("Mayhem", $"OnRoomEntered: room={runState.CurrentRoom?.GetType().Name ?? "null"} actIndex={runState.CurrentActIndex} stageIndex={stageIndex} stageResolved={modifier?.IsStageResolved(stageIndex)} startedWithNeow={runState.ExtraFields.StartedWithNeow} {DescribeCurrentEventState(runState)}");
-		if (runState.CurrentRoom is EventRoom { CanonicalEvent: AncientEventModel ancientEvent }
-			&& modifier != null
-			&& runState.CurrentActIndex >= 0
-			&& !modifier.IsStageResolved(stageIndex))
+		if (modifier != null
+			&& extraStageId == null
+			&& ShouldDeferActSelectionUntilAfterCurrentEvent(runState)
+			&& !modifier.IsActResolved(runState.CurrentActIndex))
 		{
-			HextechLog.Info("Mayhem", $"OnRoomEntered: pending act selection is deferred until ancient event proceed. act={runState.CurrentActIndex} event={ancientEvent.Id.Entry} {DescribeCurrentEventState(runState)}");
+			HextechLog.Info("Mayhem", $"OnRoomEntered: pending act selection is deferred until the opening event is left. act={runState.CurrentActIndex} {DescribeCurrentEventState(runState)}");
+			EnsurePostOpeningEventSelectionWatch(runState, "OnRoomEntered");
 		}
 		if (modifier != null && ShouldScheduleActSelectionOnRoomEntered(runState, modifier, stageIndex))
 		{

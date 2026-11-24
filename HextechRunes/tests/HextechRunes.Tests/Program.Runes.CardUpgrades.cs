@@ -13,8 +13,10 @@ using MegaCrit.Sts2.Core.GameActions;
 using MegaCrit.Sts2.Core.GameActions.Multiplayer;
 using MegaCrit.Sts2.Core.Models;
 using MegaCrit.Sts2.Core.Models.Cards;
+using MegaCrit.Sts2.Core.Models.Characters;
 using MegaCrit.Sts2.Core.Models.Powers;
 using MegaCrit.Sts2.Core.MonsterMoves.Intents;
+using MegaCrit.Sts2.Core.Multiplayer.Game;
 using MegaCrit.Sts2.Core.Rewards;
 using MegaCrit.Sts2.Core.Rooms;
 using MegaCrit.Sts2.Core.Saves.Runs;
@@ -146,7 +148,7 @@ internal static partial class Program
 	}
 
 	[HextechTest]
-	private static void SearingAttackRuneGrantsUpgradedCard()
+	private static void RegisteredCustomCardsUseOwnerPoolTokenContract()
 	{
 		Expect(typeof(HextechOwnerPoolTokenCard).IsAbstract, "owner-pool token card base should stay abstract");
 		Expect(
@@ -157,13 +159,6 @@ internal static partial class Program
 			HextechCustomModelRegistry.CustomCardTypes.Count(
 				static type => typeof(HextechOwnerPoolTokenCard).IsAssignableFrom(type) && !type.IsAbstract),
 			"all registered custom cards should use the owner-pool token card contract");
-
-		SearingAttackCard card = CreateMutableTestModel<SearingAttackCard>();
-
-		SearingAttackRune.UpgradeGrantedCard(card);
-
-		Equal(1, card.CurrentUpgradeLevel, "granted Searing Attack upgrade level");
-		Equal(16m, card.DynamicVars.Damage.BaseValue, "granted Searing Attack damage");
 	}
 
 	[HextechTest]
@@ -334,4 +329,117 @@ internal static partial class Program
 			"Hidden Gem should retain the vanilla restriction against cards that already have Replay");
 		Equal(PileType.Hand, HiddenGemUpgradeRune.ReplayTargetPile, "Hidden Gem upgraded replay target pile");
 	}
+
+	// 升级类海克斯的可用性还会看牌组，角色测试玩家默认没有牌组。
+	private static Player CreateUpgradeAvailabilityTestPlayer(Type characterType)
+	{
+		Player player = CreateCharacterTestPlayer(characterType);
+		SetAutoProperty(player, nameof(Player.Deck), new CardPile(PileType.Deck));
+		return player;
+	}
+
+	/// <summary>升级：慷慨捐助仅联机、仅储君；只把这次慷慨捐助为目标玩家加入手牌的那一张设为本回合免费。</summary>
+	[HextechTest]
+	private static void LargesseUpgradeIsMultiplayerRegentOnlyAndFreesTheGrantedCard()
+	{
+		LargesseUpgradeRune availability = CreateMutableTestModel<LargesseUpgradeRune>();
+		Player regent = CreateUpgradeAvailabilityTestPlayer(typeof(Regent));
+		Player ironclad = CreateUpgradeAvailabilityTestPlayer(typeof(Ironclad));
+		WithFeedbackNetGameType(NetGameType.Singleplayer, () => Expect(!availability.IsAvailableForPlayer(regent), "single-player Regent cannot get Upgrade: Largesse"));
+		WithFeedbackNetGameType(NetGameType.Host, () =>
+		{
+			Expect(availability.IsAvailableForPlayer(regent), "multiplayer Regent can get Upgrade: Largesse");
+			Expect(!availability.IsAvailableForPlayer(ironclad), "multiplayer non-Regent cannot get Upgrade: Largesse");
+		});
+
+		(HextechEnemyHexContext _, Player owner, Player teammate) = CreatePrismaticEnemyFixture();
+		LargesseUpgradeRune rune = CreateMutableTestModel<LargesseUpgradeRune>();
+		rune.Owner = owner;
+		foreach (Player player in new[] { owner, teammate })
+		{
+			SetAutoProperty(player.Creature, nameof(Creature.Player), player);
+		}
+
+		Largesse largesse = CreateMutableTestModel<Largesse>();
+		largesse.Owner = owner;
+		CardPlay play = CreateCardPlay(largesse, isAutoPlay: false);
+		AccessTools.Property(typeof(CardPlay), nameof(CardPlay.Target)).SetValue(play, teammate.Creature);
+		StrikeIronclad UpgradeGrantedCard(Player cardOwner, PileType pileType)
+		{
+			StrikeIronclad card = CreateMutableTestModel<StrikeIronclad>();
+			card.Owner = cardOwner;
+			pileType.GetPile(cardOwner).AddInternal(card);
+			return card;
+		}
+
+		StrikeIronclad unrelated = UpgradeGrantedCard(teammate, PileType.Hand);
+		rune.AfterCardGeneratedForCombat(unrelated, owner).GetAwaiter().GetResult();
+		Equal(1, unrelated.EnergyCost.GetWithModifiers(CostModifiers.Local), "cards generated outside Largesse keep their cost");
+
+		rune.BeforeCardPlayed(play).GetAwaiter().GetResult();
+		StrikeIronclad foreignCreator = UpgradeGrantedCard(teammate, PileType.Hand);
+		rune.AfterCardGeneratedForCombat(foreignCreator, teammate).GetAwaiter().GetResult();
+		Equal(1, foreignCreator.EnergyCost.GetWithModifiers(CostModifiers.Local), "a card the recipient created themselves is not the gift");
+		StrikeIronclad ownCard = UpgradeGrantedCard(owner, PileType.Hand);
+		rune.AfterCardGeneratedForCombat(ownCard, owner).GetAwaiter().GetResult();
+		Equal(1, ownCard.EnergyCost.GetWithModifiers(CostModifiers.Local), "a card for the holder is not the gift");
+		StrikeIronclad gift = UpgradeGrantedCard(teammate, PileType.Hand);
+		rune.AfterCardGeneratedForCombat(gift, owner).GetAwaiter().GetResult();
+		Equal(0, gift.EnergyCost.GetWithModifiers(CostModifiers.Local), "the card Largesse adds to the teammate's hand is free this turn");
+		StrikeIronclad second = UpgradeGrantedCard(teammate, PileType.Hand);
+		rune.AfterCardGeneratedForCombat(second, owner).GetAwaiter().GetResult();
+		Equal(1, second.EnergyCost.GetWithModifiers(CostModifiers.Local), "only the first matching card per Largesse play is freed");
+		rune.AfterCardPlayed(null!, play).GetAwaiter().GetResult();
+
+		Largesse foreignLargesse = CreateMutableTestModel<Largesse>();
+		foreignLargesse.Owner = teammate;
+		CardPlay foreignPlay = CreateCardPlay(foreignLargesse, isAutoPlay: false);
+		AccessTools.Property(typeof(CardPlay), nameof(CardPlay.Target)).SetValue(foreignPlay, owner.Creature);
+		rune.BeforeCardPlayed(foreignPlay).GetAwaiter().GetResult();
+		StrikeIronclad teammateGift = UpgradeGrantedCard(owner, PileType.Hand);
+		rune.AfterCardGeneratedForCombat(teammateGift, teammate).GetAwaiter().GetResult();
+		Equal(1, teammateGift.EnergyCost.GetWithModifiers(CostModifiers.Local), "a teammate's Largesse is not upgraded by this holder");
+	}
+
+#if STS2_108_OR_NEWER
+	/// <summary>升级：群情激愤仅联机、仅铁甲战士；加成 = 本场战斗任意玩家打出群情激愤的次数（含复制品与重放），只加在群情激愤的强化攻击上。</summary>
+	[HextechTest]
+	private static void OutrageUpgradeIsMultiplayerIroncladOnlyAndScalesWithEveryonesPlays()
+	{
+		OutrageUpgradeRune availability = CreateMutableTestModel<OutrageUpgradeRune>();
+		Player ironclad = CreateUpgradeAvailabilityTestPlayer(typeof(Ironclad));
+		Player silent = CreateUpgradeAvailabilityTestPlayer(typeof(Silent));
+		WithFeedbackNetGameType(NetGameType.Singleplayer, () => Expect(!availability.IsAvailableForPlayer(ironclad), "single-player Ironclad cannot get Upgrade: Outrage"));
+		WithFeedbackNetGameType(NetGameType.Host, () =>
+		{
+			Expect(availability.IsAvailableForPlayer(ironclad), "multiplayer Ironclad can get Upgrade: Outrage");
+			Expect(!availability.IsAvailableForPlayer(silent), "multiplayer non-Ironclad cannot get Upgrade: Outrage");
+		});
+
+		(HextechEnemyHexContext _, Player owner, Player teammate) = CreatePrismaticEnemyFixture();
+		OutrageUpgradeRune rune = CreateMutableTestModel<OutrageUpgradeRune>();
+		rune.Owner = owner;
+		Outrage own = CreateMutableTestModel<Outrage>();
+		own.Owner = owner;
+		Outrage copy = CreateMutableTestModel<Outrage>();
+		copy.Owner = teammate;
+		StrikeIronclad strike = CreateMutableTestModel<StrikeIronclad>();
+		strike.Owner = owner;
+		WithFeedbackCombatHistory((history, entries) =>
+		{
+			Equal(0m, rune.ModifyDamageAdditiveCompat(null, 9m, ValueProp.Move, owner.Creature, own), "no bonus before any Outrage is played");
+			RecordFeedbackPlayFinished(history, entries, own, playIndex: 0, playCount: 1, isAutoPlay: false);
+			Equal(1m, rune.ModifyDamageAdditiveCompat(null, 9m, ValueProp.Move, owner.Creature, own), "the holder's play adds one");
+			Equal(1m, rune.ModifyDamageAdditiveCompat(null, 9m, ValueProp.Move, teammate.Creature, copy), "a teammate's copy sees the same bonus");
+			RecordFeedbackPlayFinished(history, entries, copy, playIndex: 0, playCount: 2, isAutoPlay: false);
+			RecordFeedbackPlayFinished(history, entries, copy, playIndex: 1, playCount: 2, isAutoPlay: false);
+			Equal(3m, rune.ModifyDamageAdditiveCompat(null, 9m, ValueProp.Move, owner.Creature, own), "a teammate's play and its replay each add one");
+			RecordFeedbackPlayFinished(history, entries, strike, playIndex: 0, playCount: 1, isAutoPlay: false);
+			Equal(3m, rune.ModifyDamageAdditiveCompat(null, 9m, ValueProp.Move, owner.Creature, own), "other cards do not count");
+			Equal(0m, rune.ModifyDamageAdditiveCompat(null, 6m, ValueProp.Move, owner.Creature, strike), "other cards gain nothing");
+			Equal(0m, rune.ModifyDamageAdditiveCompat(null, 9m, ValueProp.Unpowered, owner.Creature, own), "only powered attacks are increased, as Momentum");
+		});
+		Equal(0m, rune.ModifyDamageAdditiveCompat(null, 9m, ValueProp.Move, owner.Creature, own), "the bonus ends with the combat history");
+	}
+#endif
 }

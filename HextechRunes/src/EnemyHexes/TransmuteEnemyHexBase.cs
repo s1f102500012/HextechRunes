@@ -34,7 +34,7 @@ internal static class HextechEnemyTransmute
 	{
 		IReadOnlyList<MonsterHexKind> expanded = Expand(
 			hexes,
-			rarity => HextechMonsterHexRoller.GetConfiguredRarityPool(rarity, modifier.DisabledMonsterHexIdsForPool),
+			rarity => HextechMonsterHexRoller.GetConfiguredRarityPool(rarity, modifier.DisabledMonsterHexIdsForPool, runState),
 			(pool, step) => HextechStableRandom.Index(
 				runState,
 				pool.Count,

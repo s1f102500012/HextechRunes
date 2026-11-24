@@ -10,6 +10,9 @@ internal static class HextechExternalContentRegistry
 	private static readonly List<PlayerRuneRegistration> PlayerRuneRegistrations = new();
 	private static readonly List<ForgeRegistration> ForgeRegistrations = new();
 	private static readonly List<Type> EventRelicTypes = new();
+	// 外部敌方海克斯按展示遗物类型登记；身份（MonsterHexKind 数值、配置 ID）在 HextechContentRegistry 按当前 ModelId 派生。
+	private static readonly List<ExternalEnemyHexRegistration> EnemyHexRegistrations = new();
+	private static readonly Dictionary<Type, Func<IRunState, bool>> EnemyHexAvailabilityByType = new(ModelTypeComparer.Instance);
 	// 外部元数据一律按类型保存，查询时再取类型当前的 ModelId：RitsuLib 等前置会在登记类型之后才把条目改成带模组前缀的形式，
 	// 而外部模组常在登记内容之前就调用注册接口，注册时算出的 ModelId 可能和游戏最终使用的不一致（见 HextechModelDbState）。
 	private static readonly Dictionary<Type, string> AssetModIdsByType = new(ModelTypeComparer.Instance);
@@ -138,6 +141,48 @@ internal static class HextechExternalContentRegistry
 		}
 	}
 
+	internal static void RegisterEnemyHex(
+		ExternalEnemyHexRegistration registration,
+		string? assetModId,
+		Func<IRunState, bool>? availability = null)
+	{
+		if (RejectBuiltInType(registration.DisplayRelicType, "enemy hex"))
+		{
+			return;
+		}
+
+		lock (SyncRoot)
+		{
+			int existingIndex = EnemyHexRegistrations.FindIndex(
+				existing => HextechModelTypeIdentity.IsSame(existing.DisplayRelicType, registration.DisplayRelicType));
+			if (existingIndex < 0)
+			{
+				EnemyHexRegistrations.Add(registration);
+				TryStoreAssetModId(registration.DisplayRelicType, assetModId);
+				TryStoreEnemyHexAvailability(registration.DisplayRelicType, availability);
+				_version++;
+				return;
+			}
+
+			ExternalEnemyHexRegistration existing = EnemyHexRegistrations[existingIndex];
+			if (!HasSameEnemyHexMetadata(existing, registration))
+			{
+				HextechLog.Warn(
+					"ExternalContent", $"Conflicting duplicate enemy hex registration for {registration.DisplayRelicType.FullName}; first metadata retained: "
+					+ $"existing=({Describe(existing)}, assetModId={DescribeValue(GetStoredAssetModId(registration.DisplayRelicType))}) "
+					+ $"incoming=({Describe(registration)}, assetModId={DescribeValue(assetModId)}) "
+					+ $"callerAssembly={DescribeCallerAssembly(registration.DisplayRelicType)}");
+			}
+
+			bool assetOwnerStored = TryStoreAssetModId(registration.DisplayRelicType, assetModId);
+			bool availabilityStored = TryStoreEnemyHexAvailability(registration.DisplayRelicType, availability);
+			if (assetOwnerStored || availabilityStored)
+			{
+				_version++;
+			}
+		}
+	}
+
 	internal static void RegisterEnchantmentIcon(Type enchantmentType, string iconPath)
 	{
 		lock (SyncRoot)
@@ -169,6 +214,24 @@ internal static class HextechExternalContentRegistry
 		lock (SyncRoot)
 		{
 			return EventRelicTypes.ToArray();
+		}
+	}
+
+	internal static IReadOnlyList<ExternalEnemyHexRegistration> GetEnemyHexRegistrations()
+	{
+		lock (SyncRoot)
+		{
+			return EnemyHexRegistrations.ToArray();
+		}
+	}
+
+	internal static Func<IRunState, bool>? GetEnemyHexAvailability(Type displayRelicType)
+	{
+		lock (SyncRoot)
+		{
+			return EnemyHexAvailabilityByType.TryGetValue(displayRelicType, out Func<IRunState, bool>? availability)
+				? availability
+				: null;
 		}
 	}
 
@@ -294,7 +357,7 @@ internal static class HextechExternalContentRegistry
 	}
 
 	/// <summary>
-	/// 外部 API 不能重新登记本体内置的符文/锻造:内置与外部列表会被拼接后按类型 ToDictionary,
+	/// 外部 API 不能重新登记本体内置的符文/锻造/敌方海克斯展示遗物:内置与外部列表会被拼接后按类型 ToDictionary,
 	/// 同一类型出现两次会让注册表查找永久抛 ArgumentException。前置的 ModelId 检查按 IsSame 放行同一类型,
 	/// 所以必须对内置清单单独拦截。<see cref="HextechRunesApi"/> 在池登记与 SavedProperty 注入之前先调用一次,
 	/// 这里的最终登记处再兜底一次。
@@ -302,7 +365,8 @@ internal static class HextechExternalContentRegistry
 	internal static bool RejectBuiltInType(Type modelType, string kind)
 	{
 		bool isBuiltIn = HextechPlayerRuneRegistry.Registrations.Any(builtIn => HextechModelTypeIdentity.IsSame(builtIn.Type, modelType))
-			|| HextechForgeRegistry.Registrations.Any(builtIn => HextechModelTypeIdentity.IsSame(builtIn.Type, modelType));
+			|| HextechForgeRegistry.Registrations.Any(builtIn => HextechModelTypeIdentity.IsSame(builtIn.Type, modelType))
+			|| HextechMonsterHexRegistry.Registrations.Any(builtIn => HextechModelTypeIdentity.IsSame(builtIn.IconRelicType, modelType));
 		if (!isBuiltIn)
 		{
 			return false;
@@ -350,6 +414,22 @@ internal static class HextechExternalContentRegistry
 			"external-content.availability-conflict",
 			(_, _) => $"Conflicting duplicate availability predicate for {runeType.FullName}; first predicate retained: "
 				+ $"callerAssembly={DescribeCallerAssembly(runeType)}");
+	}
+
+	private static bool TryStoreEnemyHexAvailability(Type displayRelicType, Func<IRunState, bool>? availability)
+	{
+		if (availability == null)
+		{
+			return false;
+		}
+
+		return TryStoreFirstWriter(
+			EnemyHexAvailabilityByType,
+			displayRelicType,
+			availability,
+			"external-content.enemy-hex-availability-conflict",
+			(_, _) => $"Conflicting duplicate enemy hex availability predicate for {displayRelicType.FullName}; first predicate retained: "
+				+ $"callerAssembly={DescribeCallerAssembly(displayRelicType)}");
 	}
 
 	// 首个写入者生效：同键再次登记不同的值只按预算告警、不覆盖，登记相同的值静默忽略。
@@ -452,6 +532,24 @@ internal static class HextechExternalContentRegistry
 		return $"rarity={registration.Rarity}, flags={registration.Flags}, "
 			+ $"characterPool={registration.CharacterPool?.ToString() ?? "none"}, "
 			+ $"characterOrder={registration.CharacterOrder}, tagKey={DescribeValue(registration.TagKey)}";
+	}
+
+	private static bool HasSameEnemyHexMetadata(
+		ExternalEnemyHexRegistration existing,
+		ExternalEnemyHexRegistration incoming)
+	{
+		return HextechModelTypeIdentity.IsSame(existing.PowerType, incoming.PowerType)
+			&& existing.Rarity == incoming.Rarity
+			&& existing.AmountAct1 == incoming.AmountAct1
+			&& existing.AmountAct2 == incoming.AmountAct2
+			&& existing.AmountAct3 == incoming.AmountAct3
+			&& existing.Flags == incoming.Flags;
+	}
+
+	private static string Describe(ExternalEnemyHexRegistration registration)
+	{
+		return $"power={registration.PowerType.FullName}, rarity={registration.Rarity}, "
+			+ $"amounts={registration.AmountAct1}/{registration.AmountAct2}/{registration.AmountAct3}, flags={registration.Flags}";
 	}
 
 	private static string DescribeValue(string? value)

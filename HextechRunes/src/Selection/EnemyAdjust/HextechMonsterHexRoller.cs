@@ -6,9 +6,10 @@ internal static class HextechMonsterHexRoller
 		HextechRarityTier rarity,
 		IEnumerable<MonsterHexKind>? knownHexes,
 		IEnumerable<MonsterHexKind>? extraExcludedHexes = null,
-		IReadOnlySet<string>? disabledMonsterHexIds = null)
+		IReadOnlySet<string>? disabledMonsterHexIds = null,
+		IRunState? runState = null)
 	{
-		IReadOnlyList<MonsterHexKind> rarityPool = GetConfiguredRarityPool(rarity, disabledMonsterHexIds);
+		IReadOnlyList<MonsterHexKind> rarityPool = GetConfiguredRarityPool(rarity, disabledMonsterHexIds, runState);
 		HashSet<MonsterHexKind> excluded = ToSet(knownHexes);
 		if (extraExcludedHexes != null)
 		{
@@ -68,9 +69,10 @@ internal static class HextechMonsterHexRoller
 		MonsterHexKind? currentHex,
 		IReadOnlySet<ModelId> excludedIconRelicIds,
 		Func<MonsterHexKind, ModelId> getIconRelicId,
-		IReadOnlySet<string>? disabledMonsterHexIds = null)
+		IReadOnlySet<string>? disabledMonsterHexIds = null,
+		IRunState? runState = null)
 	{
-		IReadOnlyList<MonsterHexKind> rarityPool = GetConfiguredRarityPool(rarity, disabledMonsterHexIds);
+		IReadOnlyList<MonsterHexKind> rarityPool = GetConfiguredRarityPool(rarity, disabledMonsterHexIds, runState);
 		HashSet<MonsterHexKind> alreadyChosen = knownHexes
 			.Where(kind => kind != currentHex)
 			.ToHashSet();
@@ -100,21 +102,33 @@ internal static class HextechMonsterHexRoller
 		return pool.Count > 0 ? pool : rarityPool.ToArray();
 	}
 
-	/// <summary>本稀有度下本局可抽到的敌方海克斯:去掉配置禁用项与联机局不出现的项。抽取、重掷、远端校验与质变共用。</summary>
-	public static IReadOnlyList<MonsterHexKind> GetConfiguredRarityPool(HextechRarityTier rarity, IReadOnlySet<string>? disabledMonsterHexIds)
+	/// <summary>
+	/// 本稀有度下本局可抽到的敌方海克斯:去掉配置禁用项、联机局不出现的项与外部条目的过滤委托排除的项。
+	/// 抽取、重掷、远端校验与质变共用;顺序就是注册顺序(内置在前,外部按数值接在后面)。
+	/// </summary>
+	public static IReadOnlyList<MonsterHexKind> GetConfiguredRarityPool(
+		HextechRarityTier rarity,
+		IReadOnlySet<string>? disabledMonsterHexIds,
+		IRunState? runState)
 	{
-		return GetConfiguredRarityPool(rarity, disabledMonsterHexIds, HextechPlayerContextHelper.IsNetworkMultiplayerRun());
+		return GetConfiguredRarityPool(rarity, disabledMonsterHexIds, HextechPlayerContextHelper.IsNetworkMultiplayerRun(), runState);
 	}
 
 	internal static IReadOnlyList<MonsterHexKind> GetConfiguredRarityPool(
 		HextechRarityTier rarity,
 		IReadOnlySet<string>? disabledMonsterHexIds,
-		bool networkMultiplayer)
+		bool networkMultiplayer,
+		IRunState? runState = null)
 	{
 		IReadOnlyList<MonsterHexKind> rarityPool = MonsterHexCatalog.GetMonsterHexesForRarity(rarity);
 		if (networkMultiplayer)
 		{
 			rarityPool = rarityPool.Where(static kind => !MonsterHexCatalog.IsSinglePlayerOnly(kind)).ToList();
+		}
+
+		if (HextechContentRegistry.MonsterHexMetadata.ExternalByKind.Count > 0)
+		{
+			rarityPool = rarityPool.Where(kind => MonsterHexCatalog.IsAvailableInRun(kind, runState)).ToList();
 		}
 
 		return ApplyConfig(rarityPool, disabledMonsterHexIds);
@@ -135,7 +149,7 @@ internal static class HextechMonsterHexRoller
 		}
 
 		return rarityPool
-			.Where(kind => !disabledMonsterHexIds.Contains(kind.ToString()))
+			.Where(kind => !disabledMonsterHexIds.Contains(MonsterHexCatalog.GetConfigId(kind)))
 			.ToList();
 	}
 }

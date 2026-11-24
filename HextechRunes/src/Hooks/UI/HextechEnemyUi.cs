@@ -278,7 +278,7 @@ internal static class HextechEnemyUi
 		RelicModel relic = MonsterHexCatalog.GetIconRelicForMonsterHex(hex).ToMutable();
 		NRelicBasicHolder holder = NRelicBasicHolder.Create(relic)
 			?? throw new InvalidOperationException("Failed to create top bar enemy hex holder.");
-		holder.Name = $"{EnemyHexHolderNamePrefix}{hex}";
+		holder.Name = EnemyHexHolderNamePrefix + MonsterHexCatalog.GetConfigId(hex);
 		holder.Scale = Vector2.One * EnemyHexScale;
 		holder.MouseFilter = Control.MouseFilterEnum.Stop;
 		holder.TreeExiting += () => NHoverTipSet.Remove(holder);
@@ -289,7 +289,7 @@ internal static class HextechEnemyUi
 	{
 		string name = holder.Name.ToString();
 		if (name.StartsWith(EnemyHexHolderNamePrefix, StringComparison.Ordinal)
-			&& Enum.TryParse(name[EnemyHexHolderNamePrefix.Length..], out hex))
+			&& MonsterHexCatalog.TryGetMonsterHexByConfigId(name[EnemyHexHolderNamePrefix.Length..], out hex))
 		{
 			return true;
 		}

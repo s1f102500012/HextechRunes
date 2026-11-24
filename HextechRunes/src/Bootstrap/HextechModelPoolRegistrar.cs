@@ -37,6 +37,13 @@ internal static class HextechModelPoolRegistrar
 		RegisterModelsInPool(typeof(SharedRelicPool), HextechModelTypeIdentity.Distinct(forgeTypes));
 	}
 
+	// 外部敌方海克斯的展示遗物与内置 EnemyHexIconRelicTypes 同口径：进 SharedRelicPool 取得模型身份，
+	// 原版自然遗物生成按注册表过滤（HextechNaturalRelicPoolHooks），玩家获取池不含它们。
+	internal static void RegisterEnemyHexDisplayRelicModels(IEnumerable<Type> relicTypes)
+	{
+		RegisterModelsInPool(typeof(SharedRelicPool), HextechModelTypeIdentity.Distinct(relicTypes));
+	}
+
 	internal static void RegisterEventRelicModels(IEnumerable<Type> relicTypes)
 	{
 		RegisterModelsInPool(typeof(EventRelicPool), HextechModelTypeIdentity.Distinct(relicTypes));

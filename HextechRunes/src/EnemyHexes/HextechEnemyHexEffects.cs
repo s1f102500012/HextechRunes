@@ -4,7 +4,8 @@ namespace HextechRunes;
 
 internal static class HextechEnemyHexEffects
 {
-	private static readonly IReadOnlyList<HextechEnemyHexEffect> OrderedEffects = CreateOrderedEffects(
+	// 内置效果的顺序就是分发顺序，与 HextechMonsterHexRegistry 一一对应；外部登记的效果接在后面（见 OrderedEffects）。
+	private static readonly IReadOnlyList<HextechEnemyHexEffect> BuiltInEffects = CreateBuiltInEffects(
 	[
 		new SlapEnemyHex(),
 		new EscapePlanEnemyHex(),
@@ -153,8 +154,41 @@ internal static class HextechEnemyHexEffects
 		new SpinyToadEnemyHex(),
 		new ScrollOfBitingEnemyHex(),
 		new SpectralKnightEnemyHex(),
-		new OwlMagistrateEnemyHex()
+		new OwlMagistrateEnemyHex(),
+		new FanTheHammerEnemyHex(),
+		new BrokenGoldenCrownEnemyHex(),
+		new RedEnvelopeEnemyHex()
 	]);
+
+	private static readonly object OrderedEffectsLock = new();
+	private static MonsterHexMetadataCatalog? _orderedEffectsCatalog;
+	private static IReadOnlyList<HextechEnemyHexEffect>? _orderedEffects;
+
+	// 其他模组晚于本体初始化，外部敌方海克斯在本体静态初始化之后才登记：完整顺序跟着注册表目录重建，
+	// 目录不变（登记窗口关闭、ModelDb 收录之后）就一直是同一份列表。外部条目按 kind 数值排序，各端一致。
+	private static IReadOnlyList<HextechEnemyHexEffect> OrderedEffects
+	{
+		get
+		{
+			MonsterHexMetadataCatalog catalog = HextechContentRegistry.MonsterHexMetadata;
+			lock (OrderedEffectsLock)
+			{
+				if (_orderedEffects == null || !ReferenceEquals(_orderedEffectsCatalog, catalog))
+				{
+					_orderedEffects = catalog.ExternalByKind.Count == 0
+						? BuiltInEffects
+						: BuiltInEffects
+							.Concat(catalog.ExternalByKind.Values
+								.OrderBy(static external => (int)external.Kind)
+								.Select(static external => new ExternalPowerEnemyHex(external)))
+							.ToArray();
+					_orderedEffectsCatalog = catalog;
+				}
+
+				return _orderedEffects;
+			}
+		}
+	}
 
 	// 惰性枚举：每取一项都按当时的生效状态判断，语义见 HextechActiveEnemyHexCursor。
 	internal static IEnumerable<HextechEnemyHexEffect> GetActive(HextechMayhemModifier modifier)
@@ -185,9 +219,10 @@ internal static class HextechEnemyHexEffects
 	{
 		List<HextechEnemyHexEffect> effects = new(active.Count);
 		List<int> orders = new(active.Count);
-		for (int i = 0; i < OrderedEffects.Count; i++)
+		IReadOnlyList<HextechEnemyHexEffect> orderedEffects = OrderedEffects;
+		for (int i = 0; i < orderedEffects.Count; i++)
 		{
-			HextechEnemyHexEffect effect = OrderedEffects[i];
+			HextechEnemyHexEffect effect = orderedEffects[i];
 			if (active.Contains(effect.Kind))
 			{
 				effects.Add(effect);
@@ -207,7 +242,7 @@ internal static class HextechEnemyHexEffects
 		}
 	}
 
-	private static IReadOnlyList<HextechEnemyHexEffect> CreateOrderedEffects(IReadOnlyList<HextechEnemyHexEffect> effects)
+	private static IReadOnlyList<HextechEnemyHexEffect> CreateBuiltInEffects(IReadOnlyList<HextechEnemyHexEffect> effects)
 	{
 		MonsterHexKind[] duplicateKinds = effects
 			.GroupBy(static effect => effect.Kind)
@@ -219,7 +254,9 @@ internal static class HextechEnemyHexEffects
 			throw new InvalidOperationException($"Duplicate enemy hex effects: {string.Join(", ", duplicateKinds)}");
 		}
 
-		IReadOnlySet<MonsterHexKind> registeredKinds = HextechContentRegistry.MonsterHexMetadata.AllKinds;
+		HashSet<MonsterHexKind> registeredKinds = HextechMonsterHexRegistry.Registrations
+			.Select(static registration => registration.Kind)
+			.ToHashSet();
 		MonsterHexKind[] missingEffects = registeredKinds
 			.Except(effects.Select(static effect => effect.Kind))
 			.ToArray();

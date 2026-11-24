@@ -55,7 +55,7 @@ public sealed class EnemyHexConsoleCmd : AbstractConsoleCmd
 		if (args.Length <= 1)
 		{
 			string[] actionCompletions = [ AddAction, RemoveAction, SetAction, ReplaceAction ];
-			string[] legacyHexCompletions = GetAvailableMonsterHexes().Select(static hex => hex.ToString()).ToArray();
+			string[] legacyHexCompletions = GetAvailableMonsterHexes().Select(MonsterHexCatalog.GetConfigId).ToArray();
 			return CompleteArgument(
 				actionCompletions.Concat(legacyHexCompletions).ToArray(),
 				Array.Empty<string>(),
@@ -74,7 +74,7 @@ public sealed class EnemyHexConsoleCmd : AbstractConsoleCmd
 	{
 		if (modifier.HasActiveMonsterHex(hex))
 		{
-			return new CmdResult(success: true, $"敌方已拥有海克斯 {hex}。");
+			return new CmdResult(success: true, $"敌方已拥有海克斯 {MonsterHexCatalog.GetConfigId(hex)}。");
 		}
 
 		if (HextechEnemyTransmute.GetTargetRarity(hex).HasValue)
@@ -90,23 +90,23 @@ public sealed class EnemyHexConsoleCmd : AbstractConsoleCmd
 			}
 
 			HextechEnemyUi.Refresh(modifier);
-			return new CmdResult(ApplyIfNeeded(modifier), success: true, $"敌方海克斯 {hex} 已质变为：{string.Join(", ", gained)}。");
+			return new CmdResult(ApplyIfNeeded(modifier), success: true, $"敌方海克斯 {MonsterHexCatalog.GetConfigId(hex)} 已质变为：{string.Join(", ", gained.Select(MonsterHexCatalog.GetConfigId))}。");
 		}
 
 		modifier.DebugAddMonsterHex(hex);
 		HextechEnemyUi.Refresh(modifier);
-		return new CmdResult(ApplyIfNeeded(modifier), success: true, $"已添加敌方海克斯 {hex}。");
+		return new CmdResult(ApplyIfNeeded(modifier), success: true, $"已添加敌方海克斯 {MonsterHexCatalog.GetConfigId(hex)}。");
 	}
 
 	private static CmdResult RemoveEnemyHex(HextechMayhemModifier modifier, MonsterHexKind hex)
 	{
 		if (!modifier.DebugRemoveMonsterHex(hex))
 		{
-			return new CmdResult(success: false, $"敌方未拥有海克斯 {hex}。");
+			return new CmdResult(success: false, $"敌方未拥有海克斯 {MonsterHexCatalog.GetConfigId(hex)}。");
 		}
 
 		HextechEnemyUi.Refresh(modifier);
-		return new CmdResult(success: true, $"已移除敌方海克斯 {hex}。");
+		return new CmdResult(success: true, $"已移除敌方海克斯 {MonsterHexCatalog.GetConfigId(hex)}。");
 	}
 
 	private static CmdResult SetEnemyHex(RunState runState, HextechMayhemModifier modifier, MonsterHexKind hex)
@@ -119,7 +119,7 @@ public sealed class EnemyHexConsoleCmd : AbstractConsoleCmd
 
 		modifier.DebugSetOnlyMonsterHex(actIndex, hex, MonsterHexCatalog.GetMonsterHexRarity(hex));
 		HextechEnemyUi.Refresh(modifier);
-		return new CmdResult(ApplyIfNeeded(modifier), success: true, $"当前楼层敌方海克斯已替换为 {hex}。");
+		return new CmdResult(ApplyIfNeeded(modifier), success: true, $"当前楼层敌方海克斯已替换为 {MonsterHexCatalog.GetConfigId(hex)}。");
 	}
 
 	private static async System.Threading.Tasks.Task ApplyIfNeeded(HextechMayhemModifier modifier)
@@ -188,10 +188,10 @@ public sealed class EnemyHexConsoleCmd : AbstractConsoleCmd
 		{
 			return HextechRunLifecycleHooks.EnsureMayhemModifier(runState)
 				.GetActiveMonsterHexes()
-				.Select(static hex => hex.ToString());
+				.Select(MonsterHexCatalog.GetConfigId);
 		}
 
-		return GetAvailableMonsterHexes().Select(static hex => hex.ToString());
+		return GetAvailableMonsterHexes().Select(MonsterHexCatalog.GetConfigId);
 	}
 
 	private static bool TryParseMonsterHex(string input, out MonsterHexKind hex)
@@ -199,7 +199,7 @@ public sealed class EnemyHexConsoleCmd : AbstractConsoleCmd
 		string normalized = Normalize(input);
 		foreach (MonsterHexKind candidate in GetAvailableMonsterHexes())
 		{
-			if (Normalize(candidate.ToString()) == normalized)
+			if (Normalize(MonsterHexCatalog.GetConfigId(candidate)) == normalized)
 			{
 				hex = candidate;
 				return true;

@@ -1,4 +1,5 @@
 using Godot;
+using MegaCrit.Sts2.Core.Map;
 using MegaCrit.Sts2.Core.Nodes;
 
 namespace HextechRunes;
@@ -12,13 +13,14 @@ internal static partial class HextechRunLifecycleHooks
 	private const int EndlessLoopRoomReadyTimeoutFrames = 600;
 	private const int EndlessLoopWaitLogIntervalFrames = 120;
 	private const int RemoteEventsWaitLogIntervalFrames = 300;
-	// 等待其他玩家完成远古事件超过这个帧数时告警一次，但继续等待：超时由各端独立判定，单端放弃会让
-	// 先放弃的一端等下一房间、后完成的一端等它完成选择，互相卡住，所以只能换局时退出。
+	// 先古结束后等待所有玩家的事件完成超过这个帧数时告警一次，但不单端放弃：等待期间地图行进保持可用，
+	// 条件一直不满足时由各端同步的进房关口（BeforeRoomEntered）补选，退出条件只有换局、本幕已决或已离开开幕房。
 	private const int RemoteEventsSlowWaitWarnFrames = 18000;
 
 	private static readonly HashSet<RunState> RunsInsideStartRunOrig = [];
-
-	private readonly record struct EventRoomProceedState(RunState RunState, int ActIndex, string EventId);
+	// 原版 NGame.LoadRun 尚未完成的局：读档时进入当前房间的 BeforeRoomEntered 在这里面被等待，
+	// 此时读档入口的转场遮罩还没淡入、LoadRun 也被挡住，不能在这里等玩家选择（交给读档后续跑与 RoomEntered）。
+	private static readonly HashSet<RunState> RunsInsideLoadRunOrig = [];
 
 	/// <summary>
 	/// 跑局开始与读档共用：清空日志预算、战斗与敌方海克斯的跑局临时状态，并按新跑局重置夺金同步。
@@ -71,10 +73,36 @@ internal static partial class HextechRunLifecycleHooks
 		return ReferenceEquals(RunManager.Instance.DebugOnlyGetState(), runState);
 	}
 
+	/// <summary>
+	/// 当前房是本幕的开幕事件：先古事件，或本幕起点上的事件房（其他模组把涅奥换成非先古事件时也算）。
+	/// 本幕选择推迟到离开它、地图可以行进时（见 <see cref="EnsurePostOpeningEventSelectionWatch"/>）。
+	/// </summary>
 	private static bool ShouldDeferActSelectionUntilAfterCurrentEvent(RunState runState)
 	{
 		return runState.CurrentActIndex >= 0
-			&& runState.CurrentRoom is EventRoom { CanonicalEvent: AncientEventModel };
+			&& runState.CurrentRoom is EventRoom eventRoom
+			&& (eventRoom.CanonicalEvent is AncientEventModel || IsAtActStartingPoint(runState));
+	}
+
+	private static bool IsAtActStartingPoint(RunState runState)
+	{
+		try
+		{
+			return runState.CurrentMapCoord is MapCoord current
+				&& runState.Map?.StartingMapPoint is MapPoint start
+				&& current.Equals(start.coord);
+		}
+		catch (Exception ex)
+		{
+			HextechLog.Warn("Mayhem", $"IsAtActStartingPoint failed: {ex.GetType().Name}: {ex.Message}");
+			return false;
+		}
+	}
+
+	/// <summary>原版开局/读档流程（NGame.StartRun / NGame.LoadRun）仍在进行；各端都在自己的同一流程位置里。</summary>
+	internal static bool IsInsideVanillaRunEntry(RunState runState)
+	{
+		return RunsInsideStartRunOrig.Contains(runState) || RunsInsideLoadRunOrig.Contains(runState);
 	}
 
 	private static int ResolveCurrentStageIndex(

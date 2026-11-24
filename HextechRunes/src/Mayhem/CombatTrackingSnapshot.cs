@@ -40,6 +40,7 @@ internal sealed class CombatTrackingSnapshot
 	public List<uint> StatsOnStatsApplied { get; set; } = [];
 	public List<uint> StatsOnStatsOnStatsApplied { get; set; } = [];
 	public List<uint> DoormakerRealStartApplied { get; set; } = [];
+	public Dictionary<int, HashSet<uint>> ExternalEnemyHexApplied { get; set; } = new();
 	public Dictionary<uint, int> TestSubjectPhaseStartApplied { get; set; } = new();
 	public Dictionary<uint, int> MonsterMaxHpCoefficientBase { get; set; } = new();
 	public Dictionary<uint, int> MonsterMaxHpCoefficientProjected { get; set; } = new();

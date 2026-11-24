@@ -8,7 +8,8 @@ using MegaCrit.Sts2.Core.Nodes;
 namespace HextechRunes;
 
 /// <summary>
-/// 选择界面的信号噪声：打开我方海克斯三选一时，以极低概率把其中一个选项的外观换成噪声卡，点该位置的刷新即还原（不消耗次数）。
+/// 选择界面的信号噪声：打开我方海克斯三选一时，把其中一个选项的外观换成噪声卡，点该位置的刷新即还原（不消耗次数）。
+/// 自然触发概率为 0（正常游玩不出现）；只经由调试环境变量或控制台指令触发，两条调试路径都不读概率。
 /// 纯本地表现：用本机随机数决定，不碰共享随机流，不进存档，不发联机消息，底下的真实选项始终不变。
 /// 中文游戏语言给汉字片段，其余语言给拉丁片段；片段文本在密文里给出，这里不存原文；导入配置时的口令只存哈希。
 /// </summary>
@@ -17,7 +18,8 @@ internal static class HextechSignalNoise
 	private const string LogTag = "SignalNoise";
 	private const string ProgressFileName = "signal_noise.json";
 	private static readonly string[] HanLanguages = ["zhs", "zht"];
-	private const double TriggerChance = 0.005;
+	// 自然触发已关闭（原为 0.005）；调试路径在掷概率之前就分流，不受此值影响。
+	private const double TriggerChance = 0;
 
 	/// <summary>本机调试：设为 1 时每次打开都出噪声，片段按顺序轮换，不受每局一次的限制。</summary>
 	private const string DebugEnvironmentVariable = "HEXTECH_SIGNAL_NOISE_DEBUG";

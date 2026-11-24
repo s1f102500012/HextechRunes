@@ -184,7 +184,7 @@ internal static partial class HextechCatalog
 			ToModelIdSet(PlayerRuneMetadata.AllTypes),
 			ToModelIdSet(AllForgeTypes),
 			ToModelIdSet(HextechCustomModelRegistry.ShopOnlyRelicTypes),
-			ToModelIdSet(HextechCustomModelRegistry.EnemyHexIconRelicTypes),
+			ToModelIdSet(HextechCustomModelRegistry.EnemyHexIconRelicTypes.Concat(HextechContentRegistry.ExternalEnemyHexDisplayRelicTypes)),
 			BuildPlayerRuneRarityById(),
 			BuildForgeRarityById(),
 			BuildPlayerRuneTagKeyById(),

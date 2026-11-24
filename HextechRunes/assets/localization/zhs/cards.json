@@ -29,9 +29,6 @@
   "WHITE_HOLE_CARD.title": "白洞",
   "WHITE_HOLE_CARD.description": "每当你抽到这张牌时，获得{Energy:energyIcons()}。\n抽{Cards}张牌。",
   "WHITE_HOLE_CARD.flavor": "它不吞噬选择，只把选择吐回手心。",
-  "SEARING_ATTACK_CARD.title": "灼热攻击",
-  "SEARING_ATTACK_CARD.description": "造成{Damage:diff()}点伤害。\n可以被多次升级。",
-  "SEARING_ATTACK_CARD.flavor": "越烧越亮，越斩越深。",
   "OSTY_WISH_CARD.title": "奥斯提的遗愿",
   "OSTY_WISH_CARD.description": "获得{WishBlock}点格挡。\n对所有敌人造成{WishDamage}点伤害。",
   "OSTY_WISH_CARD.hoverTip": "[blue]0[/blue]费技能牌。获得[blue]X[/blue]点格挡，对所有敌人造成[blue]X[/blue]点伤害。[blue]X[/blue]为奥斯提死亡时的最大生命值。消耗。升级后保留。",
@@ -49,8 +46,5 @@
   "FEEL_THE_BURN_CARD.flavor": "先掐灭他们的气焰，再点燃你的。",
   "OK_BOOMERANG_CARD.title": "回力OK镖",
   "OK_BOOMERANG_CARD.description": "对所有敌人造成{Damage:diff()}点伤害[blue]{Hits}[/blue]次。\n将此牌返回你的手牌。",
-  "OK_BOOMERANG_CARD.flavor": "它飞走时像玩笑，飞回时像催债。",
-  "QUANTUM_COMPUTING_CARD.title": "量子计算",
-  "QUANTUM_COMPUTING_CARD.description": "对所有敌人造成其最大生命值{DamagePercent:diff()}%的伤害，并回复相当于所造成伤害值{HealPercent:diff()}%的生命。",
-  "QUANTUM_COMPUTING_CARD.flavor": "答案还没出现，敌人的生命值已经开始坍缩。"
+  "OK_BOOMERANG_CARD.flavor": "它飞走时像玩笑，飞回时像催债。"
 }

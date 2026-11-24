@@ -44,28 +44,43 @@ internal static partial class HextechRuneConfiguration
 		// 只禁用我方；敌方"无本万利"不受影响。
 		new(37, [], [ typeof(SomethingForNothingRune), typeof(SoulCallingRune) ]),
 		new(39, [], [ typeof(GhostFormRune), typeof(DieForYouRune) ]),
-		new(40, [], [ typeof(SearingAttackRune), typeof(ScapegoatRune), typeof(TwilightVeilRune) ]),
+		new(40, [], [ typeof(ScapegoatRune), typeof(TwilightVeilRune) ]),
 		// 大地苏醒重做为"每抽 8 张牌新增一块 5 层滚石"，转为默认启用。
 		new(41, [ typeof(EarthAwakensRune) ], []),
 		// 启动流程敌我双方转为默认禁用。
 		new(42, [], [ typeof(StartupRoutineRune) ]),
 		// 我方吸血习性（原死亡收割，v23 默认禁用）转为默认启用。
 		new(43, [ typeof(DeathHarvestRune) ], []),
-		// 0.9.9：俯冲轰炸、量子计算与升级势不可当/火焰屏障/狱火/抉择，抉择（只我方）转为默认禁用。
-		new(44, [], [ typeof(DiveBomberRune), typeof(QuantumComputingRune), typeof(JuggernautUpgradeRune), typeof(FlameBarrierUpgradeRune), typeof(InfernoUpgradeRune), typeof(DecisionsDecisionsUpgradeRune) ]),
+		// 0.9.9：俯冲轰炸与升级势不可当/火焰屏障/狱火/抉择，抉择（只我方）转为默认禁用。
+		new(44, [], [ typeof(DiveBomberRune), typeof(JuggernautUpgradeRune), typeof(FlameBarrierUpgradeRune), typeof(InfernoUpgradeRune), typeof(DecisionsDecisionsUpgradeRune) ]),
 		// 物法皆修（只我方）重做为“力量与敏捷同时作用于伤害和格挡，开局各 +1”，转为默认启用。
 		new(45, [ typeof(MasterOfDualityRune) ], []),
 		// 升级：暴露、感受燃烧转为默认禁用。
 		new(47, [], [ typeof(ExposeUpgradeRune), typeof(FeelTheBurnRune) ]),
 		// 引吭高歌转为默认禁用。
-		new(48, [], [ typeof(SingOutRune) ])
+		new(48, [], [ typeof(SingOutRune) ]),
+		// "？？？"敌我双方转为默认禁用。
+		new(50, [], [ typeof(MysteryRune) ])
 	];
 
 	/// <summary>敌方海克斯默认禁用迁移:只迁移一次,之后尊重玩家手动开启。</summary>
 	private static readonly (int BelowVersion, MonsterHexKind Kind)[] MonsterHexDefaultDisableMigrations =
 	[
 		// 我方同在 v42 默认禁用。
-		(42, MonsterHexKind.StartupRoutine)
+		(42, MonsterHexKind.StartupRoutine),
+		// 只禁用敌方；我方"潦草急就"不受影响。
+		(49, MonsterHexKind.HastyScribble),
+		// 我方同在 v50 默认禁用。
+		(50, MonsterHexKind.Mystery)
+	];
+
+	// 出厂默认禁用的属性锻造器。百分比最大生命的两档与“生命锻造器”那条线重复，白银、黄金各留一个最大生命锻造器。
+	private static readonly Type[] DefaultDisabledForgeTypes = [ typeof(SilverHpForge), typeof(GoldHpForge) ];
+
+	/// <summary>属性锻造器默认禁用迁移:只迁移一次,之后尊重玩家手动开启。</summary>
+	private static readonly (int BelowVersion, Type[] Disable)[] ForgeDefaultDisableMigrations =
+	[
+		(50, [ typeof(SilverHpForge), typeof(GoldHpForge) ])
 	];
 
 	private static RuneConfig NormalizeLoadedConfig(RuneConfig config)
@@ -82,6 +97,7 @@ internal static partial class HextechRuneConfiguration
 		HashSet<string> disabledMonsterHexIds = NormalizeDisabledMonsterHexIds(config.DisabledMonsterHexIds);
 		ApplyPlayerRuneDefaultMigrations(previousConfigVersion, disabledIds);
 		ApplyMonsterHexDefaultMigrations(previousConfigVersion, disabledMonsterHexIds);
+		config.DisabledForgeIds = ApplyForgeDefaultMigrations(previousConfigVersion, config.DisabledForgeIds);
 		MigrateLegacyScalarSettings(config, previousConfigVersion);
 
 		config.ConfigVersion = CurrentConfigVersion;
@@ -118,9 +134,23 @@ internal static partial class HextechRuneConfiguration
 		{
 			if (previousConfigVersion < belowVersion)
 			{
-				disabledMonsterHexIds.Add(kind.ToString());
+				disabledMonsterHexIds.Add(MonsterHexCatalog.GetConfigId(kind));
 			}
 		}
+	}
+
+	private static HashSet<string> ApplyForgeDefaultMigrations(int previousConfigVersion, IEnumerable<string>? disabledForgeIds)
+	{
+		HashSet<string> ids = NormalizeDisabledForgeIds(disabledForgeIds);
+		foreach ((int belowVersion, Type[] disable) in ForgeDefaultDisableMigrations)
+		{
+			if (previousConfigVersion < belowVersion)
+			{
+				ids.UnionWith(GetForgeIds(disable));
+			}
+		}
+
+		return ids;
 	}
 
 	private static void MigrateLegacyScalarSettings(RuneConfig config, int previousConfigVersion)
@@ -199,6 +229,19 @@ internal static partial class HextechRuneConfiguration
 		return (normalized.ConfigVersion, normalized.DisabledMonsterHexIds);
 	}
 
+	internal static (int ConfigVersion, IReadOnlySet<string> DisabledForgeIds) MigrateDisabledForgeIdsForTests(
+		int configVersion,
+		IEnumerable<string> disabledIds)
+	{
+		RuneConfig config = new()
+		{
+			ConfigVersion = configVersion,
+			DisabledForgeIds = disabledIds.ToHashSet(StringComparer.Ordinal)
+		};
+		RuneConfig normalized = NormalizeLoadedConfig(config);
+		return (normalized.ConfigVersion, normalized.DisabledForgeIds);
+	}
+
 	internal static (int ConfigVersion, HextechRarityWeights RuneRarityWeights, bool PreventConsecutiveSilverRunes) MigrateRarityConfigForTests(
 		int configVersion,
 		HextechRarityWeights normalWeights)
@@ -252,6 +295,14 @@ internal static partial class HextechRuneConfiguration
 		};
 		RuneConfig normalized = NormalizeLoadedConfig(config);
 		return (normalized.ConfigVersion, normalized.EnemyHexCountsByAct!);
+	}
+
+	// 锻造器的配置 ID 就是模型 ID 的 Entry（见 HextechForgeGrantHelper.IsForgeDisabledForPlayer）。
+	private static HashSet<string> GetForgeIds(IEnumerable<Type> forgeTypes)
+	{
+		return forgeTypes
+			.Select(static type => ModelDb.GetId(type).Entry)
+			.ToHashSet(StringComparer.Ordinal);
 	}
 
 	private static HashSet<string> GetPlayerRuneIds(IEnumerable<Type> runeTypes)

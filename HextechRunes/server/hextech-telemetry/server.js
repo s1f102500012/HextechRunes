@@ -89,24 +89,25 @@ function parseOfficialOnly(value) {
   return value === "1" || value === "true";
 }
 
-// 敌方海克斯是本体枚举，其他模组无法添加（旧客户端偶尔把不认识的编号报成数字），所以只过滤我方海克斯表。
+// 0.10.2 起其他模组也能注册敌方海克斯（以展示遗物的模型 ID 上报），所以三张表都按官方清单过滤；
+// 旧客户端偶尔把不认识的敌方编号报成数字，这些行同样不在清单里，仅官方时一并隐藏。
 const CONTENT_TABLES = [
-  ["playerRuneRuns", "runes", true],
-  ["playerRuneChoices", "runes", true],
-  ["monsterHexRuns", "monsterHexes", false]
+  ["playerRuneRuns", "runes"],
+  ["playerRuneChoices", "runes"],
+  ["monsterHexRuns", "monsterHexes"]
 ];
 
 // 派生快照里的中文名是生成时写入的；展示时按当前 labels 重新标注，新增内容的中文名在服务重启后立即生效。
-// officialOnly 时去掉不在官方清单里的我方海克斯条目（只影响海克斯表，局数与胜率口径不变）。
+// officialOnly 时去掉不在官方清单里的我方与敌方海克斯条目（只影响海克斯表，局数与胜率口径不变）。
 function prepareSummaryForDisplay(summary, officialOnly) {
   const tables = { ...summary.tables };
   let hiddenUnofficialEntries = 0;
-  for (const [tableName, category, filterable] of CONTENT_TABLES) {
+  for (const [tableName, category] of CONTENT_TABLES) {
     const rows = Array.isArray(tables[tableName]) ? tables[tableName] : [];
     const relabeled = rows.map((row) => ({
       ...row,
       name: getLabel(category, row.id),
-      official: !filterable || isOfficialContent(category, row.id)
+      official: isOfficialContent(category, row.id)
     }));
     const visible = officialOnly ? relabeled.filter((row) => row.official) : relabeled;
     hiddenUnofficialEntries += relabeled.length - visible.length;

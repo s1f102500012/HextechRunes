@@ -29,9 +29,6 @@
   "WHITE_HOLE_CARD.title": "Белая дыра",
   "WHITE_HOLE_CARD.description": "Вы получаете {Energy:energyIcons()} когда добираете эту карту.\nДоберите {Cards} карт.",
   "WHITE_HOLE_CARD.flavor": "Оно не проглатывает выбор. Оно выплёвывает его обратно — тебе в руку.",
-  "SEARING_ATTACK_CARD.title": "Всполох",
-  "SEARING_ATTACK_CARD.description": "Наносит {Damage:diff()} урона.\nМожно улучшать любое количество раз.",
-  "SEARING_ATTACK_CARD.flavor": "С каждой заточкой всё горячее.",
   "OSTY_WISH_CARD.title": "Желание Кости",
   "OSTY_WISH_CARD.description": "Получите {WishBlock} [gold]защиты[/gold].\nНаносит {WishDamage} урона всем врагам.",
   "OSTY_WISH_CARD.hoverTip": "Навык за [blue]0[/blue] энергии. Получите [blue]X[/blue] защиты и нанесите [blue]X[/blue] урона всем врагам. [blue]X[/blue] равно макс. ОЗ Кости на момент его гибели. Сжигается. Улучшенные копии [gold]оставляются[/gold].",
@@ -49,8 +46,5 @@
   "FEEL_THE_BURN_CARD.flavor": "Сначала потуши их огонь, потом разожги свой.",
   "OK_BOOMERANG_CARD.title": "ОК-бумеранг",
   "OK_BOOMERANG_CARD.description": "Наносит {Damage:diff()} урона всем врагам [blue]{Hits}[/blue] раз(а).\nВерните эту карту в руку.",
-  "OK_BOOMERANG_CARD.flavor": "Улетает как шутка, возвращается как коллектор.",
-  "QUANTUM_COMPUTING_CARD.title": "Квантовые вычисления",
-  "QUANTUM_COMPUTING_CARD.description": "Нанесите всем врагам урон в размере {DamagePercent:diff()}% от их макс. ОЗ, затем исцелитесь на {HealPercent:diff()}% от нанесённого урона.",
-  "QUANTUM_COMPUTING_CARD.flavor": "Прежде чем появится ответ, ОЗ врага уже схлопнулись."
+  "OK_BOOMERANG_CARD.flavor": "Улетает как шутка, возвращается как коллектор."
 }

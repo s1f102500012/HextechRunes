@@ -29,7 +29,7 @@ internal static partial class Program
 	[HextechTest]
 	private static void EnemyEntomancerGrantsVanillaPersonalHiveInsteadOfCustomDazed()
 	{
-		IReadOnlyList<HextechEnemyHexEffect> effects = (IReadOnlyList<HextechEnemyHexEffect>)AccessTools.Field(typeof(HextechEnemyHexEffects), "OrderedEffects").GetValue(null)!;
+		IReadOnlyList<HextechEnemyHexEffect> effects = (IReadOnlyList<HextechEnemyHexEffect>)AccessTools.Property(typeof(HextechEnemyHexEffects), "OrderedEffects").GetValue(null)!;
 		HextechEnemyHexEffect effect = effects.Single(candidate => candidate.Kind == MonsterHexKind.MadScientist);
 		Equal(typeof(MadScientistEnemyHex), effect.GetType(), "the MadScientist kind is handled by the Entomancer effect");
 		Expect(effect is IHextechEnemyMaxHpCoefficientProvider, "the max HP reduction is kept");

@@ -28,6 +28,7 @@ HextechRunes.HextechCollectionHooks._loggedMissingFallbackContainer : Boolean
 HextechRunes.HextechCollectionHooks._starterHeaderTemplate : String
 HextechRunes.HextechCombatHooks.ActivePlayEnergyValues : Dictionary`2 [readonly]
 HextechRunes.HextechCombatHooks.DualWieldProcessedCommands : ConditionalWeakTable`2 [readonly]
+HextechRunes.HextechCombatHooks.FanTheHammerFollowUps : ConditionalWeakTable`2 [readonly]
 HextechRunes.HextechCombatHooks.OstyRedirectSlipperyByCommand : Dictionary`2 [readonly]
 HextechRunes.HextechCombatHooks.PendingInstantDeathDoomKills : List`1 [readonly]
 HextechRunes.HextechCombatHooks.PendingManualPlayEnergyValues : Dictionary`2 [readonly]
@@ -38,6 +39,7 @@ HextechRunes.HextechCombatVfx._glowTexture : Texture2D
 HextechRunes.HextechCombatVfx._ringTexture : Texture2D
 HextechRunes.HextechCombatVfxHooks.PowerFlyFanOffsets : ConditionalWeakTable`2 [readonly]
 HextechRunes.HextechContentRegistry._lookups : RegistryLookups
+HextechRunes.HextechContentRegistry._lookupsFinal : Boolean
 HextechRunes.HextechContentRegistry._lookupsVersion : Int32
 HextechRunes.HextechCreatureAttachedVisual.ActiveAttachments : HashSet`1 [readonly]
 HextechRunes.HextechCreatureNodeRegistry.Nodes : Dictionary`2 [readonly]
@@ -57,10 +59,14 @@ HextechRunes.HextechEnemyHexCollapseView._linkedMapControl : Control
 HextechRunes.HextechEnemyHexCollapseView._open : Boolean
 HextechRunes.HextechEnemyHexCollapseView._panel : PanelContainer
 HextechRunes.HextechEnemyHexCollapseView._previousMapFocusNeighborLeft : NodePath
+HextechRunes.HextechEnemyHexEffects._orderedEffects : IReadOnlyList`1
+HextechRunes.HextechEnemyHexEffects._orderedEffectsCatalog : MonsterHexMetadataCatalog
 HextechRunes.HextechEnemyPowerScalingHooks.ScalingOverrides : Dictionary`2 [readonly]
 HextechRunes.HextechExternalContentRegistry.AssetModIdsByType : Dictionary`2 [readonly]
 HextechRunes.HextechExternalContentRegistry.ConfigSectionTitleKeysByAssetModId : Dictionary`2 [readonly]
 HextechRunes.HextechExternalContentRegistry.EnchantmentIconPathsByType : Dictionary`2 [readonly]
+HextechRunes.HextechExternalContentRegistry.EnemyHexAvailabilityByType : Dictionary`2 [readonly]
+HextechRunes.HextechExternalContentRegistry.EnemyHexRegistrations : List`1 [readonly]
 HextechRunes.HextechExternalContentRegistry.EventRelicTypes : List`1 [readonly]
 HextechRunes.HextechExternalContentRegistry.ForgeRegistrations : List`1 [readonly]
 HextechRunes.HextechExternalContentRegistry.ModelIdResolver : Func`2
@@ -100,12 +106,15 @@ HextechRunes.HextechRelicBase.WarnedMissingIconPaths : HashSet`1 [readonly]
 HextechRunes.HextechRelicVisibilityHooks._drawPileAnchor : NDrawPileButton
 HextechRunes.HextechRelicVisibilityHooks._multiplayerStateHiddenByToggle : Boolean
 HextechRunes.HextechRewardSafetyHooks.CardRewardStates : ConditionalWeakTable`2 [readonly]
+HextechRunes.HextechRunLifecycleHooks.RunsInsideLoadRunOrig : HashSet`1 [readonly]
 HextechRunes.HextechRunLifecycleHooks.RunsInsideStartRunOrig : HashSet`1 [readonly]
+HextechRunes.HextechRunLifecycleHooks._openingEventWatch : Nullable`1
 HextechRunes.HextechRunLogBudget.ConsumedByKey : Dictionary`2 [readonly]
 HextechRunes.HextechRuneConfigMenuHooks.SessionLikedIds : HashSet`1 [readonly]
 HextechRunes.HextechRuneConfiguration._config : RuneConfig
 HextechRunes.HextechRuneConfiguration._loaded : Boolean
 HextechRunes.HextechRuneGeneration._chaosTransform : CandidateTransform
+HextechRunes.HextechRuneSelectionCoordinator._actSelectionCompletion : TaskCompletionSource
 HextechRunes.HextechRuneSelectionCoordinator._actSelectionRun : RunState
 HextechRunes.HextechRuneSelectionScreen.DisplayTextureFallbackWarnings : HashSet`1 [readonly]
 HextechRunes.HextechRuneSelectionScreen.RerollSfxPlayer : AudioStreamPlayer
@@ -143,6 +152,8 @@ HextechRunes.HextechWorkshopPlaytime.StartedItemIds : HashSet`1 [readonly]
 HextechRunes.ModEntry._harmony : Harmony
 HextechRunes.ModEntry._initialized : Boolean
 HextechRunes.MonsterHexCatalog.SinglePlayerOnlyMonsterHexes : HashSet`1 [readonly]
+HextechRunes.MonsterHexCatalog._monsterHexByIconRelicId : IReadOnlyDictionary`2
+HextechRunes.MonsterHexCatalog._monsterHexByIconRelicIdCatalog : MonsterHexMetadataCatalog
 HextechRunes.MoreTheMerrierRune.ReplacingPlayers : HashSet`1 [readonly]
 HextechRunes.PiercingThreadRune.RunesWithPendingDamage : HashSet`1 [readonly]
 HextechRunes.SlowCookAuraVisual._flowShader : Shader

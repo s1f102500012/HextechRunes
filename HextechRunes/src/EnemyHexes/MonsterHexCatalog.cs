@@ -1,4 +1,5 @@
 using Godot;
+using MegaCrit.Sts2.Core.Entities.Relics;
 using MegaCrit.Sts2.Core.Localization;
 
 namespace HextechRunes;
@@ -87,7 +88,9 @@ internal static class MonsterHexCatalog
 			[MonsterHexKind.CorruptedBranch] = [static () => HoverTipFactory.FromKeyword(CardKeyword.Exhaust)],
 		};
 
-	private static readonly Lazy<IReadOnlyDictionary<ModelId, MonsterHexKind>> MonsterHexByIconRelicId = new(BuildMonsterHexByIconRelicId);
+	private static readonly object MonsterHexByIconRelicIdLock = new();
+	private static MonsterHexMetadataCatalog? _monsterHexByIconRelicIdCatalog;
+	private static IReadOnlyDictionary<ModelId, MonsterHexKind>? _monsterHexByIconRelicId;
 
 	// 只在单人局出现的敌方海克斯；联机局抽取、重掷与质变都不会给出。
 	private static readonly HashSet<MonsterHexKind> SinglePlayerOnlyMonsterHexes = [MonsterHexKind.TestSubject];
@@ -125,7 +128,77 @@ internal static class MonsterHexCatalog
 	public static bool TryGetMonsterHexKind(RelicModel relic, out MonsterHexKind hex)
 	{
 		ModelId id = relic.CanonicalId();
-		return MonsterHexByIconRelicId.Value.TryGetValue(id, out hex);
+		return GetMonsterHexByIconRelicId().TryGetValue(id, out hex);
+	}
+
+	/// <summary>存档、联机载荷里的整数是否是本机注册表里的敌方海克斯（内置或外部登记）；不认识的数值由调用方丢弃。</summary>
+	public static bool TryGetRegisteredMonsterHex(int rawHex, out MonsterHexKind hex)
+	{
+		hex = (MonsterHexKind)rawHex;
+		return HextechContentRegistry.MonsterHexMetadata.AllKinds.Contains(hex);
+	}
+
+	/// <summary>
+	/// 敌方海克斯的配置 ID：内置是枚举名，外部登记的是展示遗物的 ModelId.Entry。禁用列表、分享码、控制台、遥测与界面节点名都用它，
+	/// 与 <see cref="TryGetMonsterHexByConfigId"/> 成对使用，不要直接写 <c>kind.ToString()</c> / <c>Enum.TryParse</c>。
+	/// </summary>
+	public static string GetConfigId(MonsterHexKind hex)
+	{
+		return HextechContentRegistry.MonsterHexMetadata.ConfigIdByKind.TryGetValue(hex, out string? configId)
+			? configId
+			: hex.ToString();
+	}
+
+	public static bool TryGetMonsterHexByConfigId(string? configId, out MonsterHexKind hex)
+	{
+		hex = default;
+		return configId != null
+			&& HextechContentRegistry.MonsterHexMetadata.KindByConfigId.TryGetValue(configId, out hex);
+	}
+
+	/// <summary>
+	/// 本局能否抽到该敌方海克斯。内置条目恒为 true；外部条目的展示遗物稀有度必须是 Starter（与外部我方符文同一约定），
+	/// 并经过登记时附带的过滤委托。委托抛异常时排除该项并限额告警；委托仍须只依赖同步状态，各端才会得到同一个池。
+	/// <paramref name="runState"/> 为空（离线预览、测试）时不调用委托。
+	/// </summary>
+	public static bool IsAvailableInRun(MonsterHexKind hex, IRunState? runState)
+	{
+		if (!HextechContentRegistry.MonsterHexMetadata.ExternalByKind.TryGetValue(hex, out ResolvedExternalEnemyHex? external))
+		{
+			return true;
+		}
+
+		Type displayRelicType = external.Registration.DisplayRelicType;
+		RelicModel displayRelic = ModelDb.GetById<RelicModel>(HextechExternalContentRegistry.ModelIdResolver(displayRelicType));
+		if (displayRelic.Rarity != RelicRarity.Starter)
+		{
+			if (HextechRunLogBudget.TryConsume("external-content.non-starter-enemy-hex", 12))
+			{
+				HextechLog.Warn("ExternalContent", $"External enemy hex display relic {displayRelicType.FullName} has rarity {displayRelic.Rarity}; only Starter display relics are drawn.");
+			}
+
+			return false;
+		}
+
+		Func<IRunState, bool>? availability = HextechExternalContentRegistry.GetEnemyHexAvailability(displayRelicType);
+		if (availability == null || runState == null)
+		{
+			return true;
+		}
+
+		try
+		{
+			return availability(runState);
+		}
+		catch (Exception ex)
+		{
+			if (HextechRunLogBudget.TryConsume("external-content.enemy-hex-availability-failed", 12))
+			{
+				HextechLog.Warn("ExternalContent", $"Availability predicate for enemy hex {displayRelicType.FullName} threw and the hex was excluded: {ex.GetType().Name}: {ex.Message}");
+			}
+
+			return false;
+		}
 	}
 
 	/// <summary>
@@ -215,8 +288,14 @@ internal static class MonsterHexCatalog
 
 	internal static IReadOnlyList<Type> GetEnemyHexPowerHoverTipTypes(MonsterHexKind hex)
 	{
-		return EnemyHexPowerHoverTipTypes.TryGetValue(hex, out Type[]? powerTypes)
-			? powerTypes
+		if (EnemyHexPowerHoverTipTypes.TryGetValue(hex, out Type[]? powerTypes))
+		{
+			return powerTypes;
+		}
+
+		// 外部登记的条目直接取登记的能力。
+		return HextechContentRegistry.MonsterHexMetadata.ExternalByKind.TryGetValue(hex, out ResolvedExternalEnemyHex? external)
+			? [ external.Registration.PowerType ]
 			: Array.Empty<Type>();
 	}
 
@@ -249,10 +328,26 @@ internal static class MonsterHexCatalog
 		return HextechEnemyHexContext.ClampScalingPlayerCount(count);
 	}
 
-	private static IReadOnlyDictionary<ModelId, MonsterHexKind> BuildMonsterHexByIconRelicId()
+	// 跟着注册表目录重建：外部条目晚于本体初始化登记，目录定型前的映射不能留用。
+	private static IReadOnlyDictionary<ModelId, MonsterHexKind> GetMonsterHexByIconRelicId()
+	{
+		MonsterHexMetadataCatalog catalog = HextechContentRegistry.MonsterHexMetadata;
+		lock (MonsterHexByIconRelicIdLock)
+		{
+			if (_monsterHexByIconRelicId == null || !ReferenceEquals(_monsterHexByIconRelicIdCatalog, catalog))
+			{
+				_monsterHexByIconRelicId = BuildMonsterHexByIconRelicId(catalog);
+				_monsterHexByIconRelicIdCatalog = catalog;
+			}
+
+			return _monsterHexByIconRelicId;
+		}
+	}
+
+	private static IReadOnlyDictionary<ModelId, MonsterHexKind> BuildMonsterHexByIconRelicId(MonsterHexMetadataCatalog catalog)
 	{
 		Dictionary<ModelId, MonsterHexKind> byId = new();
-		foreach (KeyValuePair<MonsterHexKind, Type> pair in HextechContentRegistry.MonsterHexMetadata.IconRelicTypes)
+		foreach (KeyValuePair<MonsterHexKind, Type> pair in catalog.IconRelicTypes)
 		{
 			RelicModel iconRelic = ModelDb.GetById<RelicModel>(ModelDb.GetId(pair.Value));
 			ModelId id = iconRelic.CanonicalId();

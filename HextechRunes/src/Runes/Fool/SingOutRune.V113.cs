@@ -111,13 +111,15 @@ public sealed partial class SingOutRune
 		}
 	}
 
-	// 曲中意、失落鲁特琴对任意旋律生效；暴力和弦只认哇，歌之道只认啾。
+	// 曲中意、失落鲁特琴对任意旋律生效；暴力和弦只认哇，歌之道只认啾——持有对应的"升级"海克斯时改为任意旋律都触发。
 	internal List<PowerModel> GetMelodyGainedPowers(CardTag melody)
 	{
+		bool violentChordAnyMelody = ViolentChordUpgradeRune.UpgradesAnyMelody(Owner);
+		bool songPathAnyMelody = SongPathUpgradeRune.UpgradesAnyMelody(Owner);
 		return Owner.Creature.Powers
 			.Where(power => power is MotifPower or LostLutePower
-				|| (power is ViolentChordPower && melody == CardTag.Wah)
-				|| (power is SongPathPower && melody == CardTag.Cho))
+				|| (power is ViolentChordPower && (melody == CardTag.Wah || violentChordAnyMelody))
+				|| (power is SongPathPower && (melody == CardTag.Cho || songPathAnyMelody)))
 			.ToList();
 	}
 
