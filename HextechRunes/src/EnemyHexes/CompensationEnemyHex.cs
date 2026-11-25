@@ -8,6 +8,8 @@ internal sealed class CompensationEnemyHex : HextechEnemyHexEffect
 	// ModifyHpLostAfterOsty 是查询钩子，只记下"最近一次查询拆出了什么"；原版只在真实伤害里、紧接着这次查询调
 	// AfterModifyingHpLostAfterOsty，由它把记录确认成待结算项，AfterEnemyDamageReceivedAny 再按目标取走施加。
 	// 不依赖伤害命令的 AsyncLocal 作用域：作用域在某一端丢失时，只有那一端不拆分，联机分歧（主机全额、客户端拆分）。
+	// 0.114.0 起查询（试算）与确认（落实）之间隔着 BeforeDamageReceived（荆棘在里面反伤，会再查询一次），
+	// 卡面伤害预览也会查询；记录改由 HextechCombatHooks.Compensation.V114.cs 在试算结束时取走、落实开始时确认。
 	private static PendingCompensation? _lastQuerySplit;
 	private static readonly List<PendingCompensation> PendingCompensations = [];
 
@@ -60,13 +62,19 @@ internal sealed class CompensationEnemyHex : HextechEnemyHexEffect
 
 	internal override void AfterModifyingHpLostAfterOsty(HextechEnemyHexContext context)
 	{
+		TakeQuerySplitConfirmation()?.Invoke();
+	}
+
+	/// <summary>取走最近一次查询的拆分记录，返回确认它的动作；没有记录时返回 null。</summary>
+	internal static Action? TakeQuerySplitConfirmation()
+	{
 		if (_lastQuerySplit is not { } split)
 		{
-			return;
+			return null;
 		}
 
 		_lastQuerySplit = null;
-		ConfirmPendingCompensation(split);
+		return () => ConfirmPendingCompensation(split);
 	}
 
 	internal override async Task AfterEnemyDamageReceivedAny(HextechEnemyHexContext context, Creature target, DamageResult result, Creature? dealer, CardModel? cardSource)

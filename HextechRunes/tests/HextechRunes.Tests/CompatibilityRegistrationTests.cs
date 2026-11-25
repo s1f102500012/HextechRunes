@@ -13,73 +13,6 @@ namespace HextechRunes.Tests;
 internal static partial class Program
 {
 	[HextechTest]
-	private static void SavedPropertyLateRegistrationFailsClosedOn0107WithoutPartialState()
-	{
-#if !STS2_109_OR_NEWER
-		Type runeType = typeof(CompatibilityLateSavedPropertyRune);
-		Type cacheType = typeof(SavedPropertiesTypeCache);
-		FieldInfo canonicalizedField = typeof(HextechSavedPropertyNetIdHooks)
-			.GetField("_registrationFrozen", BindingFlags.NonPublic | BindingFlags.Static)
-			?? throw new InvalidOperationException("SavedProperty registration-frozen field should exist");
-		FieldInfo cacheField = cacheType.GetField("_cache", BindingFlags.NonPublic | BindingFlags.Static)
-			?? throw new InvalidOperationException("0.107 SavedProperty per-type cache should exist");
-		IDictionary cache = (IDictionary)(cacheField.GetValue(null)
-			?? throw new InvalidOperationException("0.107 SavedProperty per-type cache should not be null"));
-		Action[] restore =
-		[
-			CaptureStaticCollectionRestore(cacheType, "_cache"),
-			CaptureStaticCollectionRestore(cacheType, "_propertyNameToNetIdMap"),
-			CaptureStaticCollectionRestore(cacheType, "_netIdToPropertyNameMap")
-		];
-		bool originalCanonicalized = canonicalizedField.GetValue(null) is true;
-		int originalBitSize = SavedPropertiesTypeCache.NetIdBitSize;
-		int registryVersion = HextechExternalContentRegistry.Version;
-		int registrationCount = HextechExternalContentRegistry.GetPlayerRuneRegistrations().Count;
-		try
-		{
-			cache.Remove(runeType);
-			canonicalizedField.SetValue(null, true);
-			Dictionary<string, (object? Value, int? Count)> wireBefore = new(StringComparer.Ordinal)
-			{
-				["_propertyNameToNetIdMap"] = SnapshotStaticCollection(cacheType, "_propertyNameToNetIdMap"),
-				["_netIdToPropertyNameMap"] = SnapshotStaticCollection(cacheType, "_netIdToPropertyNameMap")
-			};
-
-			ExpectThrows<InvalidOperationException>(
-				() => HextechRunesApi.RegisterPlayerRune<CompatibilityLateSavedPropertyRune>(HextechRarityTier.Silver),
-				"0.107 late SavedProperty registration should fail after net-id canonicalization");
-
-			Expect(!cache.Contains(runeType), "late failure must not populate the per-type SavedProperty cache");
-			foreach ((string fieldName, (object? beforeValue, int? beforeCount)) in wireBefore)
-			{
-				(object? afterValue, int? afterCount) = SnapshotStaticCollection(cacheType, fieldName);
-				Expect(ReferenceEquals(beforeValue, afterValue), $"{fieldName} instance after late failure");
-				Equal(beforeCount, afterCount, $"{fieldName} count after late failure");
-			}
-			Equal(originalBitSize, SavedPropertiesTypeCache.NetIdBitSize, "SavedProperty bit size after late failure");
-			Equal(registryVersion, HextechExternalContentRegistry.Version, "registry version after late failure");
-			Equal(
-				registrationCount,
-				HextechExternalContentRegistry.GetPlayerRuneRegistrations().Count,
-				"player rune registration count after late failure");
-			Expect(
-				!HextechModelPoolRegistrar.IsModelAlreadyQueuedForPool(
-					typeof(MegaCrit.Sts2.Core.Models.RelicPools.SharedRelicPool),
-					runeType),
-				"late failure must not queue the rune in the shared relic pool");
-		}
-		finally
-		{
-			canonicalizedField.SetValue(null, originalCanonicalized);
-			foreach (Action restoreCollection in restore.Reverse())
-			{
-				restoreCollection();
-			}
-		}
-#endif
-	}
-
-	[HextechTest]
 	private static void ExternalRegistrationValidationPrecedesAllSideEffects()
 	{
 		int registryVersion = HextechExternalContentRegistry.Version;
@@ -324,11 +257,7 @@ internal static partial class Program
 
 	private static IReadOnlyList<PropertyInfo>? GetSavedPropertiesForCompatibilityTest(Type type)
 	{
-#if STS2_109_OR_NEWER
 		return MegaCrit.Sts2.Core.Multiplayer.Serialization.ModelIdSerializationCache.GetJsonPropertiesForType(type);
-#else
-		return SavedPropertiesTypeCache.GetJsonPropertiesForType(type);
-#endif
 	}
 
 	private static void RegisterCompatibilityForgeModel(Type forgeType, HextechRarityTier rarity)
@@ -371,12 +300,6 @@ internal static partial class Program
 		}
 
 		return restore;
-	}
-
-	private sealed class CompatibilityLateSavedPropertyRune : HextechRelicBase
-	{
-		[SavedProperty(SerializationCondition.SaveIfNotTypeDefault)]
-		private int LateCompatibilityCounter { get; set; } = 1;
 	}
 
 	private sealed class CompatibilityInvalidRarityRune : HextechRelicBase

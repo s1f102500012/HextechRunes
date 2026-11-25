@@ -7,13 +7,11 @@ global using MegaCrit.Sts2.Core.HoverTips;
 global using MegaCrit.Sts2.Core.Localization.DynamicVars;
 global using MegaCrit.Sts2.Core.Logging;
 global using MegaCrit.Sts2.Core.Saves.Runs;
-#if STS2_109_OR_NEWER
 // 0.109.0 起 SavedPropertiesTypeCache 并入 Multiplayer.Serialization.ModelIdSerializationCache
 // (新增 category/entry/epoch 映射与 ContentSorter 确定性排序+XxHash32 哈希)。私有字段
 // _netIdToPropertyNameMap/_propertyNameToNetIdMap 同名保留,反射点经别名继续可用;
 // 差异 API(NetIdBitSize→PropertyIdBitSize、InjectTypeIntoCache 移除)在各消费点逐一 #if。
 global using SavedPropertiesTypeCache = MegaCrit.Sts2.Core.Multiplayer.Serialization.ModelIdSerializationCache;
-#endif
 // 锻造稀有度权重与海克斯稀有度权重结构相同(银/金/棱彩三个 int),合并为同一类型;
 // 保留旧名作别名,锻造侧代码与存档 JSON 形状(Silver/Gold/Prismatic)都不变。
 global using HextechForgeRarityWeights = HextechRunes.HextechRarityWeights;

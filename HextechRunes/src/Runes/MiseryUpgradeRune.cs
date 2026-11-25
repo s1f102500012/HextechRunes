@@ -42,7 +42,6 @@ public sealed class MiseryUpgradeRune : CardUpgradeRuneBase<Misery>
 			Flash([cardPlay.Target]);
 			foreach (PowerModel debuff in debuffs)
 			{
-				HextechRuneApiCompat.PrepareTemporaryPowerReapply(debuff);
 				await HextechPowerCmdCompat.Apply(debuff, cardPlay.Target, debuff.Amount, Owner.Creature, cardPlay.Card);
 			}
 		}

@@ -1,4 +1,3 @@
-#if STS2_110_OR_NEWER
 using Godot;
 using MegaCrit.Sts2.Core.Nodes.Combat;
 using MegaCrit.Sts2.Core.Nodes.Rooms;
@@ -80,4 +79,3 @@ internal static partial class HextechFormVfxSafetyHooks
 		}
 	}
 }
-#endif

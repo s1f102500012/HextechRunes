@@ -9,7 +9,7 @@ namespace HextechRunes;
 /// </summary>
 public sealed class AutomationUpgradeRune : CardUpgradeRuneBase<Automation>
 {
-	// 私有访问均对照原版 0.107.1~0.111.0：AutomationPower 私有嵌套类 Data 的公有字段 cardsLeft，
+	// 私有访问均对照原版 0.111.0：AutomationPower 私有嵌套类 Data 的公有字段 cardsLeft，
 	// PowerModel 的 protected GetInternalData<T>()。
 	// 任一缺失时进启动摘要，ShouldUseUpgradedDraw 返回 false，自动化回落原版(不追加抽牌)。
 	private static readonly Type? AutomationDataType = TryGetNestedType(typeof(AutomationPower), "Data");

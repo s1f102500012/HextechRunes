@@ -6,6 +6,8 @@ public sealed class CompensationRune : HextechRelicBase
 {
 	// 与敌方代偿相同：查询钩子只记下最近一次查询，原版只在真实伤害里紧接着调的 AfterModifyingHpLostAfterOsty 确认，
 	// AfterDamageReceived 取走施加。不依赖伤害命令的 AsyncLocal 作用域。
+	// 0.114.0 起查询（试算）与确认（落实）之间隔着 BeforeDamageReceived，记录改由
+	// HextechCombatHooks.Compensation.V114.cs 在试算结束时取走、落实开始时确认。
 	private PendingCompensation? _lastQuerySplit;
 
 	private readonly List<PendingCompensation> _pendingCompensations = [];
@@ -62,13 +64,20 @@ public sealed class CompensationRune : HextechRelicBase
 
 	public override Task AfterModifyingHpLostAfterOsty()
 	{
-		if (_lastQuerySplit is { } split)
+		TakeQuerySplitConfirmation()?.Invoke();
+		return Task.CompletedTask;
+	}
+
+	/// <summary>取走最近一次查询的拆分记录，返回确认它的动作；没有记录时返回 null。</summary>
+	internal Action? TakeQuerySplitConfirmation()
+	{
+		if (_lastQuerySplit is not { } split)
 		{
-			_lastQuerySplit = null;
-			ConfirmPendingCompensation(split);
+			return null;
 		}
 
-		return Task.CompletedTask;
+		_lastQuerySplit = null;
+		return () => ConfirmPendingCompensation(split);
 	}
 
 	public override async Task AfterDamageReceived(PlayerChoiceContext choiceContext, Creature target, DamageResult result, ValueProp props, Creature? dealer, CardModel? cardSource)

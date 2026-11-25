@@ -1,3 +1,4 @@
+#if !STS2_114_OR_NEWER
 namespace HextechRunes;
 
 internal static partial class HextechCombatHooks
@@ -22,3 +23,4 @@ internal static partial class HextechCombatHooks
 		}
 	}
 }
+#endif

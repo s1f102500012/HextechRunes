@@ -79,9 +79,16 @@ internal static partial class Program
 		TurnEnd(rune, CombatSide.Player, fool.Creature, teammate.Creature);
 		SequenceEqual(new[] { (fool.Creature, block * 2, ValueProp.Unpowered) }, FoolMelodyTestScope.BlockGains, "one arrow is impaled: two of three count");
 
+#if STS2_114_OR_NEWER
+		// 0.114.0 起原版没有“已销毁”的箭矢状态，改用再扎出一支来减少可用箭矢。
+		combat.Impale(enemy, fool);
+		TurnEnd(rune, CombatSide.Player, fool.Creature);
+		Equal((fool.Creature, block, ValueProp.Unpowered), FoolMelodyTestScope.BlockGains[^1], "two arrows are impaled: one of three counts");
+#else
 		fool.PlayerCombatState!.Arrows.First(static slot => slot.IsAvailable).Status = ArrowStatus.Destroyed;
 		TurnEnd(rune, CombatSide.Player, fool.Creature);
 		Equal((fool.Creature, block, ValueProp.Unpowered), FoolMelodyTestScope.BlockGains[^1], "a destroyed arrow does not count");
+#endif
 
 		TurnEnd(rune, CombatSide.Enemy);
 		TurnEnd(rune, CombatSide.Player, teammate.Creature);
@@ -265,31 +272,9 @@ internal static partial class Program
 	}
 
 	/// <summary>
-	/// 引吭高歌给予旋律时按能力列表结算"获得旋律时"：持有升级：歌之道 / 升级：暴力和弦时，歌之道 / 暴力和弦对任意旋律都结算。
-	/// </summary>
-	[HextechTest]
-	private static void FoolSingOutResolvesUpgradedMelodyPowersForAnyMelody()
-	{
-		using FoolMelodyTestScope scope = new();
-		using IDisposable models = InjectMissingModels(typeof(SongPathPower), typeof(ViolentChordPower));
-		(CombatState _, Player fool, Player _) = CreateFoolMelodyCombatFixture();
-		SingOutRune singOut = AttachFoolTestRune<SingOutRune>(fool);
-		PowerModel songPath = AddFoolTestPower<SongPathPower>(fool, 5);
-		PowerModel violentChord = AddFoolTestPower<ViolentChordPower>(fool, 9);
-
-		Equal(0, singOut.GetMelodyGainedPowers(CardTag.Ki).Count, "without upgrades Ki triggers neither");
-		AttachFoolTestRune<SongPathUpgradeRune>(fool);
-		SequenceEqual(new[] { songPath }, singOut.GetMelodyGainedPowers(CardTag.Ki), "upgraded Song Path resolves for Ki");
-		SequenceEqual(new[] { songPath, violentChord }, singOut.GetMelodyGainedPowers(CardTag.Wah), "Wah: upgraded Song Path and vanilla Violent Chord, in power-list order");
-		AttachFoolTestRune<ViolentChordUpgradeRune>(fool);
-		SequenceEqual(new[] { songPath, violentChord }, singOut.GetMelodyGainedPowers(CardTag.Ki), "both upgraded: Ki resolves both");
-		SequenceEqual(new[] { songPath, violentChord }, singOut.GetMelodyGainedPowers(CardTag.Cho), "both upgraded: Cho resolves both");
-	}
-
-	/// <summary>
 	/// 弦歌不辍：口径同弦外之音，本回合每种旋律首次获得时各给 {StretchPower} 点拉伸（施加者是持有者、没有来源牌）；
 	/// 一张牌带来多种新旋律一次给多份；同种再打、非旋律牌、队友出牌、敌方回合不给；下一回合重置；
-	/// 开嗓第一回合开始检查时一次给三份，引吭高歌给予的旋律在回合开始检查时算一种。
+	/// 开嗓第一回合开始检查时一次给三份。
 	/// </summary>
 	[HextechTest]
 	private static void FoolUnbrokenSongGainsStretchForEachNewMelody()
@@ -321,12 +306,6 @@ internal static partial class Program
 		Play(CreateFoolTestCard<WahChoKi>(fool));
 		Play(CreateFoolTestCard<KiVerse>(fool));
 		SequenceEqual(new[] { stretch, stretch, stretch * 3 }, Gains(), "next turn resets; one card bringing three new melodies gives three at once");
-
-		AdvanceFoolTestRound(combat, fool, teammate);
-		SingOutRune singOut = AttachFoolTestRune<SingOutRune>(fool);
-		singOut.BeforeHandDraw(fool, null!, combat).GetAwaiter().GetResult();
-		rune.AfterPlayerTurnStart(null!, fool).GetAwaiter().GetResult();
-		Equal(stretch, Gains()[^1], "a melody granted by Sing Out counts as one at turn start");
 
 		(CombatState _, Player opener, Player _) = CreateFoolMelodyCombatFixture();
 		AttachFoolTestRune<OpeningNoteRune>(opener);

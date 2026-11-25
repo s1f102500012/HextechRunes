@@ -193,11 +193,11 @@ class SecondCard : CardModel
         dist = root / "dist"
         dist.mkdir()
         (dist / "HextechRunes.json").write_text(json.dumps({"id": "HextechRunes", "has_dll": True,
-            "has_pck": True, "min_game_version": "0.107.1"}))
+            "has_pck": True, "min_game_version": "0.111.0"}))
         (dist / "HextechRunes.dll").write_bytes(b"test loader")
         (dist / "HextechRunes.pck").write_bytes(b"test pck")
         variants = []
-        for target in ("0.107.1", "0.110.0", "0.111.0"):
+        for target in ("0.111.0", "0.113.0"):
             sub = dist / "lib" / target
             sub.mkdir(parents=True)
             payload = target.encode()
@@ -217,8 +217,8 @@ class SecondCard : CardModel
             output = root / "release.zip"
             packaging.write_package(dist, output)
             with zipfile.ZipFile(output) as archive:
-                self.assertEqual(len(archive.namelist()), 10)
-                for target in ("0.107.1", "0.110.0", "0.111.0"):
+                self.assertEqual(len(archive.namelist()), 8)
+                for target in ("0.111.0", "0.113.0"):
                     self.assertEqual(archive.read(f"HextechRunes/lib/{target}/HextechRunes.dll"), target.encode())
                 self.assertFalse(any("更新日志" in name or ".DS_Store" in name for name in archive.namelist()))
 

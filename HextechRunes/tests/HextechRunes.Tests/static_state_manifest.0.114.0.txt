@@ -27,6 +27,7 @@ HextechRunes.HextechCollectionHooks._loggedFlatFallback : Boolean
 HextechRunes.HextechCollectionHooks._loggedMissingFallbackContainer : Boolean
 HextechRunes.HextechCollectionHooks._starterHeaderTemplate : String
 HextechRunes.HextechCombatHooks.ActivePlayEnergyValues : Dictionary`2 [readonly]
+HextechRunes.HextechCombatHooks.CompensationConfirmationsByResult : ConditionalWeakTable`2 [readonly]
 HextechRunes.HextechCombatHooks.DualWieldProcessedCommands : ConditionalWeakTable`2 [readonly]
 HextechRunes.HextechCombatHooks.FanTheHammerFollowUps : ConditionalWeakTable`2 [readonly]
 HextechRunes.HextechCombatHooks.OstyRedirectSlipperyByCommand : Dictionary`2 [readonly]
@@ -124,7 +125,7 @@ HextechRunes.HextechRuneSelectionScreen._noiseFragmentFont : Font
 HextechRunes.HextechRunesApi.ForgeShopPriceModifiers : List`1 [readonly]
 HextechRunes.HextechRunesInterop.ExtraActProviders : List`1 [readonly]
 HextechRunes.HextechRuntimeRuneCompatibility.HookFailedPlayerRuneTypes : HashSet`1 [readonly]
-HextechRunes.HextechSavedPropertyNetIdHooks._registrationFrozen : Boolean
+HextechRunes.HextechSavedPropertyBootstrap._officialCacheAudited : Boolean
 HextechRunes.HextechSelectionProgress.Changed : Action
 HextechRunes.HextechSelectionProgress.Completed : HashSet`1 [readonly]
 HextechRunes.HextechSelfUpgradeCardStore.BonusByCard : ConditionalWeakTable`2 [readonly]
@@ -135,7 +136,6 @@ HextechRunes.HextechSignalNoise._debugCursor : Int32
 HextechRunes.HextechSignalNoise._pendingDebug : Nullable`1
 HextechRunes.HextechSignalNoise._slain : Nullable`1
 HextechRunes.HextechSoarFloatDriver.ActiveCreatureNodes : HashSet`1 [readonly]
-HextechRunes.HextechStarterUpgradeHooks._stepDownDepth : Int32
 HextechRunes.HextechTelemetry.SubmittedRunIds : HashSet`1 [readonly]
 HextechRunes.HextechTextures.CompressedTextureCache : Dictionary`2 [readonly]
 HextechRunes.HextechTextures.TextureCache : Dictionary`2 [readonly]

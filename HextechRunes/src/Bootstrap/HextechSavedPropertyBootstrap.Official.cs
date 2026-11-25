@@ -1,4 +1,3 @@
-#if STS2_109_OR_NEWER
 using static HextechRunes.HextechHookReflection;
 
 namespace HextechRunes;
@@ -62,4 +61,3 @@ internal static partial class HextechSavedPropertyBootstrap
 		}
 	}
 }
-#endif

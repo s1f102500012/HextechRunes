@@ -31,7 +31,7 @@ internal sealed class ProteinShakeEnemyHex : HextechEnemyHexEffect
 	}
 
 	// 照原版走前置回调与格挡修正算出最终格挡量（各种格挡加成都已计入），先拿它回复已损失的生命；
-	// 没能回复的部分（回满，或治疗被禁止、被削减）照常获得格挡：后半段照搬原版 CreatureCmd.GainBlock（0.107.1 / 0.111.0 相同）。
+	// 没能回复的部分（回满，或治疗被禁止、被削减）照常获得格挡：后半段照搬原版 CreatureCmd.GainBlock（0.111.0）。
 	// 回血被改记成延迟格挡时，那部分已经换成了别的收益，算作已转换，不再作为格挡返还。
 	internal static async Task<decimal> HealThenBlock(HextechMayhemModifier modifier, Creature creature, decimal amount, ValueProp props, CardPlay? cardPlay, bool fast)
 	{

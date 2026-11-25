@@ -8,18 +8,13 @@ internal static class HextechEnemyCuttingEdgeAlchemistHooks
 {
 	private const float PotionRewardMultiplier = 0.5f;
 	private const float FloatTolerance = 0.000001f;
-	// AbstractOdds._rng（0.107.1/0.111.0 原版私有字段）：药水掉落共用的奖励 RNG。
+	// AbstractOdds._rng（0.111.0 原版私有字段）：药水掉落共用的奖励 RNG。
 	// 缺失时本敌方海克斯不再减半药水掉落（保持原版结果），缺失成员进启动摘要。
 	private static readonly FieldInfo? OddsRngField = TryGetField(typeof(AbstractOdds), "_rng");
 
 	internal readonly record struct PotionRollState(bool Active, float OriginalValue);
 
-	// 0.107.1 的 PotionRewardOdds.Roll 多一个 AscensionManager 参数（补丁目标签名随版本变化，允许行内 #if）。
-#if STS2_107_1
-	[HarmonyPatch(typeof(PotionRewardOdds), nameof(PotionRewardOdds.Roll), typeof(Player), typeof(MegaCrit.Sts2.Core.Entities.Ascension.AscensionManager), typeof(RoomType))]
-#else
 	[HarmonyPatch(typeof(PotionRewardOdds), nameof(PotionRewardOdds.Roll), typeof(Player), typeof(RoomType))]
-#endif
 	[HextechPatch("enemy-hex.cutting-edge-alchemist", "敌方海克斯:尖端炼金术士")]
 	private static class RollPatch
 	{

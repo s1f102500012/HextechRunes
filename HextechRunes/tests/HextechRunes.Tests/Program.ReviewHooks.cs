@@ -194,7 +194,6 @@ internal static partial class Program
 		rewardFinalizer.Invoke(null, [rewardState[0], failure]);
 		Equal(0, ReadDoubleVisionSuppressionDepth(), "a later failure must not restore twice");
 
-#if STS2_110_OR_NEWER
 		// 疫情响应守卫：深度守卫不是幂等的，重复出栈会弹掉外层作用域。
 		MethodInfo outbreakPrefix = FindPatchMethod(typeof(HextechCombatHooks), "OutbreakPatch", "Prefix")
 			?? throw new MissingMethodException("OutbreakPatch.Prefix");
@@ -220,7 +219,6 @@ internal static partial class Program
 		Expect(HextechCombatHooks.IsResolvingOutbreakPowerPoisonResponse, "a failure after the postfix must not pop the enclosing guard");
 		outbreakFinalizer.Invoke(null, [enclosing[0], failure]);
 		Expect(!HextechCombatHooks.IsResolvingOutbreakPowerPoisonResponse, "caller context is clean after the enclosing guard");
-#endif
 	}
 
 	/// <summary>

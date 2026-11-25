@@ -4,7 +4,7 @@
   "description": "为《海克斯大乱斗》启用部分风格更独立的赞助者物品内容。需要同时安装海克斯大乱斗本体。",
   "updateDescription": false,
   "visibility": "public",
-  "changeNote": "海斗拓展包0.10.0更新日志：\n支持游戏版本0.113.0、0.111.0和0.107.1；",
+  "changeNote": "海斗拓展包0.10.3更新日志：\n支持游戏版本0.114.0、0.113.0和0.111.0；",
   "tags": [
     "Gameplay",
     "Modifiers",

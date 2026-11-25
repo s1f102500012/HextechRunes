@@ -249,7 +249,7 @@ internal static class HextechRewardSafetyHooks
 	// 对超过 2 个备选项直接抛异常，本模组的多次浮木重掷与多份佩尔之翼献祭会超过这个上限，没有可用的 Hook 放宽它。
 	// 只在本局启用海克斯、且玩家持有浮木或佩尔之翼（或这份奖励已在按浮木次数计数）时替换，其余卡牌奖励走原版，
 	// 不挡其他模组在 Generate 上的前缀。替换体逐步复制原版（跳过/重掷 → Hook.ModifyCardRewardAlternatives），
-	// 仅去掉数量上限、按浮木数量计重掷次数并合并重复的献祭项。目标 IL 由原版拷贝守卫冻结（0.107.1/0.111.0）。
+	// 仅去掉数量上限、按浮木数量计重掷次数并合并重复的献祭项。目标 IL 由原版拷贝守卫冻结（0.111.0）。
 	[HarmonyPatch(typeof(CardRewardAlternative), nameof(CardRewardAlternative.Generate), typeof(CardReward))]
 	[HextechPatch("reward.card-alternatives", "卡牌奖励备选项")]
 	private static class CardRewardAlternativesPatch

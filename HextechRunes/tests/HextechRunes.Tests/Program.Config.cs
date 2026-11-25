@@ -682,11 +682,5 @@ internal static partial class Program
 		});
 		Equal(iconPath, HextechExternalContentRegistry.GetEnchantmentIconPath(id), "external enchantment icon path");
 
-#if !STS2_109_OR_NEWER
-		SavedProperties? props = SavedProperties.FromInternal(new ExternalRegistrationEnchantment(), id);
-		Expect(
-			props?.ints?.Any(static property => property.name == "PersistentCounter" && property.value == 7) == true,
-			"0.107 explicit SavedProperty carrier registration should inject the property");
-#endif
 	}
 }

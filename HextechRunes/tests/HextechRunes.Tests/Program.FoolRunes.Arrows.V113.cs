@@ -279,8 +279,10 @@ internal static partial class Program
 		Equal(5m, Extra(rune, fool, ArrowAttackProps, null), "deadeye adds the same again: 10 in total");
 
 		HeavyShot heavyShot = CreateFoolTestCard<HeavyShot>(fool);
-		Equal(10m, Vanilla(fool, ArrowAttackProps, heavyShot), "heavy shot doubles aim in vanilla");
-		Equal(10m, Extra(rune, fool, ArrowAttackProps, heavyShot), "deadeye doubles the heavy-shot aim again: 20 in total, 4 times the aim");
+		// 沉重射击自己的瞄准倍率随原版版本变化（0.113 为 2，0.114.0 起为 3），从牌上读。
+		decimal heavyShotAim = 5m * heavyShot.DynamicVars["AimMultiplier"].BaseValue;
+		Equal(heavyShotAim, Vanilla(fool, ArrowAttackProps, heavyShot), "heavy shot multiplies aim in vanilla");
+		Equal(heavyShotAim, Extra(rune, fool, ArrowAttackProps, heavyShot), "deadeye doubles the heavy-shot aim again");
 
 		Equal(0m, Extra(rune, fool, ValueProp.Move, null), "non-arrow damage");
 		Equal(0m, Extra(rune, fool, ValueProp.Unpowered | ValueProp.FromArrow, null), "unpowered arrow damage");
@@ -292,7 +294,7 @@ internal static partial class Program
 		fool.Creature.GetPower<AimPower>()!.BeforeAttack(registered).GetAwaiter().GetResult();
 		Equal(0m, Vanilla(fool, ArrowAttackProps, heavyShot), "vanilla gives other cards nothing during a registered attack");
 		Equal(0m, Extra(rune, fool, ArrowAttackProps, heavyShot), "neither does deadeye");
-		Equal(10m, Extra(rune, fool, ArrowAttackProps, (CardModel)registered.ModelSource!), "the registered card still gets doubled");
+		Equal(heavyShotAim, Extra(rune, fool, ArrowAttackProps, (CardModel)registered.ModelSource!), "the registered card still gets doubled");
 
 		GiveAim(teammate, 5);
 		Equal(0m, Extra(rune, teammate, ArrowAttackProps, null), "a teammate's aim is not yours");
@@ -301,7 +303,7 @@ internal static partial class Program
 		Equal(0m, Extra(CreateArrowRune<DeadeyeRune>(ironclad), ironclad, ArrowAttackProps, null), "non-Fool holders do not trigger");
 
 		rune.DynamicVars["AimMultiplier"].BaseValue = 3m;
-		Equal(20m, Extra(rune, fool, ArrowAttackProps, (CardModel)registered.ModelSource!), "a multiplier of 3 adds two more shares");
+		Equal(heavyShotAim * 2m, Extra(rune, fool, ArrowAttackProps, (CardModel)registered.ModelSource!), "a multiplier of 3 adds two more shares");
 	}
 
 	/// <summary>

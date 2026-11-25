@@ -10,7 +10,7 @@ namespace HextechRunes.Tests;
 internal static partial class Program
 {
 	/// <summary>
-	/// 注册内容三个目标一致：愚者专属三个只对愚者可用（旧目标没有愚者，任何玩家都拿不到，界面也不列出），毒雾是黄金通用。
+	/// 注册内容各目标一致：愚者专属三个只对愚者可用（旧目标没有愚者，任何玩家都拿不到，界面也不列出），毒雾是黄金通用。
 	/// </summary>
 	[HextechTest]
 	private static void ForgeAdditionsAreRegisteredWithExpectedRarityAndAvailability()

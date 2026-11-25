@@ -27,14 +27,4 @@ internal readonly record struct HextechNearDeathHpLoss(int HpLoss, bool Killed, 
 		return new HextechNearDeathHpLoss(hpLoss, Killed: false, dying, Math.Max(0, -newEffectiveHp), dying ? 1 : newEffectiveHp, OverkillDamage: 0);
 	}
 
-	// DamageResult 的 UnblockedDamage / WasTargetKilled / OverkillDamage 在三个维护版本都是 public init，直接构造即可。
-	internal DamageResult ToDamageResult(Creature creature, ValueProp props)
-	{
-		return new DamageResult(creature, props)
-		{
-			UnblockedDamage = HpLoss,
-			WasTargetKilled = Killed,
-			OverkillDamage = OverkillDamage
-		};
-	}
 }

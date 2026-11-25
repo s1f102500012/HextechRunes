@@ -11,7 +11,7 @@ using MegaCrit.Sts2.Core.Models.Powers;
 
 namespace HextechRunes.Tests;
 
-// 旋律组：开嗓、引吭高歌（直接拥有旋律）、弦外之音、三重唱、呱！（换成哇 啾 叽）。
+// 旋律组：开嗓（直接拥有旋律）、弦外之音、三重唱、呱？（换成哇 啾 叽）。
 // 原版旋律判定走真实的 MelodyCmd + 战斗历史 + 本模组的 PlayedThisTurn 后缀；获得能量 / 抽牌只记录调用（见 FoolMelodyTestScope）。
 internal static partial class Program
 {
@@ -28,7 +28,10 @@ internal static partial class Program
 
 		Expect(HextechGrantedMelodies.MelodyTags.All(tag => MelodyCmd.PlayedThisTurn(fool, tag)), "first turn grants every melody");
 		Equal(3, MelodyCmd.MelodiesThisTurn(fool), "melody count includes granted melodies");
+#if !STS2_114_OR_NEWER
+		// 0.114.0 删掉了 MelodyCmd.MelodyCardsPlayedThisTurn（原版不再按旋律牌张数计数）。
 		Equal(0, MelodyCmd.MelodyCardsPlayedThisTurn(fool), "granted melodies leave no card plays behind");
+#endif
 		Equal(0, MelodyCmd.MelodiesThisTurn(teammate), "teammate without the rune has no melodies");
 
 		combat.CurrentSide = CombatSide.Enemy;
@@ -44,95 +47,8 @@ internal static partial class Program
 	}
 
 	/// <summary>
-	/// 引吭高歌：回合开始（抽牌前）给予一种本回合尚未拥有的旋律；结果由稳定随机决定、同回合重复计算结果相同；
-	/// 下一回合旧的给予失效后重选；已拥有两种时只能给第三种；与开嗓同持的第一回合不再给予；队友的回合钩子不触发；战斗结束清空。
-	/// </summary>
-	[HextechTest]
-	private static void FoolSingOutGrantsOneMissingMelodyPerTurn()
-	{
-		using FoolMelodyTestScope scope = new();
-		(CombatState combat, Player fool, Player teammate) = CreateFoolMelodyCombatFixture();
-		SingOutRune rune = AttachFoolTestRune<SingOutRune>(fool);
-
-		Equal(0, MelodyCmd.MelodiesThisTurn(fool), "nothing granted before the turn starts");
-		rune.BeforeHandDraw(teammate, null!, combat).GetAwaiter().GetResult();
-		Equal(0, MelodyCmd.MelodiesThisTurn(fool), "a teammate's turn start does not grant");
-
-		rune.BeforeHandDraw(fool, null!, combat).GetAwaiter().GetResult();
-		Equal(1, MelodyCmd.MelodiesThisTurn(fool), "turn start grants exactly one melody");
-		CardTag first = HextechGrantedMelodies.MelodyTags.Single(tag => MelodyCmd.PlayedThisTurn(fool, tag));
-		Equal(0, MelodyCmd.MelodiesThisTurn(teammate), "teammate is unaffected");
-		rune.BeforeHandDraw(fool, null!, combat).GetAwaiter().GetResult();
-		Expect(MelodyCmd.PlayedThisTurn(fool, first) && MelodyCmd.MelodiesThisTurn(fool) == 1, "re-evaluating the same turn picks the same melody");
-
-		AdvanceFoolTestRound(combat, fool, teammate);
-		Equal(0, MelodyCmd.MelodiesThisTurn(fool), "last turn's grant expires");
-		RecordFoolTestCardPlay(combat, CreateFoolTestCard<WahTouch>(fool));
-		RecordFoolTestCardPlay(combat, CreateFoolTestCard<ChoChorus>(fool));
-		rune.BeforeHandDraw(fool, null!, combat).GetAwaiter().GetResult();
-		Expect(rune.GrantsMelodyThisTurn(CardTag.Ki), "with Wah and Cho already owned only Ki is left to grant");
-		Equal(3, MelodyCmd.MelodiesThisTurn(fool), "granted Ki completes the set");
-
-		combat.CurrentSide = CombatSide.Enemy;
-		Expect(!rune.GrantsMelodyThisTurn(CardTag.Ki), "the grant does not cover the enemy turn");
-		combat.CurrentSide = CombatSide.Player;
-		rune.AfterCombatEnd(null!).GetAwaiter().GetResult();
-		Expect(!rune.GrantsMelodyThisTurn(CardTag.Ki), "combat end clears the grant");
-
-		(CombatState combat2, Player both, Player _) = CreateFoolMelodyCombatFixture();
-		AttachFoolTestRune<OpeningNoteRune>(both);
-		SingOutRune withOpening = AttachFoolTestRune<SingOutRune>(both);
-		withOpening.BeforeHandDraw(both, null!, combat2).GetAwaiter().GetResult();
-		Expect(HextechGrantedMelodies.MelodyTags.All(tag => !withOpening.GrantsMelodyThisTurn(tag)), "with Opening Note the first turn already owns everything, so nothing is granted");
-		AdvanceFoolTestRound(combat2, both);
-		withOpening.BeforeHandDraw(both, null!, combat2).GetAwaiter().GetResult();
-		Equal(1, MelodyCmd.MelodiesThisTurn(both), "from the second turn Sing Out grants again");
-	}
-
-	/// <summary>
-	/// 引吭高歌给予旋律算"获得旋律"：曲中意、失落鲁特琴对任意旋律结算，暴力和弦只认哇、歌之道只认啾，顺序按能力列表；
-	/// 结算在抽完起手牌后的回合开始钩子里，每次给予只结算一次，队友的钩子不触发。
-	/// </summary>
-	[HextechTest]
-	private static void FoolSingOutResolvesMelodyGainedPowersOncePerGrant()
-	{
-		using FoolMelodyTestScope scope = new();
-		using IDisposable models = InjectMissingModels(typeof(MotifPower), typeof(LostLutePower), typeof(ViolentChordPower), typeof(SongPathPower));
-		(CombatState _, Player fool, Player _) = CreateFoolMelodyCombatFixture();
-		SingOutRune rune = AttachFoolTestRune<SingOutRune>(fool);
-		PowerModel songPath = AddFoolTestPower<SongPathPower>(fool, 5);
-		PowerModel motif = AddFoolTestPower<MotifPower>(fool, 2);
-		PowerModel violentChord = AddFoolTestPower<ViolentChordPower>(fool, 9);
-
-		SequenceEqual(new[] { motif, violentChord }, rune.GetMelodyGainedPowers(CardTag.Wah), "Wah: Motif and Violent Chord, in power-list order");
-		SequenceEqual(new[] { songPath, motif }, rune.GetMelodyGainedPowers(CardTag.Cho), "Cho: Song Path and Motif");
-		SequenceEqual(new[] { motif }, rune.GetMelodyGainedPowers(CardTag.Ki), "Ki: only the any-melody powers");
-
-		(CombatState combat2, Player drawer, Player other) = CreateFoolMelodyCombatFixture();
-		SingOutRune drawRune = AttachFoolTestRune<SingOutRune>(drawer);
-		AddFoolTestPower<MotifPower>(drawer, 2);
-		drawRune.AfterPlayerTurnStart(null!, drawer).GetAwaiter().GetResult();
-		Equal(0, FoolMelodyTestScope.Draws.Count, "nothing resolves before a melody is granted");
-
-		drawRune.BeforeHandDraw(drawer, null!, combat2).GetAwaiter().GetResult();
-		drawRune.AfterPlayerTurnStart(null!, other).GetAwaiter().GetResult();
-		Equal(0, FoolMelodyTestScope.Draws.Count, "a teammate's turn start does not resolve the holder's grant");
-		drawRune.AfterPlayerTurnStart(null!, drawer).GetAwaiter().GetResult();
-		SequenceEqual(new[] { (drawer, 2m) }, FoolMelodyTestScope.Draws, "Motif draws its amount when the melody is granted");
-		drawRune.AfterPlayerTurnStart(null!, drawer).GetAwaiter().GetResult();
-		Equal(1, FoolMelodyTestScope.Draws.Count, "each grant resolves only once");
-
-		AdvanceFoolTestRound(combat2, drawer, other);
-		drawRune.AfterPlayerTurnStart(null!, drawer).GetAwaiter().GetResult();
-		Equal(1, FoolMelodyTestScope.Draws.Count, "last turn's grant does not resolve again");
-		drawRune.BeforeHandDraw(drawer, null!, combat2).GetAwaiter().GetResult();
-		drawRune.AfterPlayerTurnStart(null!, drawer).GetAwaiter().GetResult();
-		Equal(2, FoolMelodyTestScope.Draws.Count, "the next turn's grant resolves again");
-	}
-
-	/// <summary>
 	/// 弦外之音：本回合每种旋律首次获得时各给 {Energy} 点能量（每回合最多三次）；一张牌同时带来多种新旋律时一次给多份；
-	/// 同种旋律再打出、非旋律牌、队友出牌、敌方回合都不给；下一回合重置；引吭高歌给予的旋律在回合开始检查时即算一种。
+	/// 同种旋律再打出、非旋律牌、队友出牌、敌方回合都不给；下一回合重置。
 	/// </summary>
 	[HextechTest]
 	private static void FoolOvertoneGainsEnergyForEachNewMelodyEachTurn()
@@ -165,15 +81,6 @@ internal static partial class Program
 		Equal((fool, energy * 3), FoolMelodyTestScope.EnergyGains[^1], "next turn resets; one card bringing all three new melodies grants three at once");
 		rune.AfterCardPlayed(null!, RecordFoolTestCardPlay(combat, CreateFoolTestCard<KiVerse>(fool))).GetAwaiter().GetResult();
 		Equal(3, FoolMelodyTestScope.EnergyGains.Count, "at most three per turn");
-
-		AdvanceFoolTestRound(combat, fool, teammate);
-		SingOutRune singOut = AttachFoolTestRune<SingOutRune>(fool);
-		singOut.BeforeHandDraw(fool, null!, combat).GetAwaiter().GetResult();
-		rune.AfterPlayerTurnStart(null!, fool).GetAwaiter().GetResult();
-		Equal((fool, energy), FoolMelodyTestScope.EnergyGains[^1], "a granted melody counts as one at turn start");
-		rune.AfterCardPlayed(null!, RecordFoolTestCardPlay(combat, CreateFoolTestCard<WahChoKi>(fool))).GetAwaiter().GetResult();
-		Equal((fool, energy * 2), FoolMelodyTestScope.EnergyGains[^1], "Wah Cho Ki after a granted melody grants only the two missing ones");
-		Equal(5, FoolMelodyTestScope.EnergyGains.Count, "granted plus played melodies are rewarded once each");
 	}
 
 	/// <summary>
@@ -265,7 +172,7 @@ internal static partial class Program
 	}
 
 	/// <summary>
-	/// 呱！：获得时按牌组顺序把基础打击与基础防御两两配对，每对换成 {Cards} 张哇 啾 叽；落单的基础牌和非基础牌不动；
+	/// 呱？：获得时按牌组顺序把基础打击与基础防御两两配对，每对换成 {Cards} 张哇 啾 叽；落单的基础牌和非基础牌不动；
 	/// 没有成对时什么都不做。原版移除 / 加牌命令换成只记录调用的前缀（测试进程没有真实存档与牌堆界面）。
 	/// </summary>
 	[HextechTest]

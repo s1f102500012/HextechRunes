@@ -133,11 +133,11 @@ def registered_tests() -> list[str]:
 
 
 def targets() -> list[str]:
-    """维护中的目标 = 仓库根 Directory.Build.targets 里定义了版本符号的目标。"""
+    """维护中的目标 = 仓库根 Directory.Build.targets 里 HextechValidateTarget 放行的目标（最低目标不定义版本符号）。"""
     project = ET.parse(ROOT.parent / "Directory.Build.targets")
-    return [match[1] for group in project.findall("PropertyGroup")
-            if (match := re.search(r"'\$\(HextechVariantTarget\)' == '([^']+)'",
-                                   group.get("Condition", "")))]
+    validator = next(target for target in project.findall("Target")
+                     if target.get("Name") == "HextechValidateTarget")
+    return re.findall(r"'\$\(HextechVariantTarget\)' != '([^']+)'", validator.get("Condition", ""))
 
 
 def focused_tests(args: argparse.Namespace) -> int:

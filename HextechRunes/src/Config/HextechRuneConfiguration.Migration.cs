@@ -57,8 +57,6 @@ internal static partial class HextechRuneConfiguration
 		new(45, [ typeof(MasterOfDualityRune) ], []),
 		// 升级：暴露、感受燃烧转为默认禁用。
 		new(47, [], [ typeof(ExposeUpgradeRune), typeof(FeelTheBurnRune) ]),
-		// 引吭高歌转为默认禁用。
-		new(48, [], [ typeof(SingOutRune) ]),
 		// "？？？"敌我双方转为默认禁用。
 		new(50, [], [ typeof(MysteryRune) ])
 	];

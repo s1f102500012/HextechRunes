@@ -401,7 +401,6 @@ internal static partial class Program
 		Equal(1, teammateGift.EnergyCost.GetWithModifiers(CostModifiers.Local), "a teammate's Largesse is not upgraded by this holder");
 	}
 
-#if STS2_108_OR_NEWER
 	/// <summary>升级：群情激愤仅联机、仅铁甲战士；加成 = 本场战斗任意玩家打出群情激愤的次数（含复制品与重放），只加在群情激愤的强化攻击上。</summary>
 	[HextechTest]
 	private static void OutrageUpgradeIsMultiplayerIroncladOnlyAndScalesWithEveryonesPlays()
@@ -441,5 +440,4 @@ internal static partial class Program
 		});
 		Equal(0m, rune.ModifyDamageAdditiveCompat(null, 9m, ValueProp.Move, owner.Creature, own), "the bonus ends with the combat history");
 	}
-#endif
 }

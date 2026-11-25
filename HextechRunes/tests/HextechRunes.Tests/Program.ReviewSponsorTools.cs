@@ -26,66 +26,52 @@ internal static partial class Program
 
 	// 宿主已知却没有对应变体时必须返回 null(停止加载),不能回退到更新或更旧小版本的变体;宿主未知才用最新变体。
 	// 只有最新变体向后兼容更新的游戏,较旧的变体只服务同一小版本。拓展包加载器以链接方式编译同一份源码,选择规则只在这里测一次。
+	// 发布清单为 0.111.0 / 0.113.0 / 0.114.0:早于最低目标的宿主(0.107、0.110)和没有对应目标的 0.112.x 都判为不支持。
 	[HextechTest]
 	private static void LoaderSelectVariantNeverFallsBackToNewerVariant()
 	{
 		MainLoader.VariantCandidate[] main =
 		[
-			new("0.107.1", new Version(0, 107, 1), "a"),
-			new("0.111.0", new Version(0, 111, 0), "c")
-		];
-		Equal("0.107.1", MainLoader.SelectVariant(main, new Version(0, 107, 1))?.CompatTarget, "exact oldest host");
-		Equal("0.107.1", MainLoader.SelectVariant(main, new Version(0, 107, 3))?.CompatTarget, "same minor patch host uses that variant");
-		Expect(MainLoader.SelectVariant(main, new Version(0, 109, 0)) == null, "retired minor between targets refuses to load");
-		Expect(MainLoader.SelectVariant(main, new Version(0, 110, 0)) == null, "retired 0.110 refuses instead of loading the 0.107.1 variant");
-		Equal("0.111.0", MainLoader.SelectVariant(main, new Version(0, 111, 0))?.CompatTarget, "exact newest host");
-		Equal("0.111.0", MainLoader.SelectVariant(main, new Version(0, 112, 0))?.CompatTarget, "newer host picks the newest variant");
-		Equal("0.111.0", MainLoader.SelectVariant(main, null)?.CompatTarget, "unknown host picks the newest variant");
-		Expect(MainLoader.SelectVariant(main, new Version(0, 106, 0)) == null, "host older than every variant refuses to load");
-		Expect(MainLoader.SelectVariant(main, new Version(0, 107, 0)) == null, "older patch of the same minor refuses to load");
-		Expect(MainLoader.SelectVariant([], null) == null, "no variants");
-
-		// 最新目标的 DLL 缺失或哈希不符被剔除后，兼容范围仍按清单声明的最新目标算，旧变体不能顶上。
-		MainLoader.VariantCandidate[] onlyOld = [ main[0] ];
-		Version declaredNewest = new(0, 111, 0);
-		Expect(MainLoader.SelectVariant(onlyOld, new Version(0, 110, 0), declaredNewest) == null, "missing latest: 0.110 host still refuses");
-		Expect(MainLoader.SelectVariant(onlyOld, new Version(0, 111, 0), declaredNewest) == null, "missing latest: 0.111 host does not fall back to 0.107.1");
-		Expect(MainLoader.SelectVariant(onlyOld, null, declaredNewest) == null, "missing latest: unknown host does not fall back to 0.107.1");
-		Equal("0.107.1", MainLoader.SelectVariant(onlyOld, new Version(0, 107, 1), declaredNewest)?.CompatTarget, "missing latest: 0.107 host still loads its own variant");
-		Expect(!MainLoader.IsCompatibleTarget(new Version(0, 107, 1), new Version(0, 111, 0), declaredNewest), "0.107.1 never serves a 0.111 host");
-		Expect(MainLoader.IsCompatibleTarget(new Version(0, 111, 0), new Version(0, 111, 0), declaredNewest), "a declared 0.111 target serves 0.111 even when its file is unusable, so the failure is not reported as an unsupported game");
-	}
-
-	// 发布清单为 0.107.1 / 0.111.0 / 0.113.0 三个目标时:0.111.0 降为较旧目标,只服务 0.111.x;
-	// 0.112.x 没有对应目标,按同一规则判为不支持;0.113.0 及更新(或未知)的宿主用 0.113.0。
-	[HextechTest]
-	private static void LoaderSelectVariantWithThreeTargets()
-	{
-		MainLoader.VariantCandidate[] main =
-		[
-			new("0.107.1", new Version(0, 107, 1), "a"),
 			new("0.111.0", new Version(0, 111, 0), "b"),
-			new("0.113.0", new Version(0, 113, 0), "c")
+			new("0.113.0", new Version(0, 113, 0), "c"),
+			new("0.114.0", new Version(0, 114, 0), "d")
 		];
-		Equal("0.107.1", MainLoader.SelectVariant(main, new Version(0, 107, 1))?.CompatTarget, "0.107.1 host");
+		Expect(MainLoader.SelectVariant(main, new Version(0, 107, 1)) == null, "retired 0.107.1 host refuses instead of loading the 0.111.0 variant");
 		Expect(MainLoader.SelectVariant(main, new Version(0, 110, 0)) == null, "retired 0.110 host refuses");
-		Equal("0.111.0", MainLoader.SelectVariant(main, new Version(0, 111, 0))?.CompatTarget, "0.111.0 host uses the now-older 0.111.0 variant");
+		Equal("0.111.0", MainLoader.SelectVariant(main, new Version(0, 111, 0))?.CompatTarget, "exact oldest 0.111.0 host");
 		Equal("0.111.0", MainLoader.SelectVariant(main, new Version(0, 111, 2))?.CompatTarget, "0.111.x patch host stays on 0.111.0");
 		Expect(MainLoader.SelectVariant(main, new Version(0, 112, 0)) == null, "0.112.0 has no target and refuses");
 		Expect(MainLoader.SelectVariant(main, new Version(0, 112, 5)) == null, "0.112.x patch has no target and refuses");
-		Equal("0.113.0", MainLoader.SelectVariant(main, new Version(0, 113, 0))?.CompatTarget, "exact newest 0.113.0 host");
-		Equal("0.113.0", MainLoader.SelectVariant(main, new Version(0, 113, 1))?.CompatTarget, "0.113.x patch host");
-		Equal("0.113.0", MainLoader.SelectVariant(main, new Version(0, 114, 0))?.CompatTarget, "newer host picks 0.113.0");
-		Equal("0.113.0", MainLoader.SelectVariant(main, null)?.CompatTarget, "unknown host picks 0.113.0");
+		Equal("0.113.0", MainLoader.SelectVariant(main, new Version(0, 113, 0))?.CompatTarget, "exact 0.113.0 host");
+		Equal("0.113.0", MainLoader.SelectVariant(main, new Version(0, 113, 1))?.CompatTarget, "0.113.x patch host stays on 0.113.0");
+		Equal("0.114.0", MainLoader.SelectVariant(main, new Version(0, 114, 0))?.CompatTarget, "exact newest 0.114.0 host");
+		Equal("0.114.0", MainLoader.SelectVariant(main, new Version(0, 114, 1))?.CompatTarget, "0.114.x patch host");
+		Equal("0.114.0", MainLoader.SelectVariant(main, new Version(0, 115, 0))?.CompatTarget, "newer host picks 0.114.0");
+		Equal("0.114.0", MainLoader.SelectVariant(main, null)?.CompatTarget, "unknown host picks 0.114.0");
+		Expect(MainLoader.SelectVariant([], null) == null, "no variants");
 
-		// 0.113.0 的 DLL 不可用被剔除后,0.111.0 不能顶上去服务 0.113 宿主,但仍服务 0.111.x。
+		// 早于最低目标单独报出(日志写明最低支持版本);0.112 这类中间版本不算“过旧”。
+		Version minimum = new(0, 111, 0);
+		Expect(MainLoader.IsOlderThanMinimumTarget(new Version(0, 107, 1), minimum), "0.107.1 is older than the minimum target");
+		Expect(MainLoader.IsOlderThanMinimumTarget(new Version(0, 110, 1), minimum), "0.110.1 is older than the minimum target");
+		Expect(!MainLoader.IsOlderThanMinimumTarget(new Version(0, 111, 0), minimum), "the minimum target itself is supported");
+		Expect(!MainLoader.IsOlderThanMinimumTarget(new Version(0, 112, 0), minimum), "a gap version is not older than the minimum");
+		Expect(!MainLoader.IsOlderThanMinimumTarget(null, minimum), "unknown host is not reported as too old");
+		Expect(!MainLoader.IsOlderThanMinimumTarget(new Version(0, 107, 1), null), "no manifest means no minimum");
+
+		// 最新目标的 DLL 缺失或哈希不符被剔除后，兼容范围仍按清单声明的最新目标算，旧变体不能顶上，但仍服务自己的小版本。
 		MainLoader.VariantCandidate[] withoutNewest = [main[0], main[1]];
-		Version declaredNewest = new(0, 113, 0);
-		Expect(MainLoader.SelectVariant(withoutNewest, new Version(0, 113, 0), declaredNewest) == null, "missing 0.113.0: 0.113 host does not fall back to 0.111.0");
-		Expect(MainLoader.SelectVariant(withoutNewest, null, declaredNewest) == null, "missing 0.113.0: unknown host does not fall back");
-		Expect(MainLoader.SelectVariant(withoutNewest, new Version(0, 112, 0), declaredNewest) == null, "missing 0.113.0: 0.112 host still refuses");
-		Equal("0.111.0", MainLoader.SelectVariant(withoutNewest, new Version(0, 111, 0), declaredNewest)?.CompatTarget, "missing 0.113.0: 0.111 host still loads its own variant");
-		Expect(!MainLoader.IsCompatibleTarget(new Version(0, 111, 0), new Version(0, 112, 0), declaredNewest), "0.111.0 never serves a 0.112 host once 0.113.0 is declared");
+		Version declaredNewest = new(0, 114, 0);
+		Expect(MainLoader.SelectVariant(withoutNewest, new Version(0, 114, 0), declaredNewest) == null, "missing 0.114.0: 0.114 host does not fall back to 0.113.0");
+		Expect(MainLoader.SelectVariant(withoutNewest, new Version(0, 115, 0), declaredNewest) == null, "missing 0.114.0: newer host does not fall back");
+		Expect(MainLoader.SelectVariant(withoutNewest, null, declaredNewest) == null, "missing 0.114.0: unknown host does not fall back");
+		Expect(MainLoader.SelectVariant(withoutNewest, new Version(0, 112, 0), declaredNewest) == null, "missing 0.114.0: 0.112 host still refuses");
+		Expect(MainLoader.SelectVariant(withoutNewest, new Version(0, 110, 0), declaredNewest) == null, "missing 0.114.0: 0.110 host still refuses");
+		Equal("0.111.0", MainLoader.SelectVariant(withoutNewest, new Version(0, 111, 0), declaredNewest)?.CompatTarget, "missing 0.114.0: 0.111 host still loads its own variant");
+		Equal("0.113.0", MainLoader.SelectVariant(withoutNewest, new Version(0, 113, 1), declaredNewest)?.CompatTarget, "missing 0.114.0: 0.113 host still loads its own variant");
+		Expect(!MainLoader.IsCompatibleTarget(new Version(0, 111, 0), new Version(0, 112, 0), declaredNewest), "0.111.0 never serves a 0.112 host");
+		Expect(!MainLoader.IsCompatibleTarget(new Version(0, 113, 0), new Version(0, 114, 0), declaredNewest), "0.113.0 never serves a 0.114 host once 0.114.0 is declared");
+		Expect(MainLoader.IsCompatibleTarget(new Version(0, 114, 0), new Version(0, 114, 0), declaredNewest), "a declared 0.114 target serves 0.114 even when its file is unusable, so the failure is not reported as an unsupported game");
 	}
 
 	// 智能应用控制拦截时 LoadFromAssemblyPath 抛带 0x800711C7 的 FileLoadException;
@@ -146,7 +132,7 @@ internal static partial class Program
 
 			File.WriteAllText(Path.Combine(root, "hextech-runes-sponsor-pack-variants.manifest"), manifest);
 			Equal("0.111.0", SponsorLoader.PickVariant(root, libRoot, new Version(0, 112, 0))?.CompatTarget, "sponsor loader reads its own manifest");
-			Expect(SponsorLoader.PickVariant(root, libRoot, new Version(0, 107, 1)) == null, "known older host: sponsor loader stops instead of loading 0.111.0");
+			Expect(SponsorLoader.PickVariant(root, libRoot, new Version(0, 107, 1)) == null, "host older than the minimum target: sponsor loader stops instead of loading 0.111.0");
 		}
 		finally
 		{

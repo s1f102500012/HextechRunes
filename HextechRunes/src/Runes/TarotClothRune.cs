@@ -2,7 +2,7 @@ namespace HextechRunes;
 
 /// <summary>
 /// 塔罗牌桌布（愚者专属）：战斗开始时，将3张随机塔罗牌加入你的抽牌堆。你打出的塔罗牌会重放1次。
-/// 本文件只放与版本无关的声明（数值、存档属性、可用性），三个变体都编译；
+/// 本文件只放与版本无关的声明（数值、存档属性、可用性），各变体都编译；
 /// 悬浮提示（引用 0.113.0 的能力/卡牌）、钩子与战斗逻辑在 <c>Fool/TarotClothRune.V113.cs</c>，只在 0.113.0 编译。
 /// </summary>
 public sealed partial class TarotClothRune : HextechRelicBase

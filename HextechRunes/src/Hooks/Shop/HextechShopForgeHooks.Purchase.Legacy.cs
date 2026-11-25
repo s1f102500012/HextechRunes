@@ -5,13 +5,13 @@ using MegaCrit.Sts2.Core.Entities.Merchant;
 
 namespace HextechRunes;
 
-// 0.107.1 / 0.111.0：商店购买只在购买者本机执行（NMerchantRelic → OnTryPurchaseWrapper），
+// 0.111.0：商店购买只在购买者本机执行（NMerchantRelic → OnTryPurchaseWrapper），
 // 其他端靠 RewardSynchronizer 的扣钱与获得遗物广播同步结果。
 internal static partial class HextechShopForgeHooks
 {
 	private const string RelicEntryPurchaseMethodName = "OnTryPurchase";
 
-	// 0.107.1 / 0.111.0 的商店布局：删牌服务向下让出第 4 个遗物槽的价格。
+	// 0.111.0 的商店布局：删牌服务向下让出第 4 个遗物槽的价格。
 	private static readonly Vector2 CardRemovalRandomForgeOffset = new(0f, 60f);
 
 	// 开店界面时补装条目：CreateForNormalMerchant 之外构造的普通商店库存在这里补上。

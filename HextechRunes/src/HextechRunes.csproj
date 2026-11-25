@@ -5,7 +5,7 @@
     <RootNamespace>HextechRunes</RootNamespace>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
-    <HextechSts2Target Condition="'$(HextechSts2Target)' == ''">0.107.1</HextechSts2Target>
+    <HextechSts2Target Condition="'$(HextechSts2Target)' == ''">0.111.0</HextechSts2Target>
     <!-- 版本符号、未知目标拦截、游戏引用目录与 sts2/GodotSharp/0Harmony 引用见仓库根 Directory.Build.targets。 -->
     <HextechUsesVariantTargets>true</HextechUsesVariantTargets>
     <HextechVariantTarget>$(HextechSts2Target)</HextechVariantTarget>

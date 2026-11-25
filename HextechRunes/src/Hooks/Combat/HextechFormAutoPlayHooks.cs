@@ -24,7 +24,7 @@ internal static class HextechFormAutoPlayHooks
 	private static readonly AsyncLocal<HextechFormAutoPlayBatchState?> ActiveBatch = new();
 
 	// CardModel.GeneratePlayCount(ICombatState, Creature?)（protected）与 PlayPowerCardFlyVfx()（private），
-	// 0.107.1/0.111.0 原版成员。前者缺失时不合并结算、回退逐张原版自动打出；后者缺失时跳过批量飞行动画。
+	// 0.111.0 原版成员。前者缺失时不合并结算、回退逐张原版自动打出；后者缺失时跳过批量飞行动画。
 	private static readonly MethodInfo? GeneratePlayCountMethod = TryGetMethod(
 		typeof(CardModel),
 		"GeneratePlayCount",
@@ -319,7 +319,7 @@ internal static class HextechFormAutoPlayHooks
 
 	// 跳过型前缀（已裁决保留，见 architecture.md）：虚空形态 OnPlay 自带 PlayerCmd.EndTurn，开局批量自动打出时
 	// 会吃掉首回合；EndTurn 没有 Hook 可否决。只在本模组形态批次的 AsyncLocal 作用域内跳过，手动出牌不受影响；
-	// 目标 IL 由原版拷贝守卫冻结（0.107.1/0.111.0）。
+	// 目标 IL 由原版拷贝守卫冻结（0.111.0）。
 	[HarmonyPatch(typeof(PlayerCmd), nameof(PlayerCmd.EndTurn), typeof(Player), typeof(bool), typeof(Func<Task>))]
 	[HextechPatch("combat.form-auto-play.end-turn", "形态开局自动打出批处理")]
 	private static class EndTurnPatch

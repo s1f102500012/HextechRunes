@@ -53,7 +53,7 @@ internal abstract class AbyssalContractBase
 	}
 
 	// 契约赠卡刻的是 Imbued,而 Imbued 只接受技能牌(CanEnchantCardType => CardType.Skill),
-	// 三张赠卡(SwordSage / Parry / SleightOfFlesh)在 0.107.1 与 0.111.0 都是 Power ——
+	// 三张赠卡(SwordSage / Parry / SleightOfFlesh)在 0.111.0 是 Power ——
 	// 走 CardCmd.Enchant 会在 CanEnchant 处直接抛 InvalidOperationException,所以这里保留
 	// EnchantInternal。附魔历史只在 card.Pile 为牌组时才记,而这里的牌尚未入堆(HextechRelicBase
 	// .AddCardCopiesToDeckOrHand 先 CreateCard、再 configure、最后才 Add),记不记都没差别。

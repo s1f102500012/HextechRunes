@@ -49,7 +49,8 @@
 
 - **科学狂人持有者的充能球超过 10 个时，每个球触发后的表现等待按 10/球数 压缩，整串触发总时长与 10 个球时相同。** 原版每次被动触发后本机等 0.1～0.25 秒（随游戏速度缩放）、其他玩家等 0.05 秒，写死在方法里；0.110 起在 `OrbModel.TriggerPassive`，0.107.1 在私有 `OrbQueue.SmallWait`（该版本生成充能球后的等待也走它，一并压缩）。只改等待时长，不改触发次数与顺序；联机两端的等待原本就不同，不影响同步。`MadScientistRune.MadScientistOrbWaitPatch`
 
-- **升级打击/防御放开上限后，“镜中倒影”与敌方“神化”的降级只降一级，其余降级（魔法骑士 `DampenPower`、`WelcomeToWongos` 等）照原版清零。** 原版所有降级都走 `CardCmd.Downgrade` 并清零，调用方不可区分；`Reflections.TouchAMirror` 的状态机单步与 `UpgradeEnemyHex` 的同步调用期间进入降一级作用域（`[ThreadStatic]` 计数，不跨 await），`CardCmd.Downgrade` 的前缀记下“原等级 - 1”、原版照常清零后由后缀按原版读档同口径逐级升回。不跳过原版，降级记录与 `DowngradeInternal` 的重建保持原样。`HextechStarterUpgradeHooks.SteppedDowngradePatch`
+- **升级打击/防御放开上限后，“镜中倒影”与敌方“神化”的降级只降一级，其余降级（魔法骑士 `DampenPower`、`WelcomeToWongos` 等）照原版清零。** 原版所有降级都走 `CardCmd.Downgrade` 并清零，调用方不可区分；`Reflections.TouchAMirror` 的状态机单步与 `UpgradeEnemyHex` 的同步调用期间进入降一级作用域（`[ThreadStatic]` 计数，不跨 await），`CardCmd.Downgrade` 的前缀记下“原等级 - 1”、原版照常清零后由后缀按原版读档同口径逐级升回。不跳过原版，降级记录与 `DowngradeInternal` 的重建保持原样。`HextechStarterUpgradeHooks.SteppedDowngradePatch`（仅 0.111.0 / 0.113.0 变体）
+- **0.114.0 起降级幅度完全跟随原版，模组不再改写。** 原版 0.114.0 把 `CardCmd.Downgrade` 改成每次只降一级（先清零再静默升回“原等级 - 1”），清零另设 `CardCmd.RemoveAllUpgrades`（魔法骑士改调它）。上一条的补丁做的就是这件事，所以 0.114.0 变体不再编入；敌方“神化”和 `WelcomeToWongos` 对任何多级牌都只降一级。`HextechStarterUpgradeHooks.StepDown.V114.cs`
 - **升级打击/防御持有者手牌里本场未打出过的牌库打击/防御显示原版金色高亮。** 通过 `CardModel.ShouldGlowGold` 后缀实现，去重口径与胜利后升级相同（按 `DeckVersion`，战斗中生成的临时牌不发光）；手牌高亮只在牌面刷新时读取，所以每次直接扫描本场出牌历史，不另建缓存。纯本机表现。`HextechStarterUpgradeHooks.UnplayedGoldGlowPatch`
 - **穿针引线只登记经原版 `CreatureCmd.Damage` 进入的伤害。** 第三方模组自己实现、不经原版伤害命令的独立伤害通道下 `CurrentActualDamageCommandId` 为 0，这类伤害不登记穿透；要适配须先明确该通道的记账、嵌套与清理边界，不能对所有伤害重复建立命令作用域。`PiercingThreadRune`、`HextechCombatHooks.DamageCommandPatch`
 - **横扫不复制私有数据不随模型复制的能力（0.113.0 的 `ImpaledPower`）。** 扎穿的箭矢存在能力的私有数据里，复制出的副本是空的，计数归零时会抛异常；原版射箭以打出的牌为来源施加扎穿，会被横扫的复制逻辑抓到。判断收在 `HextechV113ApiCompat.IsPowerExcludedFromReplication`，旧目标恒为 false。
@@ -60,7 +61,7 @@
 - **百步穿杨不另抄瞄准的加伤条件：在伤害加法修正里直接调用持有者身上 `AimPower.ModifyDamageAdditive`，把结果再加（倍率 − 1）份。** 原版瞄准只在这一处换算成伤害，沉重射击的倍率也在这里乘，所以瞄准最终贡献的伤害整体翻倍（沉重射击 X 倍变 2X 倍），卡牌预览同步变化；瞄准的登记与消耗不动。散雨射击的主命中吃瞄准因而翻倍，溅射数额复制自主命中，间接包含翻倍部分。
 - **柔韧的“获得拉伸”是持有者自己拉伸的正数变化（`AfterPowerAmountChanged`），按战斗玩家顺序分给存活队友；只跳过“施加者是别的玩家且没有来源牌”的拉伸，这正是柔韧分出去那一笔的形状，双持不会互相回传。** 队友用卡牌（瑜伽、狂喜）给的拉伸带来源牌，照常分享。可用性是“联机局且是愚者”，与其他联机专属海克斯同一闸门。
 - **回马枪的伤害取箭从射出到扎穿之间持有者对该目标造成的箭矢伤害 `DamageResult.TotalDamage`（含被格挡部分），松脱时以 `ValueProp.Unpowered` 结算；目标已死不结算。** 不吃力量与瞄准，不让扎穿计数减少，也不再触发松脱。
-- **开嗓、引吭高歌直接给予的旋律经 `MelodyCmd.PlayedThisTurn` 后缀（`fool.granted-melodies`）生效，只在持有者本方回合内算数。** 读旋律种类的原版效果与界面会算上它；按出牌历史计数的原版“获得旋律时”效果（曲中意、失落鲁特琴、暴力和弦、歌之道）不会自己触发：引吭高歌给予旋律算“获得旋律”，抽完起手牌后由它按能力列表顺序各结算一次（照原版效果调用同一条命令，数值读能力层数）；开嗓是“拥有”，不结算。之后打出同一旋律的第一张牌，原版仍按自己的规则再触发一次，不为此改原版能力。弦外之音按“持有者本回合旋律种类数的增加量”给能量（每回合每种一次，一张牌带来多种一次给完），三重唱在 `ModifyCardPlayCount` 求值那一刻按种类数是否已达 3 决定重放，直接给予的旋律都算；原版每次出牌只在开始时求一次打出次数，所以凑齐第三种的那张牌自己不重放，重放也不连锁，与塔罗牌桌布各加 1 次。引吭高歌用稳定随机，优先从本回合尚未拥有的旋律里选。
+- **开嗓直接拥有的旋律经 `MelodyCmd.PlayedThisTurn` 后缀（`fool.granted-melodies`）生效，只在持有者本方回合内算数。** 读旋律种类的原版效果与界面会算上它；按出牌历史计数的原版“获得旋律时”效果（曲中意、失落鲁特琴、暴力和弦、歌之道，0.114.0 起还有调音）不会触发，开嗓是“拥有”，不补结算。之后打出同一旋律的第一张牌，原版仍按自己的规则触发，不为此改原版能力。弦外之音按“持有者本回合旋律种类数的增加量”给能量（每回合每种一次，一张牌带来多种一次给完），三重唱在 `ModifyCardPlayCount` 求值那一刻按种类数是否已达 3 决定重放，直接拥有的旋律都算；原版每次出牌只在开始时求一次打出次数，所以凑齐第三种的那张牌自己不重放，重放也不连锁，与塔罗牌桌布各加 1 次。（引吭高歌也走过这条路并补结算“获得旋律时”，已移除，见后文。）
 - **“生成悲伤”与原版万事无忧、肥料同一口径（`AfterCardGeneratedForCombat`，生成者与牌主都是持有者），一次生成多张逐张触发。** 破涕为笑挂在弃完手牌之后的 `AfterFlush`，把手牌里的悲伤全部变化，变出的喜悦留到下个回合。
 - **水晶球、塔罗牌桌布用稳定随机从 `TarotCards.All` 里本局允许的牌中挑选，一次多张不重复，不消耗原版战斗随机流；牌进抽牌堆随机位置。** 塔罗牌按类型属于这 22 种判定，其他来源产出的塔罗牌同样重放；重放口径同其他重放海克斯，自动打出的塔罗牌也重放。升级：神话形态逐张走原版自动打出，不进形态合并结算。
 - **前奏照纯粹主义者的做法在第一回合起手那次抽牌的 `ShouldDraw` 里拦下并读出请求张数，再在 `AfterPreventingDraw` 里照原版预见（`ForegoneConclusionPower`）从抽牌堆选牌加入手牌。** “等量”是原版本应起手抽的张数（已含起手抽牌数修正、固有牌数与手牌上限），抽牌堆不多于这个数时全部加入不弹选择；不按抽牌结算，固有牌不强制选。选择用起手准备的同一个上下文，原版对每名玩家各用一个上下文，等待期间放行其他玩家。呱！照攻防一体按牌组顺序把基础打击与基础防御两两配对换成哇 啾 叽，落单的不动。
@@ -145,7 +146,7 @@
 - **该过滤只读本局冻结配置，不读本地菜单值。** 联机房主配置尚未同步时读本地值会产生不同候选池。已接受的代价：开启模组的新局种子结果也可能与旧版本不同；旧存档已生成的房间和遭遇不重置。
 - **角色专属海克斯用动态权重，没有固定位置保底。** 每名玩家新局 150%，刷出非专属 +10 个百分点、刷出本角色专属 −10 个百分点，最低 0%、无上限；三个位置依次抽取并立即使用更新后的倍率。
 - **计数依据是刷出的候选，不是最终拿取。** 重掷成功生成的候选也计一次，未发生替换不计；混沌实验室在普通候选生成之后替换，不产生第二次计数。
-- **愚者（0.113.0 新角色）专属海克斯在三个变体里都注册（同一批类名、配置 ID、注册顺序，追加在注册表末尾），0.113.0 专属逻辑只写在整文件 `#if STS2_113_OR_NEWER` 的 `src/Runes/Fool/*.V113.cs` 里，直接调用原版类型；共享代码问"是不是愚者"只经 `HextechFoolCompat`（按类型名在原版程序集里查找愚者，旧变体查不到）。** 存档 net-id 表、配置与分享码都按注册内容取身份，各变体不一致会让同一份配置在不同游戏版本上含义不同。旧变体没有愚者：`IsFoolPlayer` 恒为 false，这些符文拿不到；配置菜单、图鉴与检视列表不列出愚者池（`IsPlayerRuneTypeShownInUi`），但条目仍在可配置 ID 集合与联机禁用位图里（位图按 Entry 字典序编码、只在同版本两端之间传输，新条目自然落位与以往新增符文相同；分享码与配置文件按 ID 字符串存储，含义不变）。新增的 SavedProperty 只能声明在共享类文件里，三个变体共用一份 `saved_property_manifest.txt`。`PlayerRuneCharacterPool.Fool`、`HextechFoolCompat`、`HextechCatalog.IsPlayerRuneTypeShownInUi`
+- **愚者（0.113.0 新角色）专属海克斯在各变体里都注册（同一批类名、配置 ID、注册顺序，追加在注册表末尾），0.113.0 专属逻辑只写在整文件 `#if STS2_113_OR_NEWER` 的 `src/Runes/Fool/*.V113.cs` 里，直接调用原版类型；共享代码问"是不是愚者"只经 `HextechFoolCompat`（按类型名在原版程序集里查找愚者，旧变体查不到）。** 存档 net-id 表、配置与分享码都按注册内容取身份，各变体不一致会让同一份配置在不同游戏版本上含义不同。旧变体没有愚者：`IsFoolPlayer` 恒为 false，这些符文拿不到；配置菜单、图鉴与检视列表不列出愚者池（`IsPlayerRuneTypeShownInUi`），但条目仍在可配置 ID 集合与联机禁用位图里（位图按 Entry 字典序编码、只在同版本两端之间传输，新条目自然落位与以往新增符文相同；分享码与配置文件按 ID 字符串存储，含义不变）。新增的 SavedProperty 只能声明在共享类文件里，各变体共用一份 `saved_property_manifest.txt`。`PlayerRuneCharacterPool.Fool`、`HextechFoolCompat`、`HextechCatalog.IsPlayerRuneTypeShownInUi`
 - **倍率为零且合法池只剩专属时回退到原有标签权重，避免空选项。** 没有映射到原版角色池的模组角色不推进专属权重。
 - **权重确认后提交绝对值，不按最后三个候选反推被重掷覆盖的历史。** 远端缺倍率或格式错误时中止该选择，禁止默默回退到 150%。`HextechWeightedRuneOptions`
 - **权重存进既有 `SavedRuneSelectionJournalJson` 的 `characterWeights`（按玩家 ID 排序），没有新增或改名 SavedProperty。** 旧存档缺这部分数据时从 150% 开始；无尽循环清理选择流水时保留倍率。
@@ -160,7 +161,7 @@
 
 ## 手柄
 
-- **是否给默认焦点只看游戏自己的输入模式（0.110 起 `IsUsingDirectionalNavigation`，0.107.1 为 `IsUsingController`），鼠标玩家打开界面不出焦点框。** 不能从事件类型自己判断：Steam Input 下按键到达时已是合成的动作事件，没有原始 `InputEventJoypadButton`；不走 Steam 时第一下按键又会被原版切换手柄模式时吞掉。原版切进手柄模式和切换界面时都会聚焦 `IScreenContext.DefaultFocusedControl`，选择界面靠这个拿到焦点。`HextechControllerInput`
+- **是否给默认焦点只看游戏自己的输入模式（0.110 起 `IsUsingDirectionalNavigation`），鼠标玩家打开界面不出焦点框。** 不能从事件类型自己判断：Steam Input 下按键到达时已是合成的动作事件，没有原始 `InputEventJoypadButton`；不走 Steam 时第一下按键又会被原版切换手柄模式时吞掉。原版切进手柄模式和切换界面时都会聚焦 `IScreenContext.DefaultFocusedControl`，选择界面靠这个拿到焦点。`HextechControllerInput`
 - **原版确认键 A/× 映射为 `ui_select`，只有原版 `NClickableControl` 认它；本模组的 Godot `Button` 和自绘控件只认 `ui_accept`，而游戏里没有任何手柄键映射到 `ui_accept`。** 选择界面和配置菜单在自己子树有焦点时，把 `ui_select` 的按下和松开延后转成 `ui_accept`；原版可点击控件不转换，以免触发两次。`HextechControllerInput.TryTranslateSelectToAccept`
 - **配置菜单挂在场景根上，不是原版认得的当前界面。** 打开期间关掉主菜单的可聚焦性，否则方向导航会跨过遮罩落到背后的主菜单按钮；社区面板和上传对话框登记为子弹窗，按 B 先逐层关闭它们；LB/RB 切页签。`HextechControllerOverlay`
 - **顶栏的敌方海克斯折叠按钮接在地图按钮的左侧焦点邻居上（两者互为左右邻居）；“隐藏 UI”开关只设了可聚焦（`FocusMode.All`），没有接焦点邻居。** 两处的实机手柄可达性都未验证。`HextechEnemyHexCollapseView`、`HextechRelicVisibilityHooks.ToggleUi`
@@ -190,8 +191,15 @@
 - **自然遗物池过滤只看内容归属，不依赖洗牌步数。** 0.113.0 起 `UnstableShuffle` 先派生子随机数生成器、外层固定走 1 步；未过滤时多出的 Starter 牌堆仍会推进 UpFront 随机数，测试同时比较牌堆顺序与外层计数。
 - **移除我方“灼热攻击”及它发放的模组卡牌“灼热攻击”，敌方“潦草急就”改为默认禁用（配置版本 49 迁移一次，我方同名海克斯不变），选择界面“信号噪声”的自然触发概率改为 0（调试环境变量与控制台命令仍可触发）。** 旧存档里的该海克斯与卡牌由原版读档换成占位遗物 / `DeprecatedCard`；遥测名称表保留退役条目。
 - **移除我方“量子计算”（连同它发放的模组卡牌与专属光柱特效）和“疯狂原始人”；“？？？”敌我双方改为默认禁用（配置版本 50 各迁移一次）；“呱！”加 `FirstActExcluded`，第一幕的选择里不出现。** 两个被移除的海克斯此前已默认禁用；旧存档的处理与遥测名称表同上一条。呱！在开局就把基础牌成对换成哇 啾 叽，留到第二幕起。
+- **“呱！”改名“呱？”，去掉 `FirstActExcluded`，第一幕起可选。** 原版 0.114.0 削弱了哇 啾 叽，开局成对替换基础牌不再需要推迟；标题九语言只把感叹号换成问号，模型 ID 与配置 ID 不变。旧版本变体里的哇 啾 叽仍是削弱前的数值，按同一规则放开。
 - **敌方“红包”只去掉房间自己生成的金币奖励，按“不在该玩家 `CombatRoom.ExtraRewards` 里的 `GoldReward`”识别（引用比较）。** 原版 `RewardsSet.WithRewardsFromRoom` 先放房间奖励再追加 `ExtraRewards`，之后才调用 `Hook.ModifyRewards`；遗物、海克斯、锻造器给的金币和被偷后夺回的金币都经 `AddExtraReward`，因此不受影响。普通、精英、首领战的自然金币都去掉。`RedEnvelopeEnemyHex`
-- **属性锻造器补愚者专属三个（白银瞄准、白银拉伸、黄金箭矢）和通用四个（黄金毒雾、白银冲势、黄金黑暗、棱彩回响）；白银、黄金两档百分比最大生命的“血量锻造器”改为默认禁用（配置版本 50 迁移一次）。** 此前愚者、铁甲战士、静默猎手没有专属锻造器；最大生命在白银、黄金各有固定值与百分比两个条目，各留一个。默认禁用而不删除：已拿到的锻造器在旧存档里照常生效。通用四个的描述都写结果，实现是战斗开始时给持有者对应的原版能力（毒雾、势不可当、黑暗之拥、回响形态），时机与联机表现沿用原版能力；已有的毒液、血肉、虚空三个锻造器的描述同样改为写结果，效果不变。愚者专属的声明三个目标都编译，钩子只在 0.113.0 编译，旧目标的抽取池里不出现。`HextechForges.Fool.cs`、`NoxiousFumesForge`、`ForgeDefaultDisableMigrations`
+- **属性锻造器补愚者专属三个（白银瞄准、白银拉伸、黄金箭矢）和通用四个（黄金毒雾、白银冲势、黄金黑暗、棱彩回响）；白银、黄金两档百分比最大生命的“血量锻造器”改为默认禁用（配置版本 50 迁移一次）。** 此前愚者、铁甲战士、静默猎手没有专属锻造器；最大生命在白银、黄金各有固定值与百分比两个条目，各留一个。默认禁用而不删除：已拿到的锻造器在旧存档里照常生效。通用四个的描述都写结果，实现是战斗开始时给持有者对应的原版能力（毒雾、势不可当、黑暗之拥、回响形态），时机与联机表现沿用原版能力；已有的毒液、血肉、虚空三个锻造器的描述同样改为写结果，效果不变。愚者专属的声明各目标都编译，钩子只在 0.113.0 编译，旧目标的抽取池里不出现。`HextechForges.Fool.cs`、`NoxiousFumesForge`、`ForgeDefaultDisableMigrations`
+- **0.107.1 目标退役，发布变体改为从 0.111.0 起（当前清单见下一条），最低支持游戏版本 0.111.0。** 两个包的 `min_game_version` 改为 0.111.0，更旧的游戏由原版按清单拒绝加载；加载器对最低目标编译，宿主早于最低目标时记日志并不加载任何变体（主菜单照常提示版本不受支持），不拿 0.111.0 变体去跑更旧的游戏。只为 0.107.1 存在的 SavedProperty net-id 规范化、`Entomancer.SpitMove` 兼容补丁和加载器的旧式程序集关联一并删除。`Directory.Build.targets`、`tools/lib_build.sh`、`LoaderBootstrap`
+- **新增 0.114.0 变体，发布变体为 0.111.0 / 0.113.0 / 0.114.0。** 加载器规则不变：0.113.x 用 0.113.0 变体，0.114 及更新的游戏用 0.114.0 变体。0.113.0 变体不能在 0.114.0 上凑合用：原版改了 `CardModel.UpgradeInternal/DowngradeInternal`、`Creature.LoseHpInternal/DamageBlockInternal` 的签名，四个补丁类装不上。版本符号 `STS2_114_OR_NEWER`。
+- **0.114.0 的伤害结算改为“先试算、后落实”，濒死狂宴、穿针引线、代偿各按新流程接入（仅 0.114.0 变体）。** 原版 `CreatureCmd.Damage` 先在 `GetDamageResults` 里以 `dryRun` 调 `DamageBlockInternal` / `LoseHpInternal` 并查询全部 `ModifyHpLost*`，再派发 `BeforeDamageReceived`，最后在 `ApplyDamageResults` 里按试算结果扣格挡、扣血并派发 `AfterModifyingHpLost*`；卡面伤害预览（`GetDamageResultsPreview`）也走试算。①濒死狂宴的 `LoseHpInternal` 前缀在试算时只返回推演结果（失血量不按当前生命截断，与旧版本同口径），落实时才写生命与负血债务。②穿针引线的穿透量改在 `GetDamageResults` 入口登记（旧版本在 `BeforeDamageReceived`，0.114.0 它已晚于格挡试算），只在试算那次 `DamageBlockInternal` 里扣减，预览不登记。③代偿的“查询记下拆分 → 确认”之间现在隔着 `BeforeDamageReceived`（荆棘在里面反伤会再查询一次）和等待期间的本机卡面预览，记录改为试算结束时取走并挂在这次试算的 `DamageResults.original` 上、`ApplyDamageResults` 开始时按结果对象确认；预览的结果不落实，不会确认。`HextechCombatHooks.NearDeathFeast.LoseHp.V114.cs`、`HextechCombatHooks.PiercingThread.V114.cs`、`HextechCombatHooks.Compensation.V114.cs`
+- **额外怪物行动（珠光护手、连拨击锤）的收尾补上“死亡后移除能力并调用 `AfterRemoved`”。** 0.114.0 起原版在怪物行动或攻击途中死亡时不再当场移除能力，留到 `MonsterModel.PerformMove` / `AttackCommand.Execute` 收尾；照抄 `PerformMove` 的这段跟着补。更早的版本击杀时已经移除，这一步取到空集合。`HextechCombatHooks.PerformExtraMonsterMove`
+- **敌方“升级：实验体”对疼痛戳刺的“死前摘除 + 回合边界清理”只留在 0.111.0 / 0.113.0 变体。** 这两个版本的原版 `PainfulStabsPower` 让持有者死后留场、能力不移除，尸体会继续排意图，所以模组在死前把它摘掉。0.114.0 原版删了这两个覆写，尸体与能力走标准移除链，0.114.0 变体不再编入这段；差别是敌人攻击途中被反伤打死时，0.114.0 照原版塞伤口，旧版本不塞。`TestSubjectEnemyHex.Legacy.cs`
+- **移除我方“引吭高歌”（愚者专属，回合开始时获得一种随机旋律）。** 0.10.1 起已默认禁用；原版 0.114.0 把调音重写成新的“获得旋律时”效果后，它补结算的名单还得再跟一次，不值得继续维护。随它一起删掉的还有两个“升级”海克斯里只给它用的“任意旋律都触发”查询；愚者池其余条目的图鉴顺序各前移一位。旧存档与遥测名称表的处理同之前移除的海克斯（名称表保留条目）。
 
 ## 待实机验证
 

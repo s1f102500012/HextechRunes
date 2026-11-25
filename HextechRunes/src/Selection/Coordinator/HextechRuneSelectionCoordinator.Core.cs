@@ -551,7 +551,7 @@ internal static partial class HextechRuneSelectionCoordinator
 	}
 
 	/// <summary>
-	/// 本局仍是当前局且不在原版退出清理中。原版 RunManager.CleanUp（保存并退出/放弃，0.107.1–0.111.0 一致）
+	/// 本局仍是当前局且不在原版退出清理中。原版 RunManager.CleanUp（保存并退出/放弃，0.111.0 一致）
 	/// 先置 ShouldSave=false、IsCleaningUp=true，再清覆盖层，最后才清 State；清覆盖层会取消等待中的选择界面，
 	/// 让本局任务链在 State 仍指向本局时同步续跑。只比较 State 引用会把正在拆除的对局当成当前局继续推进本幕。
 	/// </summary>

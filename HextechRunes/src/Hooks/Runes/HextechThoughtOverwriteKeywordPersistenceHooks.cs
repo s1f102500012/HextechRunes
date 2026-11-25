@@ -136,7 +136,12 @@ internal static class HextechThoughtOverwriteKeywordPersistenceHooks
 		[HarmonyTargetMethods]
 		private static IEnumerable<MethodBase> TargetMethods()
 		{
+			// 0.114.0 起 DowngradeInternal 带降级级数参数，没有无参重载。
+#if STS2_114_OR_NEWER
+			yield return AccessTools.Method(typeof(CardModel), nameof(CardModel.DowngradeInternal), [typeof(int)]);
+#else
 			yield return AccessTools.Method(typeof(CardModel), nameof(CardModel.DowngradeInternal), Type.EmptyTypes);
+#endif
 			yield return AccessTools.Method(typeof(CardModel), nameof(CardModel.FinalizeUpgradeInternal), Type.EmptyTypes);
 		}
 

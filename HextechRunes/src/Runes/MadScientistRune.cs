@@ -54,32 +54,6 @@ public sealed class MadScientistRune : HextechRelicBase
 			: Cmd.Wait(0.05f * scale);
 	}
 
-#if STS2_107_1
-	// 跳过理由：0.107.1 的回合开始/结束逐球触发后调用私有 OrbQueue.SmallWait 做表现等待（生成充能球后也会调用），
-	// 时长写死，没有 Hook 可改。激活条件：持有本符文且球数超过 10 时按比例缩短，其余情况走原版。
-	// 原方法 IL 由 vanilla_copy_guard 冻结。
-	[HarmonyPatch(typeof(OrbQueue), "SmallWait")]
-	[HextechPatch("rune.mad-scientist.orb-wait", "科学狂人", Rune = typeof(MadScientistRune))]
-	private static class MadScientistOrbWaitPatch
-	{
-		private static readonly AccessTools.FieldRef<OrbQueue, Player> OwnerRef = AccessTools.FieldRefAccess<OrbQueue, Player>("_owner");
-
-		[HarmonyPrefix]
-		[HarmonyPriority(Priority.Low)]
-		private static bool Prefix(OrbQueue __instance, ref Task __result)
-		{
-			Player owner = OwnerRef(__instance);
-			float scale = GetOrbWaitScale(owner);
-			if (scale >= 1f)
-			{
-				return true;
-			}
-
-			__result = ScaledOrbWait(owner, scale);
-			return false;
-		}
-	}
-#else
 	// 跳过理由：0.110 起每个球的被动由 OrbModel.TriggerPassive 触发，每次触发后的表现等待写死在方法内部，没有 Hook 可改。
 	// 激活条件：持有本符文且球数超过 10 时，用同一流程（触发次数 Hook → 逐次 Passive → 等待）替换，只把等待按比例缩短；
 	// 其余情况走原版。原方法 IL 由 vanilla_copy_guard 冻结。
@@ -113,7 +87,6 @@ public sealed class MadScientistRune : HextechRelicBase
 			}
 		}
 	}
-#endif
 
 	// 跳过理由：原版 OrbCmd.AddSlots(三个版本一致)写死 amount = Min(10 - Capacity, amount)，充能球栏位上限 10
 	// 没有任何 Hook 可改。激活条件：仅对持有本符文的玩家替换为不封顶的同一流程(IsOverOrEnding 判断 → AddCapacity →

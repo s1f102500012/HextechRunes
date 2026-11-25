@@ -93,14 +93,15 @@ public sealed class NearDeathFeastRune : HextechRelicBase
 
 	// 在 Creature.LoseHpInternal 的同步前缀里运行：这里只改生命与负血债务，不发命令。
 	// 力量补差放在 AfterCurrentHpChanged：原版 CreatureCmd.Damage 只要 UnblockedDamage > 0 就会派发它
-	// （不看生命是否真的变化，0.107.1 / 0.111.0 相同），本方法返回的 UnblockedDamage 就是本次失血，
+	// （不看生命是否真的变化，0.111.0 相同），本方法返回的失血量就是那个 UnblockedDamage，
 	// 所以"生命钉在 1、只有债务增加"时同样会走到那里并被等待。
-	internal static DamageResult LoseHpAllowingDying(Creature creature, decimal amount, ValueProp props)
+	// dryRun：0.114.0 起原版每次伤害先试算再落实，卡面伤害预览也会试算；试算只返回推演结果，不写任何状态。
+	internal static HextechNearDeathHpLoss LoseHpAllowingDying(Creature creature, decimal amount, bool dryRun = false)
 	{
 		NearDeathFeastRune? rune = GetRune(creature);
 		if (rune == null || amount <= 0m)
 		{
-			return new DamageResult(creature, props);
+			return default;
 		}
 
 		HextechNearDeathHpLoss outcome = HextechNearDeathHpLoss.Resolve(
@@ -109,10 +110,14 @@ public sealed class NearDeathFeastRune : HextechRelicBase
 			creature.CurrentHp,
 			amount,
 			GetDeathNegativeHpLimit(creature));
-		rune._nearDeathActive = outcome.Dying;
-		rune._nearDeathDebt = outcome.Debt;
-		creature.SetCurrentHpInternal(outcome.CurrentHp);
-		return outcome.ToDamageResult(creature, props);
+		if (!dryRun)
+		{
+			rune._nearDeathActive = outcome.Dying;
+			rune._nearDeathDebt = outcome.Debt;
+			creature.SetCurrentHpInternal(outcome.CurrentHp);
+		}
+
+		return outcome;
 	}
 
 	internal static void ForceDeathThresholdForKill(Creature creature)
