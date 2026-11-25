@@ -6,9 +6,9 @@
     <RootNamespace>HextechRunes.Tests</RootNamespace>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
-    <HextechSts2Target Condition="'$(HextechSts2Target)' == ''">0.107.1</HextechSts2Target>
+    <HextechSts2Target Condition="'$(HextechSts2Target)' == ''">0.111.0</HextechSts2Target>
     <!-- 版本符号、未知目标拦截、引用目录与 sts2/GodotSharp/0Harmony 引用见仓库根 Directory.Build.targets。 -->
-    <!-- 测试自身也需要版本符号(如 0.108 起 SavedPropertiesTypeCache 需显式 Init);测试宿主要把游戏程序集复制到输出。 -->
+    <!-- 测试自身也需要版本符号(如 STS2_113_OR_NEWER 专属测试);测试宿主要把游戏程序集复制到输出。 -->
     <HextechUsesVariantTargets>true</HextechUsesVariantTargets>
     <HextechVariantTarget>$(HextechSts2Target)</HextechVariantTarget>
     <HextechGameRefsPrivate>true</HextechGameRefsPrivate>

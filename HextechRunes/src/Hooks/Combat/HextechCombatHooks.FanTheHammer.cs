@@ -23,7 +23,7 @@ internal static partial class HextechCombatHooks
 	// 怪物本回合没有行动等），下一次 RollMove 前把 _performedFirstMove 置回 false，让原版 RollMove
 	// 原样返回 B 而不再推进：被推进出来的那一步要么本回合连着执行，要么下回合照常执行，不会丢失。
 
-	// MonsterMoveStateMachine._currentState（MonsterState）与 _performedFirstMove（bool），0.107.1/0.111.0/0.113.0 原版私有字段；
+	// MonsterMoveStateMachine._currentState（MonsterState）与 _performedFirstMove（bool），0.111.0/0.113.0 原版私有字段；
 	// MonsterModel.NextMove 的 private setter 同三版。任一缺失时 RollMove 补丁的 Prepare 返回 false，连拨击锤整体停用。
 	private static readonly FieldInfo MoveStateMachineCurrentStateField =
 		TryGetField(typeof(MonsterMoveStateMachine), "_currentState")!;

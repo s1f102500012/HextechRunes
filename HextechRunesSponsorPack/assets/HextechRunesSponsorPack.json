@@ -4,7 +4,7 @@
   "author": "Natsuki",
   "description": "Adds more distinctive supporter-created content to ARAM: Mayhem, including extra Hextech Runes, forgers, enchantments, and an event. Requires the ARAM: Mayhem main mod.\n为海克斯大乱斗加入一批风格更独立的赞助者内容，包括额外的海克斯符文、锻造器、附魔与事件。需要同时启用海克斯大乱斗本体。",
   "version": "0.10.0",
-  "min_game_version": "0.107.1",
+  "min_game_version": "0.111.0",
   "has_pck": true,
   "has_dll": true,
   "affects_gameplay": true

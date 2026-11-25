@@ -86,11 +86,7 @@ internal static partial class Program
 
 	private static ulong GetGenerationRngCounter(Rng rng)
 	{
-#if STS2_110_OR_NEWER
 		return (ulong)rng.ToSerializable().counter;
-#else
-		return (ulong)rng.Counter;
-#endif
 	}
 
 	[HextechTest]

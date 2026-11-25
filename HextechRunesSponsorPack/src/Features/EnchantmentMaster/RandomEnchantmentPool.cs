@@ -135,7 +135,7 @@ internal static class RandomEnchantmentPool
 	{
 		List<EnchantmentModel> eligible = [];
 		List<string> excluded = [];
-		// ModelDb 只有 DebugEnchantments 一个附魔全集(0.107.1~0.111.0 都没有非 Debug 的等价 API;原版 PreloadManager
+		// ModelDb 只有 DebugEnchantments 一个附魔全集(0.111.0 都没有非 Debug 的等价 API;原版 PreloadManager
 		// 的正式加载路径同样读它)。它按类型枚举全部附魔,含测试用 mock,排除规则见上。
 		foreach (EnchantmentModel enchantment in ModelDb.DebugEnchantments)
 		{

@@ -2,7 +2,7 @@ using System.Diagnostics.CodeAnalysis;
 
 namespace HextechRunes;
 
-public sealed class PiercingThreadRune : HextechRelicBase
+public sealed partial class PiercingThreadRune : HextechRelicBase
 {
 	internal const decimal PiercingPercent = 50m;
 
@@ -31,33 +31,30 @@ public sealed class PiercingThreadRune : HextechRelicBase
 		return Task.CompletedTask;
 	}
 
-	public override Task BeforeDamageReceived(
-		PlayerChoiceContext choiceContext,
-		Creature target,
-		decimal amount,
-		ValueProp props,
-		Creature? dealer,
-		CardModel? cardSource)
+	// 在原版结算格挡之前登记这次伤害要穿透的量，随后由 Creature.DamageBlockInternal 的前缀取走。
+	// 登记入口随版本不同：0.113.x 及更早是 BeforeDamageReceived（PiercingThreadRune.Legacy.cs），
+	// 0.114.0 起原版先试算格挡再派发 BeforeDamageReceived，改由 CreatureCmd.GetDamageResults 的前缀登记
+	// （HextechCombatHooks.PiercingThread.V114.cs）。只在真实伤害命令里登记，预览与模拟不登记。
+	internal void RegisterPendingDamage(Creature target, decimal amount, ValueProp props, Creature? dealer, CardModel? cardSource)
 	{
 		if (target.Side != CombatSide.Enemy
 			|| amount <= 0m
 			|| props.HasFlag(ValueProp.Unblockable)
 			|| !IsDamageFromOwner(dealer, cardSource))
 		{
-			return Task.CompletedTask;
+			return;
 		}
 
 		long commandId = HextechCombatHooks.CurrentActualDamageCommandId;
 		int piercingDamage = CalculatePiercingDamage(amount);
 		if (commandId == 0L || piercingDamage <= 0)
 		{
-			return Task.CompletedTask;
+			return;
 		}
 
 		Creature blockReceiver = target.PetOwner?.Creature ?? target;
 		_pendingDamage.Add(new PendingPiercingDamage(commandId, blockReceiver, target, amount, props, piercingDamage));
 		RunesWithPendingDamage.Add(this);
-		return Task.CompletedTask;
 	}
 
 	internal static int CalculatePiercingDamage(decimal amount)

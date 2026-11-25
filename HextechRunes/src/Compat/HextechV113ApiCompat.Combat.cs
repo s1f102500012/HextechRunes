@@ -7,7 +7,7 @@ namespace HextechRunes;
 /// </summary>
 internal static partial class HextechV113ApiCompat
 {
-	// 君王之剑的连击段数：0.107.1/0.111.0 是 RepeatVar（DynamicVars.Repeat），0.113.0 改为 HitCountVar（DynamicVars.HitCount），
+	// 君王之剑的连击段数：0.111.0 是 RepeatVar（DynamicVars.Repeat），0.113.0 改为 HitCountVar（DynamicVars.HitCount），
 	// 原版 OnPlay 用它作 WithHitCount 的段数。0.113.0 的牌上已没有 "Repeat" 键，读旧变量会抛 KeyNotFoundException。
 	internal static int GetSovereignBladeHitCount(SovereignBlade card)
 	{
@@ -18,7 +18,7 @@ internal static partial class HextechV113ApiCompat
 #endif
 	}
 
-	// TreasureRoomRelicSynchronizer 的玩家集合私有字段：0.107.1/0.111.0 为 IPlayerCollection _playerCollection，
+	// TreasureRoomRelicSynchronizer 的玩家集合私有字段：0.111.0 为 IPlayerCollection _playerCollection，
 	// 0.113.0 改为 IRunState _runState（IRunState 继承 IPlayerCollection，按 IPlayerCollection 读取两版一致）。
 	internal const string TreasureRelicSynchronizerPlayersFieldName =
 #if STS2_113_OR_NEWER

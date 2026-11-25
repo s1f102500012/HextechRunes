@@ -12,7 +12,7 @@ public sealed partial class DoubleVisionRune : HextechRelicBase
 	private static readonly AsyncLocal<DustyTome?> SuppressedDustyTomeAfterObtained = new();
 	private static readonly AsyncLocal<Player?> PaelsWingSacrificeOwner = new();
 	private static readonly ConditionalWeakTable<EventRoom, EventRelicTransactionBatch> EventRelicTransactionBatches = new();
-	// 原版 GoldReward 私有字段 _wasGoldStolenBack(0.107.1~0.111.0)；缺失时进启动摘要，复制金币按"非夺回"处理。
+	// 原版 GoldReward 私有字段 _wasGoldStolenBack(0.111.0)；缺失时进启动摘要，复制金币按"非夺回"处理。
 	private static readonly FieldInfo? GoldRewardWasStolenBackField = HextechHookReflection.TryGetField(typeof(GoldReward), "_wasGoldStolenBack");
 
 	// 旧版本存档兼容占位：旧版本把待复制的事件遗物写进此字段；现由 EventOption.Chosen 外层事务

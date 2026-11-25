@@ -20,17 +20,10 @@ public abstract class HextechPowerBase : PowerModel
 		return 1m;
 	}
 
-#if STS2_108_OR_NEWER
 	public sealed override decimal ModifyDamageMultiplicative(Creature? target, decimal amount, ValueProp props, Creature? dealer, CardModel? cardSource, CardPlay? cardPlay)
 	{
 		return ModifyDamageMultiplicativeCompat(target, amount, props, dealer, cardSource);
 	}
-#else
-	public sealed override decimal ModifyDamageMultiplicative(Creature? target, decimal amount, ValueProp props, Creature? dealer, CardModel? cardSource)
-	{
-		return ModifyDamageMultiplicativeCompat(target, amount, props, dealer, cardSource);
-	}
-#endif
 
 	public virtual Task BeforeSideTurnStart(PlayerChoiceContext choiceContext, CombatSide side, HextechCombatState combatState)
 	{

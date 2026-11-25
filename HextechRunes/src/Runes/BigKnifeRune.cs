@@ -47,11 +47,7 @@ public sealed class BigKnifeRune : HextechRelicBase
 	}
 
 	// 0.109 起 Shiv.CreateInHand 尾部多一个可选参 Player creator。
-#if STS2_109_OR_NEWER
 	[HarmonyPatch(typeof(Shiv), nameof(Shiv.CreateInHand), typeof(Player), typeof(HextechCombatState), typeof(Player))]
-#else
-	[HarmonyPatch(typeof(Shiv), nameof(Shiv.CreateInHand), typeof(Player), typeof(HextechCombatState))]
-#endif
 	[HextechPatch("rune.big-knife.shiv-one", "大刀", Rune = typeof(BigKnifeRune))]
 	private static class ShivCreateOnePatch
 	{
@@ -69,11 +65,7 @@ public sealed class BigKnifeRune : HextechRelicBase
 		}
 	}
 
-#if STS2_109_OR_NEWER
 	[HarmonyPatch(typeof(Shiv), nameof(Shiv.CreateInHand), typeof(Player), typeof(int), typeof(HextechCombatState), typeof(Player))]
-#else
-	[HarmonyPatch(typeof(Shiv), nameof(Shiv.CreateInHand), typeof(Player), typeof(int), typeof(HextechCombatState))]
-#endif
 	[HextechPatch("rune.big-knife.shiv-many", "大刀", Rune = typeof(BigKnifeRune))]
 	private static class ShivCreateManyPatch
 	{

@@ -17,7 +17,7 @@ internal static partial class HextechCombatHooks
 	private const string TheInsatiableOpeningMoveId = "LIQUIFY_GROUND_MOVE";
 
 	// MonsterModel._isPerformingMove（bool）与 KnowledgeDemon._curseOfKnowledgeCounter（int），
-	// 0.107.1/0.111.0 原版私有字段；MoveState.Intents 后备字段见 HextechCombatHooks.Core。
+	// 0.111.0 原版私有字段；MoveState.Intents 后备字段见 HextechCombatHooks.Core。
 	// 任一缺失时两个补丁的 Prepare 都返回 false，珠光护手整组停用，补丁体内不再判空。
 	private static readonly FieldInfo MonsterIsPerformingMoveField =
 		TryGetField(typeof(MonsterModel), "_isPerformingMove")!;
@@ -29,7 +29,7 @@ internal static partial class HextechCombatHooks
 		&& MonsterIsPerformingMoveField != null
 		&& KnowledgeDemonCurseCounterField != null;
 
-	// 原版 MonsterModel.PerformMove（0.107.1/0.111.0/0.113.0）完成后，本回合的额外行动按固定顺序执行：
+	// 原版 MonsterModel.PerformMove（0.111.0/0.113.0）完成后，本回合的额外行动按固定顺序执行：
 	//   本回合行动 A（原版）→ 珠光护手重复 A → 连拨击锤推进出来的 B → 珠光护手重复 B。
 	// 珠光护手对 A、B 各自判定（键含行动 ID，同名行动结果相同），重复出来的行动不再判定，连拨击锤只在
 	// RollMove 时推进一步，所以一回合最多 4 次行动，不会连锁膨胀。头顶意图按同一顺序列出。
@@ -62,7 +62,7 @@ internal static partial class HextechCombatHooks
 	}
 
 	// 按原版 PerformMove 的同一顺序执行一次 NextMove：
-	// 等待 → 置 _isPerformingMove → MoveState.PerformMove → 记战斗历史 → 清标志 → 死亡移除 → 等待。
+	// 等待 → 置 _isPerformingMove → MoveState.PerformMove → 记战斗历史 → 清标志 → 死亡移除（0.114.0 起含移除能力）→ 等待。
 	// 原版没有"本回合额外执行一次行动"的 Hook；刻意省略 MoveStateMachine.OnMovePerformed，状态机不因此前进。
 	// 这段复制写在 Postfix 里而非跳过型前缀，因此由 HextechPatch.CopiesVanillaLogic 把 PerformMove 纳入原版拷贝守卫。
 	private static async Task<bool> PerformExtraMonsterMove(
@@ -99,9 +99,19 @@ internal static partial class HextechCombatHooks
 			MonsterIsPerformingMoveField.SetValue(monster, false);
 		}
 
-		if (creature.IsDead && Hook.ShouldCreatureBeRemovedFromCombatAfterDeath(combatState, creature))
+		if (creature.IsDead)
 		{
-			combatState.RemoveCreature(creature);
+			if (Hook.ShouldCreatureBeRemovedFromCombatAfterDeath(combatState, creature))
+			{
+				combatState.RemoveCreature(creature);
+			}
+
+			// 0.114.0 起原版在怪物行动期间死亡时不再当场移除它的能力，留到 PerformMove 收尾（这里照做）；
+			// 更早的版本击杀时已经移除过，这里取到的是空集合。
+			foreach (PowerModel power in creature.RemoveAllPowersAfterDeath().ToArray())
+			{
+				await power.AfterRemoved(creature);
+			}
 		}
 
 		await Cmd.CustomScaledWait(0.1f, 0.4f);

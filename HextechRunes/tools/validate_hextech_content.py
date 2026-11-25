@@ -279,7 +279,8 @@ def validate_enemy_hex_effect_layout(errors: list[str]) -> None:
 
         text = read(expected_path)
         # 同类效果可共用 src/EnemyHexes/*EnemyHexBase.cs 里的抽象基类（它们本身继承 HextechEnemyHexEffect）。
-        class_pattern = rf"\binternal\s+sealed\s+class\s+{expected_class}\s*:\s*(?:HextechEnemyHexEffect|\w+EnemyHexBase)\b"
+        # 按游戏版本拆成分部文件的效果写作 sealed partial class，基类仍声明在主文件里。
+        class_pattern = rf"\binternal\s+sealed\s+(?:partial\s+)?class\s+{expected_class}\s*:\s*(?:HextechEnemyHexEffect|\w+EnemyHexBase)\b"
         if not re.search(class_pattern, text):
             errors.append(f"{expected_path.relative_to(REPO_ROOT)} should declare {expected_class} : HextechEnemyHexEffect (or an *EnemyHexBase)")
 

@@ -9,7 +9,7 @@ namespace HextechRunes;
 
 internal static partial class HextechShopForgeHooks
 {
-	// MerchantInventory._relicEntries（List<MerchantRelicEntry>，0.107.1/0.111.0/0.113.0 原版私有字段）：
+	// MerchantInventory._relicEntries（List<MerchantRelicEntry>，0.111.0/0.113.0 原版私有字段）：
 	// 假商店（NFakeMerchantInventory）里移除随机锻造器条目用；缺失时条目保留，只影响假商店展示。
 	private static readonly FieldInfo? MerchantInventoryRelicEntriesField = TryGetField(typeof(MerchantInventory), "_relicEntries");
 
@@ -185,7 +185,7 @@ internal static partial class HextechShopForgeHooks
 		return new Vector2(160f, 0f);
 	}
 
-	// 跳过型前缀（已裁决保留，见 architecture.md）：原版 MerchantRelicEntry 的购买步骤（0.107.1/0.111.0 为 OnTryPurchase，
+	// 跳过型前缀（已裁决保留，见 architecture.md）：原版 MerchantRelicEntry 的购买步骤（0.111.0 为 OnTryPurchase，
 	// 0.113.0 为 OnTryPurchaseInternal，方法名见各版本分部文件）直接 RelicCmd.Obtain 条目模型，没有"购买时改发别的遗物"的 Hook；
 	// 只对本模组的随机锻造器条目替换为"选锻造器 → 扣款 → 发放"，其余条目走原版。替换体按各版本原版的扣款/历史/同步步骤复制，
 	// 两版的同步语义不同（见 PurchaseRandomForge 所在分部文件），IL 由原版拷贝守卫冻结。

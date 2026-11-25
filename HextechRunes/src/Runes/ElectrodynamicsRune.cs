@@ -28,11 +28,7 @@ public sealed class ElectrodynamicsRune : HextechRelicBase
 	}
 
 	// 0.108 起 ApplyLightningDamage 追加 isEvoke 参数。
-#if STS2_108_OR_NEWER
 	[HarmonyPatch(typeof(LightningOrb), "ApplyLightningDamage", typeof(decimal), typeof(Creature), typeof(PlayerChoiceContext), typeof(bool))]
-#else
-	[HarmonyPatch(typeof(LightningOrb), "ApplyLightningDamage", typeof(decimal), typeof(Creature), typeof(PlayerChoiceContext))]
-#endif
 	[HextechPatch("rune.electrodynamics", "电动力学", Rune = typeof(ElectrodynamicsRune))]
 	private static class ElectrodynamicsPatch
 	{

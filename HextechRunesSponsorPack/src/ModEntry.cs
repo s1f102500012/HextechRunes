@@ -73,7 +73,7 @@ public static class ModEntry
 	}
 
 	// ModManager.State 在全部 mod 的 initializer 跑完之后才置 Initialized / Skipped
-	// (public static,0.107.1 第 500/527 行、0.111.0 第 523/550 行),所以"仍是 None"等价于"注册窗口还开着"。
+	// (public static,0.111.0 第 523/550 行),所以"仍是 None"等价于"注册窗口还开着"。
 	private static bool IsModelRegistrationWindowClosed()
 	{
 		return ModManager.State != ModManagerState.None;

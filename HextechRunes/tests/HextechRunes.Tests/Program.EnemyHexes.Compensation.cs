@@ -80,6 +80,54 @@ internal static partial class Program
 		}
 	}
 
+#if STS2_114_OR_NEWER
+	// 0.114.0：原版先试算（查询）、再派发 BeforeDamageReceived、最后落实（确认）。试算结束时拆分记录被取走并挂在结果对象上，
+	// 中间插进来的查询（荆棘反伤、本机卡面预览）冲不掉它；只有被落实的那次结果才确认，预览的结果不落实就不确认。
+	[HextechTest]
+	private static void EnemyCompensationSplitSurvivesQueriesBetweenDryRunAndApply()
+	{
+		(HextechEnemyHexContext context, Player first, _) = CreatePrismaticEnemyFixture();
+		CombatState combat = (CombatState)first.Creature.CombatState!;
+		Creature enemy = CreatePrismaticTestCreature(CombatSide.Enemy, combat);
+		CompensationEnemyHex effect = new();
+		var pending = (System.Collections.IList)AccessTools.Field(typeof(CompensationEnemyHex), "PendingCompensations").GetValue(null)!;
+		MethodInfo capture = FindPatchMethod(typeof(HextechCombatHooks), "CompensationCaptureSplitPatch", "Postfix")
+			?? throw new MissingMethodException("CompensationCaptureSplitPatch.Postfix");
+		MethodInfo confirm = FindPatchMethod(typeof(HextechCombatHooks), "CompensationConfirmSplitPatch", "Prefix")
+			?? throw new MissingMethodException("CompensationConfirmSplitPatch.Prefix");
+		DamageResults DryRun(decimal amount)
+		{
+			effect.ModifyHpLostAfterOsty(context, enemy, amount, ValueProp.Move, first.Creature, null);
+			DamageResults results = new() { original = new DamageResult(enemy, ValueProp.Move) };
+			capture.Invoke(null, [combat, results]);
+			return results;
+		}
+
+		effect.ResetRunScopedState();
+		try
+		{
+			DamageResults real = DryRun(6m);
+			DamageResults preview = DryRun(10m);
+			// 荆棘在 BeforeDamageReceived 里反伤玩家：对玩家目标的查询不拆分，旧流程里它会把记录清掉。
+			effect.ModifyHpLostAfterOsty(context, first.Creature, 2m, ValueProp.Move, enemy, null);
+			effect.AfterModifyingHpLostAfterOsty(context);
+			Equal(0, pending.Count, "queries in between confirm nothing");
+
+			confirm.Invoke(null, [real]);
+			Equal(1, pending.Count, "applying the real results confirms their split");
+			confirm.Invoke(null, [real]);
+			Equal(1, pending.Count, "a result confirms once");
+			effect.AfterModifyingHpLostAfterOsty(context);
+			Equal(1, pending.Count, "the vanilla confirmation hook has nothing left to confirm");
+			GC.KeepAlive(preview);
+		}
+		finally
+		{
+			effect.ResetRunScopedState();
+		}
+	}
+#endif
+
 	[HextechTest]
 	private static void NextTurnDamageUsesTurnStartSnapshot()
 	{

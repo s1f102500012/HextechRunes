@@ -8,7 +8,7 @@ using MegaCrit.Sts2.Core.Models.Characters;
 
 namespace HextechRunes.Tests;
 
-// 愚者专属海克斯的共享部分：三个目标都要成立（注册身份、可用性闸门、界面隐藏、文案、配置编码）。
+// 愚者专属海克斯的共享部分：各目标都要成立（注册身份、可用性闸门、界面隐藏、文案、配置编码）。
 // 需要 0.113.0 类型的测试放 Program.FoolRunes.V113.cs；后续各组的战斗测试放 Program.FoolRunes.<组名>.V113.cs。
 internal static partial class Program
 {
@@ -23,7 +23,6 @@ internal static partial class Program
 		(typeof(DeadeyeRune), HextechRarityTier.Gold, "ARROW"),
 		(typeof(PartingShotRune), HextechRarityTier.Prismatic, "ARROW"),
 		(typeof(OpeningNoteRune), HextechRarityTier.Silver, "MELODY"),
-		(typeof(SingOutRune), HextechRarityTier.Gold, "MELODY"),
 		(typeof(OvertoneRune), HextechRarityTier.Gold, "MELODY"),
 		(typeof(TrioRune), HextechRarityTier.Prismatic, "MELODY"),
 		(typeof(RibbitRune), HextechRarityTier.Gold, "COMPREHENSIVE"),
@@ -49,28 +48,22 @@ internal static partial class Program
 	// 其余条目按注册表顺序从 1 起连续编号。
 	private static readonly Dictionary<Type, int> FoolRuneCharacterOrderOverrides = new()
 	{
-		[typeof(PluckRune)] = 19,
-		[typeof(RibbitRune)] = 20,
-		[typeof(PreludeRune)] = 21,
-		[typeof(HittingStrideRune)] = 22,
-		[typeof(HeldShotRune)] = 23,
-		[typeof(ElegyRune)] = 24,
-		[typeof(QuickShotUpgradeRune)] = 25,
-		[typeof(SongPathUpgradeRune)] = 26,
-		[typeof(ViolentChordUpgradeRune)] = 27,
-		[typeof(UnbrokenSongRune)] = 28
+		[typeof(PluckRune)] = 18,
+		[typeof(RibbitRune)] = 19,
+		[typeof(PreludeRune)] = 20,
+		[typeof(HittingStrideRune)] = 21,
+		[typeof(HeldShotRune)] = 22,
+		[typeof(ElegyRune)] = 23,
+		[typeof(QuickShotUpgradeRune)] = 24,
+		[typeof(SongPathUpgradeRune)] = 25,
+		[typeof(ViolentChordUpgradeRune)] = 26,
+		[typeof(UnbrokenSongRune)] = 27
 	};
-
-	// 默认禁用的愚者海克斯（仍可配置）。
-	private static readonly HashSet<Type> FoolRunesDisabledByDefault = [typeof(SingOutRune)];
-
-	// 第一幕的选择里不出现的愚者海克斯：呱！在开局就把基础牌成对换掉，留到第二幕起。
-	private static readonly HashSet<Type> FoolRunesExcludedFromFirstAct = [typeof(RibbitRune)];
 
 	private static readonly string[] FoolRuneLanguages = ["zhs", "eng", "jpn", "kor", "esp", "spa", "ptb", "rus", "tha"];
 
 	/// <summary>
-	/// 三个目标的注册内容一致：愚者海克斯追加在注册表末尾（不挪动已有条目的注册顺序），
+	/// 各目标的注册内容一致：愚者海克斯追加在注册表末尾（不挪动已有条目的注册顺序），
 	/// 都在愚者池、都可配置（配置 ID 集合与联机禁用位图里有它们），稀有度、标签、图鉴顺序与默认开关按规格。
 	/// </summary>
 	[HextechTest]
@@ -90,10 +83,9 @@ internal static partial class Program
 			Equal(expectedOrders[type], tail[i].CharacterOrder, $"{type.Name} character order");
 			Equal(rarity, tail[i].Rarity, $"{type.Name} rarity");
 			Equal(tagKey, tail[i].TagKey, $"{type.Name} tag");
-			PlayerRuneFlags expectedFlags = (FoolRunesDisabledByDefault.Contains(type) ? PlayerRuneFlags.Disabled : PlayerRuneFlags.None)
-				| (FoolRunesExcludedFromFirstAct.Contains(type) ? PlayerRuneFlags.FirstActExcluded : PlayerRuneFlags.None);
-			Equal(expectedFlags, tail[i].Flags, $"{type.Name} flags");
-			Equal(!FoolRunesExcludedFromFirstAct.Contains(type), HextechCatalog.IsPlayerRuneAllowedInAct(type, 0), $"{type.Name} in the first act's selection");
+			Equal(PlayerRuneFlags.None, tail[i].Flags, $"{type.Name} flags");
+			// 愚者海克斯都没有幕限制：呱？在 0.10.2 曾排除出第一幕，原版削弱哇 啾 叽后恢复。
+			Expect(HextechCatalog.IsPlayerRuneAllowedInAct(type, 0), $"{type.Name} in the first act's selection");
 			Expect(HextechCatalog.IsPlayerRuneAllowedInAct(type, 1), $"{type.Name} in the second act's selection");
 			Expect(configurable.Contains(ModelDb.GetId(type)), $"{type.Name} is configurable on every target");
 		}
@@ -107,14 +99,14 @@ internal static partial class Program
 	}
 
 	/// <summary>
-	/// 没有愚者的目标（0.107.1 / 0.111.0）：愚者池对应不到角色，界面不列出，任何玩家都拿不到；0.113.0 上界面照常列出。
+	/// 没有愚者的目标（0.111.0）：愚者池对应不到角色，界面不列出，任何玩家都拿不到；0.113.0 上界面照常列出。
 	/// 非愚者玩家在所有目标上都拿不到。
 	/// </summary>
 	[HextechTest]
 	private static void FoolRunesAreHiddenAndUnavailableWithoutFoolCharacter()
 	{
 		bool gameHasFool = typeof(Ironclad).Assembly.GetType("MegaCrit.Sts2.Core.Models.Characters.Fool") != null;
-		Equal(ModInfo.TargetGameVersion == "0.113.0", gameHasFool, "only the 0.113.0 game assembly has the Fool");
+		Equal(ModInfo.TargetGameVersion != "0.111.0", gameHasFool, "game assemblies from 0.113.0 on have the Fool");
 		Equal(gameHasFool, HextechFoolCompat.IsFoolCharacterAvailable, "compat detects the Fool");
 		Equal(gameHasFool, HextechPlayerContextHelper.IsCharacterPoolPresentInGame(PlayerRuneCharacterPool.Fool), "Fool pool presence");
 		Equal(gameHasFool, HextechPlayerContextHelper.GetCharacterId(PlayerRuneCharacterPool.Fool) != null, "Fool pool character id");
@@ -179,7 +171,7 @@ internal static partial class Program
 		HextechRunConfigurationSnapshot defaults = HextechRuneConfiguration.GetDefaultSnapshot();
 		foreach ((Type type, _, _) in FoolRuneRegistrations)
 		{
-			Equal(FoolRunesDisabledByDefault.Contains(type), defaults.DisabledPlayerRuneIds.Contains(ModelDb.GetId(type).Entry), $"{type.Name} default disabled state");
+			Expect(!defaults.DisabledPlayerRuneIds.Contains(ModelDb.GetId(type).Entry), $"{type.Name} is enabled by default");
 		}
 
 		string[] disabled = [ModelDb.GetId<SlapRune>().Entry, ModelDb.GetId<TauntRune>().Entry, ModelDb.GetId<TarotClothRune>().Entry];

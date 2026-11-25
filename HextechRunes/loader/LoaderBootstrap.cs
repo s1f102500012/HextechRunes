@@ -1,12 +1,8 @@
-using System.Collections;
-using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
 using System.Runtime.Loader;
 using System.Security.Cryptography;
 using System.Text.Json;
-using HarmonyLib;
 using MegaCrit.Sts2.Core.Debug;
-using MegaCrit.Sts2.Core.Helpers;
 using MegaCrit.Sts2.Core.Logging;
 using MegaCrit.Sts2.Core.Modding;
 
@@ -23,29 +19,9 @@ public static partial class LoaderBootstrap
 {
 	internal const string LogPrefix = "[" + ModId + ".Loader] ";
 	private const string RealDllName = ModId + ".dll";
-	private const string ReflectionBridgeHarmonyId = "Natsuki." + ModId + ".Loader.ReflectionBridge";
 	private const string CompatTargetMarkerName = "compat-target.txt";
-	private const BindingFlags InstanceMembers = BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic;
-
-	private static readonly MethodInfo? AssociateAssemblyWithModMethod =
-		typeof(ModManager).GetMethod(
-			"AssociateAssemblyWithMod",
-			BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic,
-			binder: null,
-			[typeof(string), typeof(Assembly)],
-			modifiers: null);
-
-	// 加载器只针对 0.107.1 编译,下面两个字段按名字读取:Mod.assemblies 与 AssociateAssemblyWithMod 同在 0.108+,
-	// 0.107.x 两者都没有,只有单个 Mod.assembly。
-	private static readonly FieldInfo? ModAssembliesField = typeof(Mod).GetField("assemblies", InstanceMembers);
-
-	private static readonly FieldInfo? LegacyModAssemblyField = typeof(Mod).GetField("assembly", InstanceMembers);
 
 	private static VariantCandidate? _deferredVariant;
-	private static Assembly? _selectedVariantAssembly;
-	private static Type[] _selectedVariantTypes = [];
-	private static bool _reflectionBridgeInstalled;
-	private static bool _legacyAssociationCallbackInstalled;
 
 	public static void Initialize()
 	{
@@ -75,13 +51,24 @@ public static partial class LoaderBootstrap
 				"using the newest bundled variant.");
 		}
 
-		VariantCandidate? variant = PickVariant(loaderDirectory, libRoot, host.Numeric, out bool hostUnsupported);
+		VariantCandidate? variant = PickVariant(loaderDirectory, libRoot, host.Numeric, out bool hostUnsupported, out Version? minimumTarget);
 		if (variant == null)
 		{
 			// 变体全部无效,或已知宿主没有不高于它的有效变体(对应变体缺失/哈希不符/宿主早于最低支持版本):显式停止。
-			Log.Error(
-				$"{LogPrefix}No valid variant under {libRoot} compatible with host " +
-				$"{host.ReleaseLabel ?? host.Numeric?.ToString() ?? "unknown"}; refusing to load a newer variant.");
+			string hostLabel = host.ReleaseLabel ?? host.Numeric?.ToString() ?? "unknown";
+			if (IsOlderThanMinimumTarget(host.Numeric, minimumTarget))
+			{
+				// 清单的 min_game_version 通常已让游戏拒绝加载本模组;这里兜底,不拿最低目标去跑更旧的游戏。
+				Log.Error(
+					$"{LogPrefix}Host version {hostLabel} is older than the minimum supported game version " +
+					$"{minimumTarget}; no variant is loaded.");
+			}
+			else
+			{
+				Log.Error(
+					$"{LogPrefix}No valid variant under {libRoot} compatible with host " +
+					$"{hostLabel}; refusing to load a newer variant.");
+			}
 			_hostVersionLabel = host.ReleaseLabel ?? host.Numeric?.ToString();
 			ReportLoadFailure(hostUnsupported ? LoadFailureKind.UnsupportedGameVersion : LoadFailureKind.Other);
 			return;
@@ -266,41 +253,6 @@ public static partial class LoaderBootstrap
 		}
 	}
 
-	private static void InstallReflectionBridge()
-	{
-		if (_reflectionBridgeInstalled)
-		{
-			return;
-		}
-
-		if (_selectedVariantAssembly != null)
-		{
-			_selectedVariantTypes = GetLoadableTypes(_selectedVariantAssembly).ToArray();
-		}
-
-		MethodInfo? getter =
-			AccessTools.PropertyGetter(typeof(ReflectionHelper), nameof(ReflectionHelper.ModTypes));
-		if (getter == null)
-		{
-			throw new MissingMethodException("ReflectionHelper.ModTypes getter was not found.");
-		}
-
-		new Harmony(ReflectionBridgeHarmonyId).Patch(
-			getter,
-			postfix: new HarmonyMethod(
-				typeof(LoaderBootstrap),
-				nameof(ReflectionHelperModTypesPostfix)));
-		_reflectionBridgeInstalled = true;
-	}
-
-	private static void ReflectionHelperModTypesPostfix(ref Type[] __result)
-	{
-		if (_selectedVariantTypes.Length > 0)
-		{
-			__result = __result.Concat(_selectedVariantTypes).Distinct().ToArray();
-		}
-	}
-
 	private static IEnumerable<Type> GetLoadableTypes(Assembly assembly)
 	{
 		try
@@ -316,84 +268,21 @@ public static partial class LoaderBootstrap
 		}
 	}
 
-	// 两条路径,只走一条:
-	//   ① 0.108+ ModManager.AssociateAssemblyWithMod → 游戏自己把变体程序集并入 Mod.assemblies,类型发现随之生效。
-	//      初始化器运行时本模组状态必为 None,原版在这一状态下总会登记成功,所以不再另写反射追加的回退。
-	//   ② 0.107.x 只有单个 Mod.assembly 字段,且 ModManager 在初始化器返回后会用 loader 覆盖它,
-	//      只能在 OnModDetected 里替换,并补 ReflectionHelper.ModTypes 后缀让类型发现看到变体。
-	// ① 成功后绝不再装 ReflectionHelper.ModTypes 后缀:两条路径同时贡献类型会让 ModelDb 把同一个类型
-	// 看成两个,进而触发 "Two AbstractModels X and X share an ID" 的自比较告警。
+	// ModManager.AssociateAssemblyWithMod 让游戏把变体程序集并入 Mod.assemblies,类型发现随之生效。
+	// 初始化器运行时本模组状态必为 None(拓展包延迟加载时仍在初始化循环内),原版在这一状态下总会登记成功;
+	// 万一没登记上就按加载失败处理,不让未进入类型发现的变体继续初始化。
 	private static void AssociateVariantAssemblyWithGame(Assembly assembly)
 	{
-		_selectedVariantAssembly = assembly;
-
-		if (AssociateAssemblyWithModMethod != null)
-		{
-			try
-			{
-				AssociateAssemblyWithModMethod.Invoke(null, [ModId, assembly]);
-				if (IsAssemblyAssociatedWithMod(assembly))
-				{
-					Log.Info($"{LogPrefix}Variant associated via ModManager.AssociateAssemblyWithMod.");
-					return;
-				}
-			}
-			catch (Exception exception)
-			{
-				Log.Warn(
-					$"{LogPrefix}AssociateAssemblyWithMod failed: " +
-					$"{exception.GetBaseException().Message}");
-			}
-		}
-
-		InstallReflectionBridge();
-		// 拓展包延迟加载时,自己的 OnModDetected 早已触发,直接替换记录里的程序集。
-		if (LegacyModAssemblyField != null && TryFindMod(out Mod? detectedMod) && detectedMod.state != ModLoadState.None)
-		{
-			OnLegacyModDetected(detectedMod);
-			return;
-		}
-
-		if (LegacyModAssemblyField != null && !_legacyAssociationCallbackInstalled)
-		{
-			ModManager.OnModDetected += OnLegacyModDetected;
-			_legacyAssociationCallbackInstalled = true;
-			return;
-		}
-
-		Log.Warn(
-			$"{LogPrefix}Could not associate the selected variant " +
-			"with ModManager; type discovery will rely on the reflection bridge.");
-	}
-
-	private static void OnLegacyModDetected(Mod mod)
-	{
-		if (_selectedVariantAssembly == null
-			|| !string.Equals(mod.manifest?.id, ModId, StringComparison.Ordinal))
-		{
-			return;
-		}
-
-		LegacyModAssemblyField?.SetValue(mod, _selectedVariantAssembly);
-		ModManager.OnModDetected -= OnLegacyModDetected;
-		_legacyAssociationCallbackInstalled = false;
-		Log.Info(
-			$"{LogPrefix}Associated variant " +
-			$"{_selectedVariantAssembly.GetName().Name} with the STS2 0.107.x mod record.");
-	}
-
-	private static bool IsAssemblyAssociatedWithMod(Assembly assembly)
-	{
-		return TryFindMod(out Mod? mod)
-			&& ModAssembliesField?.GetValue(mod) is IList assemblies
-			&& assemblies.Cast<object>().Any(item => ReferenceEquals(item, assembly));
-	}
-
-	private static bool TryFindMod([NotNullWhen(true)] out Mod? mod)
-	{
-		mod = ModManager.Mods.FirstOrDefault(candidate =>
+		ModManager.AssociateAssemblyWithMod(ModId, assembly);
+		Mod? mod = ModManager.Mods.FirstOrDefault(candidate =>
 			string.Equals(candidate.manifest?.id, ModId, StringComparison.Ordinal));
-		return mod != null;
+		if (mod?.assemblies.Contains(assembly) != true)
+		{
+			throw new InvalidOperationException(
+				$"ModManager.AssociateAssemblyWithMod did not associate {assembly.GetName().Name} with mod {ModId}.");
+		}
+
+		Log.Info($"{LogPrefix}Variant associated via ModManager.AssociateAssemblyWithMod.");
 	}
 
 	private static void InvokeRealInitializer(Assembly assembly)
@@ -429,20 +318,23 @@ public static partial class LoaderBootstrap
 		string libRoot,
 		Version? host)
 	{
-		return PickVariant(loaderDirectory, libRoot, host, out _);
+		return PickVariant(loaderDirectory, libRoot, host, out _, out _);
 	}
 
 	/// <param name="hostUnsupported">宿主已知但没有对应的变体（早于所有变体，或落在已退役的中间版本），即游戏版本不受支持;用于给玩家正确的提示。</param>
+	/// <param name="minimumTarget">清单声明的最低目标，即最低支持的游戏版本；清单不可用时为 null。</param>
 	internal static VariantCandidate? PickVariant(
 		string loaderDirectory,
 		string libRoot,
 		Version? host,
-		out bool hostUnsupported)
+		out bool hostUnsupported,
+		out Version? minimumTarget)
 	{
 		List<VariantCandidate> variants =
 			LoadVariantManifest(loaderDirectory, libRoot, out List<Version> declaredTargets)
 				.OrderBy(candidate => candidate.Version)
 				.ToList();
+		minimumTarget = declaredTargets.Count > 0 ? declaredTargets.Min() : null;
 		// 兼容范围按清单声明的全部目标算，不看文件是否可用：最新目标的 DLL 缺失或哈希不符时，
 		// 不能把较旧的变体当成“最新”去服务更新的游戏。
 		Version? newestDeclared = declaredTargets.Count > 0 ? declaredTargets.Max() : null;
@@ -486,8 +378,8 @@ public static partial class LoaderBootstrap
 	}
 
 	/// <summary>
-	/// 只有声明的最新目标向后兼容更新（或未知版本）的游戏；较旧的目标只服务同一小版本（0.107.x 用 0.107.1）。
-	/// 已退役的中间版本（0.108–0.110）没有对应目标，不能套用更旧的变体。
+	/// 只有声明的最新目标向后兼容更新（或未知版本）的游戏；较旧的目标只服务同一小版本（0.111.x 用 0.111.0）。
+	/// 没有对应目标的中间版本（如 0.112）和早于最低目标的版本（如 0.107、0.110）都不能套用别的变体。
 	/// </summary>
 	internal static bool IsCompatibleTarget(Version target, Version? host, Version newestDeclared)
 	{
@@ -499,6 +391,12 @@ public static partial class LoaderBootstrap
 		return target <= host
 			&& target.Major == host.Major
 			&& target.Minor == host.Minor;
+	}
+
+	/// <summary>已知宿主早于清单声明的最低目标（最低支持的游戏版本）。</summary>
+	internal static bool IsOlderThanMinimumTarget(Version? host, Version? minimumTarget)
+	{
+		return host != null && minimumTarget != null && host < minimumTarget;
 	}
 
 	private static List<VariantCandidate> LoadVariantManifest(
@@ -644,7 +542,7 @@ public static partial class LoaderBootstrap
 	private static HostVersionSnapshot ResolveHostVersion()
 	{
 		// 原版懒单例:构造时按可执行文件目录查找 release_info.json(macOS 先找 ../Resources),
-		// 读不到或解析失败都在内部记日志并返回 null,不抛异常。0.107.1–0.111.0 的查找路径一致。
+		// 读不到或解析失败都在内部记日志并返回 null,不抛异常。0.111.0–0.113.0 的查找路径一致。
 		string? label = ReleaseInfoManager.Instance.ReleaseInfo?.Version;
 		if (string.IsNullOrWhiteSpace(label))
 		{

@@ -266,7 +266,6 @@ internal static partial class Program
 	[HextechTest]
 	private static void SavedPropertyPreInitRegistrationLeavesWireTablesUntouched()
 	{
-#if STS2_109_OR_NEWER
 		Type cacheType = typeof(MegaCrit.Sts2.Core.Multiplayer.Serialization.ModelIdSerializationCache);
 		string[] wireFieldNames =
 		[
@@ -287,30 +286,19 @@ internal static partial class Program
 			Expect(ReferenceEquals(beforeValue, afterValue), $"{fieldName} instance should not change before official Init");
 			Equal(beforeCount, afterCount, $"{fieldName} count before official Init");
 		}
-#else
-		HextechSavedPropertyBootstrap.InjectModelType(typeof(PreInitSavedPropertyCarrier));
-		ModelId id = ModelDb.GetId<PreInitSavedPropertyCarrier>();
-		SavedProperties? properties = SavedProperties.FromInternal(new PreInitSavedPropertyCarrier(), id);
-		Expect(
-			properties?.ints?.Any(static property => property.name == "PreInitCounter") == true,
-			"0.107 should still inject a SavedProperty carrier explicitly");
-#endif
 	}
 
 	[HextechTest]
 	private static void SavedPropertyLateCarrierRegistrationFailsClosed()
 	{
-#if STS2_109_OR_NEWER
 		ExpectThrows<InvalidOperationException>(
 			() => HextechRunesApi.RegisterSavedPropertyCarrier<LateSavedPropertyCarrier>(),
 			"0.109 should reject a SavedProperty carrier missing from the initialized per-type cache");
-#endif
 	}
 
 	[HextechTest]
 	private static void SavedPropertySameNameCarrierStillRequiresPerTypeCache()
 	{
-#if STS2_109_OR_NEWER
 		Type cacheType = typeof(MegaCrit.Sts2.Core.Multiplayer.Serialization.ModelIdSerializationCache);
 		Action[] restore =
 		[
@@ -336,13 +324,11 @@ internal static partial class Program
 				restoreCollection();
 			}
 		}
-#endif
 	}
 
 	[HextechTest]
 	private static void SavedPropertyLateExternalRegistrationLeavesNoPartialState()
 	{
-#if STS2_109_OR_NEWER
 		Type runeType = typeof(LateExternalRegistrationRune);
 		int registryVersion = HextechExternalContentRegistry.Version;
 		int registrationCount = HextechExternalContentRegistry
@@ -374,7 +360,6 @@ internal static partial class Program
 				typeof(MegaCrit.Sts2.Core.Models.RelicPools.SharedRelicPool),
 				runeType),
 			"late failure should not enter the shared relic pool queue");
-#endif
 	}
 
 	[HextechTest]

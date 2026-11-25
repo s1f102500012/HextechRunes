@@ -74,11 +74,7 @@ internal static class HextechPlayerCoefficientHelper
 		return MultiplyRelicModifiers(
 			player,
 			"damage",
-#if STS2_108_OR_NEWER
 			static (relic, owner) => relic.ModifyDamageMultiplicative(null, 1m, ValueProp.Unpowered, owner.Creature, null, null));
-#else
-			static (relic, owner) => relic.ModifyDamageMultiplicative(null, 1m, ValueProp.Unpowered, owner.Creature, null));
-#endif
 	}
 
 	private static decimal GetBlockMultiplier(Player player)

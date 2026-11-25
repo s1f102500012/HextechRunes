@@ -46,11 +46,11 @@ internal static class HextechEnemyNearDeath
 	}
 
 	// 与玩家版相同：同步前缀里只记债务，力量补差由 NearDeathFeastEnemyHex.AfterCurrentHpChanged 等待执行。
-	internal static DamageResult LoseHpAllowingDying(Creature creature, decimal amount, ValueProp props)
+	internal static HextechNearDeathHpLoss LoseHpAllowingDying(Creature creature, decimal amount, bool dryRun = false)
 	{
 		if (amount <= 0m || !TryGetContext(creature, out HextechMayhemModifier? modifier, out uint combatId))
 		{
-			return new DamageResult(creature, props);
+			return default;
 		}
 
 		HextechMayhemCombatTrackingState tracking = modifier.CombatTracking;
@@ -61,6 +61,11 @@ internal static class HextechEnemyNearDeath
 			creature.CurrentHp,
 			amount,
 			GetDeathNegativeHpLimit(creature, modifier));
+		if (dryRun)
+		{
+			return outcome;
+		}
+
 		if (outcome.Dying)
 		{
 			tracking.NearDeathFeastEnemyDebt[combatId] = outcome.Debt;
@@ -72,7 +77,7 @@ internal static class HextechEnemyNearDeath
 		}
 
 		creature.SetCurrentHpInternal(outcome.CurrentHp);
-		return outcome.ToDamageResult(creature, props);
+		return outcome;
 	}
 
 	/// <summary>斩杀/处决类命令(CreatureCmd.Kill 系)无视濒死,直接判死。</summary>

@@ -2,7 +2,7 @@ namespace HextechRunes;
 
 /// <summary>
 /// 箭袋满满（愚者专属）：战斗开始时，额外获得1支箭矢。
-/// 本文件只放与版本无关的声明（数值、存档属性、可用性），三个变体都编译；
+/// 本文件只放与版本无关的声明（数值、存档属性、可用性），各变体都编译；
 /// 悬浮提示（引用 0.113.0 的能力/卡牌）、钩子与战斗逻辑在 <c>Fool/FullQuiverRune.V113.cs</c>，只在 0.113.0 编译。
 /// </summary>
 public sealed partial class FullQuiverRune : HextechRelicBase

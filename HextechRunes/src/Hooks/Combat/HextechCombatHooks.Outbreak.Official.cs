@@ -1,4 +1,3 @@
-#if STS2_110_OR_NEWER
 namespace HextechRunes;
 
 internal static partial class HextechCombatHooks
@@ -24,4 +23,3 @@ internal static partial class HextechCombatHooks
 		private static Exception? Finalizer(bool __state, Exception? __exception) => ExitGuardAfterSynchronousFailure(OutbreakPowerPoisonResponseGuard, __state, __exception);
 	}
 }
-#endif

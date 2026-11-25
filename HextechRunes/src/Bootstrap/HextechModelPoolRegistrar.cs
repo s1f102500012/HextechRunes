@@ -7,7 +7,7 @@ namespace HextechRunes;
 
 internal static class HextechModelPoolRegistrar
 {
-	// 原版 0.107.1–0.111.0:ModHelper 私有静态字段
+	// 原版 0.111.0:ModHelper 私有静态字段
 	// Dictionary<Type, ModPoolContent> _moddedContentForPools,ModPoolContent 为私有嵌套类,
 	// 其 public List<Type>? modelsToAdd 是待并入各池的模组模型。只用于查重,
 	// 缺失时 HextechHookReflection 会进启动摘要,查重退化为“视为未登记”。

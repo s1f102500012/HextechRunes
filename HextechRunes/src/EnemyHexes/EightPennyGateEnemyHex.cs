@@ -39,7 +39,7 @@ internal sealed class EightPennyGateEnemyHex : HextechEnemyHexEffect
 
 	/// <summary>
 	/// 本回合 <paramref name="owner"/> 已手动打出的非能力牌次数（重放只算第一次）。
-	/// 原版（0.107.1–0.111.0）在进入出牌循环前就问去向，本次出牌还没记入历史，所以真实结算和预览数到的是同一个值。
+	/// 原版（0.111.0）在进入出牌循环前就问去向，本次出牌还没记入历史，所以真实结算和预览数到的是同一个值。
 	/// </summary>
 	internal static int CountEarlierCountedPlays(IEnumerable<CardPlay> playsThisTurn, Player owner)
 	{

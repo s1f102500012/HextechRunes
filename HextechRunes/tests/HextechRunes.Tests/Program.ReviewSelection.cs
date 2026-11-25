@@ -59,7 +59,7 @@ internal static partial class Program
 		bool runeQueued = HextechModelPoolRegistrar.IsModelAlreadyQueuedForPool(sharedPool, typeof(SlapRune));
 		bool forgeQueued = HextechModelPoolRegistrar.IsModelAlreadyQueuedForPool(sharedPool, typeof(StrengthForge));
 
-		// 测试进程没有 Godot 原生层,真实 Warn 在 0.107.1 会崩溃;先耗尽该告警的日志预算。
+		// 测试进程没有 Godot 原生层,真实 Warn 可能崩溃;先耗尽该告警的日志预算。
 		Action restoreWarnings = SuppressCompatibilityWarnings("external-content.built-in-rejected");
 		try
 		{

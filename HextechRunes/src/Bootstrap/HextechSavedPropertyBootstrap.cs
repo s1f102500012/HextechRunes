@@ -4,8 +4,8 @@ using static HextechRunes.HextechHookReflection;
 namespace HextechRunes;
 
 /// <summary>
-/// SavedProperty 载体的注册窗口守卫与自检。版本差异(0.107.1 手动注入 vs 0.109+ 官方 Init 收录)
-/// 收口在 <c>.Legacy.cs</c> / <c>.Official.cs</c> 两个分部文件里,本文件只写与版本无关的流程。
+/// SavedProperty 载体的注册窗口守卫与自检。官方 Init 收录相关的冻结点与缓存读取在 <c>.Official.cs</c> 分部里,
+/// 本文件只写与之无关的流程。
 /// </summary>
 internal static partial class HextechSavedPropertyBootstrap
 {

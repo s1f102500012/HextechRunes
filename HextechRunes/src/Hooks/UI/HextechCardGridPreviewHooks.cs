@@ -13,7 +13,7 @@ namespace HextechRunes;
 /// </summary>
 internal static class HextechCardGridPreviewHooks
 {
-	// 原版 NCardGrid._cardRows(0.107.1 / 0.111.0)。
+	// 原版 NCardGrid._cardRows(0.111.0)。
 	private static readonly FieldInfo? CardRowsField = HextechHookReflection.TryGetField(typeof(NCardGrid), "_cardRows");
 
 	// 原版 NGridCardHolder._isPreviewingUpgrade(同上)。

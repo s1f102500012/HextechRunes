@@ -9,7 +9,7 @@ namespace HextechRunes;
 
 internal static partial class HextechRuneSelectionCoordinator
 {
-	// 原版 0.107.1–0.111.0:PlayerChoiceSynchronizer 私有字段 List<ReceivedChoice> _receivedChoices 缓存先到的远端选择,
+	// 原版 0.111.0:PlayerChoiceSynchronizer 私有字段 List<ReceivedChoice> _receivedChoices 缓存先到的远端选择,
 	// 私有嵌套结构 ReceivedChoice 含 public 字段 senderId/choiceId/completionSource。用于取走在本端开始等待前
 	// 已到达的选择;任一成员缺失时进启动摘要并退化为只走 PlayerChoiceReceived 事件。
 	private const BindingFlags BufferedChoiceFieldFlags = BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic;

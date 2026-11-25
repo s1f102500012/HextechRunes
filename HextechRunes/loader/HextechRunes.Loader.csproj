@@ -5,7 +5,7 @@
     <RootNamespace>HextechRunes.Loader</RootNamespace>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
-    <GameDataDir Condition="'$(GameDataDir)' == ''">$(MSBuildThisFileDirectory)../versioned-dll-backups/0.107.1/game-refs</GameDataDir>
+    <GameDataDir Condition="'$(GameDataDir)' == ''">$(MSBuildThisFileDirectory)../versioned-dll-backups/0.111.0/game-refs</GameDataDir>
   </PropertyGroup>
 
   <ItemGroup>

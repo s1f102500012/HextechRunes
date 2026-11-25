@@ -44,7 +44,6 @@ internal static partial class Program
 
 	public static int Main(string[] args)
 	{
-#if STS2_109_OR_NEWER
 		// 0.109 起游戏引用 System.IO.Hashing(XxHash32);它不在测试的 deps.json 里(仅作文件复制),
 		// 默认加载上下文按 deps.json 解析会失败,这里从输出目录兜底加载。
 		System.Runtime.Loader.AssemblyLoadContext.Default.Resolving += static (context, name) =>
@@ -57,7 +56,6 @@ internal static partial class Program
 		typeof(MegaCrit.Sts2.Core.Multiplayer.Serialization.ModelIdSerializationCache)
 			.GetField("_initialized", BindingFlags.NonPublic | BindingFlags.Static)
 			?.SetValue(null, true);
-#endif
 		TestCase[] tests = DiscoverTests();
 
 		if (args.Length > 0)
@@ -177,7 +175,6 @@ internal static partial class Program
 
 	private static void RunBeforeSavedPropertyCacheInitialization(Action action)
 	{
-#if STS2_109_OR_NEWER
 		FieldInfo initializedField = typeof(MegaCrit.Sts2.Core.Multiplayer.Serialization.ModelIdSerializationCache)
 			.GetField("_initialized", BindingFlags.NonPublic | BindingFlags.Static)
 			?? throw new InvalidOperationException("0.109 SavedProperty cache initialized field should exist");
@@ -191,9 +188,6 @@ internal static partial class Program
 		{
 			initializedField.SetValue(null, originalInitialized);
 		}
-#else
-		action();
-#endif
 	}
 
 	private static MethodInfo GetAsyncStateMachineMoveNext(MethodInfo asyncMethod)
@@ -273,9 +267,7 @@ internal static partial class Program
 		return new CardPlay
 		{
 			Card = card,
-#if STS2_109_OR_NEWER
 			Player = card.Owner,
-#endif
 			Target = null,
 			ResultPile = PileType.Discard,
 			Resources = new ResourceInfo

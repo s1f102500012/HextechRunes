@@ -13,8 +13,7 @@ namespace HextechRunes;
 /// 只认试炼局：普通局或联机局里经控制台、第三方模组拿到的弑神只是一枚无效果遗物，建筑师照常说原版台词。
 /// 原版每个玩家各有一份 TheArchitect（未覆写 IsShared），按事件归属玩家自己的遗物判断。
 /// 原版先照常挑完对话（随机数照常消耗）再替换；读不到本模组台词（ancients 表没合并上）时保持原版对话。
-/// 最后玩家出手后，原版经 RunManager.WinRun 进入结算（0.111.0 由事件直接调用；0.107.1 是私有方法，经幕切换同步后由
-/// EnterNextAct 调用）；在它前面插入终局演出，结算与记录本身不动。
+/// 最后玩家出手后，原版经 RunManager.WinRun 进入结算（0.111.0 起由事件直接调用）；在它前面插入终局演出，结算与记录本身不动。
 /// </summary>
 internal static class HextechArchitectGodslayerHooks
 {

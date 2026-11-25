@@ -11,26 +11,6 @@ namespace HextechRunes.Tests;
 internal static partial class Program
 {
 	[HextechTest]
-	private static void EntomancerFallbackIsVersionScopedAndMissingHiveOnly()
-	{
-#if STS2_110_OR_NEWER
-		Equal<Type?>(
-			null,
-			typeof(ModEntry).Assembly.GetType("HextechRunes.HextechEncounterCompatibilityHooks"),
-			"0.110 build should not contain the Entomancer SpitMove compatibility patch");
-#else
-		MethodInfo? prefix = FindPatchMethod(typeof(HextechEncounterCompatibilityHooks), "EntomancerSpitMovePatch", "Prefix");
-		Expect(prefix != null, "0.107 build should contain the narrowly scoped SpitMove patch");
-		Equal<MethodInfo?>(
-			null,
-			HextechEncounterCompatibilityHooks.TryResolveEntomancerSpitMove(
-				typeof(CompatibilityEntomancerSignatureFixture),
-				warnIfMissing: false),
-			"0.107 missing private SpitMove target should disable only the compatibility patch");
-#endif
-	}
-
-	[HextechTest]
 	private static void EnemyPowerScalingDoesNotPatchOfficialModifierPipeline()
 	{
 		BindingFlags flags = BindingFlags.Static | BindingFlags.NonPublic;
@@ -167,6 +147,4 @@ internal static partial class Program
 			harmony.UnpatchAll(harmony.Id);
 		}
 	}
-
-	private sealed class CompatibilityEntomancerSignatureFixture;
 }

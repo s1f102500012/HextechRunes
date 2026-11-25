@@ -1,4 +1,3 @@
-#if STS2_109_OR_NEWER
 using MegaCrit.Sts2.Core.Hooks;
 
 namespace HextechRunes;
@@ -38,4 +37,3 @@ internal static class HextechCardPlayResultCompat
 		return true;
 	}
 }
-#endif

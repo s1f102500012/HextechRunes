@@ -72,21 +72,26 @@ internal static partial class Program
 		Expect(rune is DrawThresholdRuneBase, "uses the shared per-combat draw counter");
 	}
 
-	// 升级打击/防御：镜中倒影与敌方“神化”的降级作用域里只降一级；作用域外（魔法骑士等）照原版清零。
+	// 升级打击/防御：0.113.x 及更早，镜中倒影与敌方“神化”的降级作用域里只降一级，作用域外（魔法骑士等）照原版清零；
+	// 0.114.0 起降级幅度完全跟随原版（每次降一级，清零走 CardCmd.RemoveAllUpgrades），模组不再改写。
 	[HextechTest]
 	private static void UnlimitedStarterCardsStepDownOneLevelInScope()
 	{
+#if !STS2_114_OR_NEWER
 		Equal(2, HextechStarterUpgradeHooks.ResolveSteppedDowngradeLevel(3, inStepDownScope: true, hasUnlockedLevels: true), "steps down one level");
 		Equal(0, HextechStarterUpgradeHooks.ResolveSteppedDowngradeLevel(1, inStepDownScope: true, hasUnlockedLevels: true), "level one clears as usual");
 		Equal(0, HextechStarterUpgradeHooks.ResolveSteppedDowngradeLevel(3, inStepDownScope: false, hasUnlockedLevels: true), "outside the scope clears");
 		Equal(0, HextechStarterUpgradeHooks.ResolveSteppedDowngradeLevel(3, inStepDownScope: true, hasUnlockedLevels: false), "cards without the rune clear");
+#endif
 
 		using IDisposable models = InjectMissingModels(typeof(StrikeIronclad), typeof(DefendIronclad));
 		Harmony harmony = new("HextechRunes.Tests.StarterStepDown");
 		try
 		{
 			harmony.CreateClassProcessor(AccessTools.Inner(typeof(HextechStarterUpgradeHooks), "MaxUpgradeLevelPatch")).Patch();
+#if !STS2_114_OR_NEWER
 			harmony.CreateClassProcessor(AccessTools.Inner(typeof(HextechStarterUpgradeHooks), "SteppedDowngradePatch")).Patch();
+#endif
 			RunStarterStepDownScenario();
 		}
 		finally
@@ -126,7 +131,14 @@ internal static partial class Program
 		Equal(reference.DynamicVars.Damage.BaseValue, strike.DynamicVars.Damage.BaseValue, "damage matches a card upgraded twice");
 		HextechStarterUpgradeHooks.DowngradeOneLevel(defend);
 		Equal(0, defend.CurrentUpgradeLevel, "ordinary upgraded cards still clear");
+#if STS2_114_OR_NEWER
+		MegaCrit.Sts2.Core.Commands.CardCmd.Downgrade(strike);
+		Equal(1, strike.CurrentUpgradeLevel, "vanilla downgrades step down one level too");
+		MegaCrit.Sts2.Core.Commands.CardCmd.RemoveAllUpgrades(strike);
+		Equal(0, strike.CurrentUpgradeLevel, "Dampen clears through RemoveAllUpgrades");
+#else
 		MegaCrit.Sts2.Core.Commands.CardCmd.Downgrade(strike);
 		Equal(0, strike.CurrentUpgradeLevel, "downgrades outside the scope (Dampen) still clear");
+#endif
 	}
 }

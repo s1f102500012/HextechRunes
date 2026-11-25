@@ -10,17 +10,10 @@ internal abstract class HextechModifierBase : ModifierModel
 		return 1m;
 	}
 
-#if STS2_108_OR_NEWER
 	public sealed override decimal ModifyDamageMultiplicative(Creature? target, decimal amount, ValueProp props, Creature? dealer, CardModel? cardSource, CardPlay? cardPlay)
 	{
 		return ModifyDamageMultiplicativeCompat(target, amount, props, dealer, cardSource);
 	}
-#else
-	public sealed override decimal ModifyDamageMultiplicative(Creature? target, decimal amount, ValueProp props, Creature? dealer, CardModel? cardSource)
-	{
-		return ModifyDamageMultiplicativeCompat(target, amount, props, dealer, cardSource);
-	}
-#endif
 
 	// 0.109.0 起卡牌打出去向从 (PileType, CardPilePosition) 元组改为 CardLocation:同 HextechRelicBase 的桥。
 	public virtual (PileType, CardPilePosition) ModifyCardPlayResultPileTypeAndPositionCompat(CardModel card, bool isAutoPlay, ResourceInfo resources, PileType pileType, CardPilePosition position)
@@ -28,7 +21,6 @@ internal abstract class HextechModifierBase : ModifierModel
 		return (pileType, position);
 	}
 
-#if STS2_109_OR_NEWER
 	public sealed override CardLocation ModifyCardPlayResultLocation(CardModel card, bool isAutoPlay, ResourceInfo resources, CardLocation cardLocation)
 	{
 		(PileType pileType, CardPilePosition position) = ModifyCardPlayResultPileTypeAndPositionCompat(card, isAutoPlay, resources, cardLocation.pileType, cardLocation.position);
@@ -36,10 +28,4 @@ internal abstract class HextechModifierBase : ModifierModel
 		cardLocation.position = position;
 		return cardLocation;
 	}
-#else
-	public sealed override (PileType, CardPilePosition) ModifyCardPlayResultPileTypeAndPosition(CardModel card, bool isAutoPlay, ResourceInfo resources, PileType pileType, CardPilePosition position)
-	{
-		return ModifyCardPlayResultPileTypeAndPositionCompat(card, isAutoPlay, resources, pileType, position);
-	}
-#endif
 }

@@ -2,7 +2,7 @@ namespace HextechRunes;
 
 /// <summary>
 /// 前奏（愚者专属）：每场战斗的第一回合开始时，不再抽牌，改为从你的抽牌堆中选择等量的牌加入手牌。
-/// 本文件只放与版本无关的声明（数值、存档属性、可用性），三个变体都编译；
+/// 本文件只放与版本无关的声明（数值、存档属性、可用性），各变体都编译；
 /// 钩子与战斗逻辑在 <c>Fool/PreludeRune.V113.cs</c>，只在 0.113.0 编译。
 /// </summary>
 public sealed partial class PreludeRune : HextechRelicBase

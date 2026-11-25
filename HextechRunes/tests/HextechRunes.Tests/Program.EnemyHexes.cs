@@ -89,9 +89,7 @@ internal static partial class Program
 			new HauntPower(),
 			new SummonNextTurnPower(),
 			new StarNextTurnPower(),
-#if STS2_108_OR_NEWER
 			new SoulboundPower(),
-#endif
 		];
 		foreach (PowerModel power in nonEnemyPowers)
 		{

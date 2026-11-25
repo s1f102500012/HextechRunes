@@ -20,7 +20,7 @@ public sealed partial class UnbrokenSongRune
 		_rewardedMelodiesThisTurn = 0;
 	}
 
-	// "获得旋律"口径同弦外之音：按持有者本回合旋律种类数（MelodyCmd.MelodiesThisTurn，含开嗓 / 引吭高歌直接给予的）的增加量计，
+	// "获得旋律"口径同弦外之音：按持有者本回合旋律种类数（MelodyCmd.MelodiesThisTurn，含开嗓直接给予的）的增加量计，
 	// 每回合每种旋律一次，一张牌带来多种就一次给多份。种类数只会在出牌结算完或回合开始前直接给予时增加，所以在这两处比较。
 	// 出牌后获得的拉伸不会被这张牌扣掉：原版拉伸按出牌开始时的层数整笔扣除。
 	public override Task AfterPlayerTurnStart(PlayerChoiceContext choiceContext, Player player)

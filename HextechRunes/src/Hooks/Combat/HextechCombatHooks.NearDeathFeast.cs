@@ -6,7 +6,7 @@ namespace HextechRunes;
 
 internal static partial class HextechCombatHooks
 {
-	// NHealthBar._creature 与 _hpLabel（0.107.1/0.111.0 原版私有字段）：濒死时血条显示负血量用；
+	// NHealthBar._creature 与 _hpLabel（0.111.0 原版私有字段）：濒死时血条显示负血量用；
 	// 缺失时只跳过这段显示（Prepare 返回 false），不连带把濒死狂宴整个标为不可用。
 	private static readonly FieldInfo HealthBarCreatureField = TryGetField(typeof(NHealthBar), "_creature")!;
 	private static readonly FieldInfo HealthBarHpLabelField = TryGetField(typeof(NHealthBar), "_hpLabel")!;
@@ -15,30 +15,6 @@ internal static partial class HextechCombatHooks
 	{
 		NearDeathFeastRune.ForceDeathThresholdForKill(creature);
 		HextechEnemyNearDeath.ForceDeathThresholdForKill(creature);
-	}
-
-	[HarmonyPatch(typeof(Creature), nameof(Creature.LoseHpInternal), typeof(decimal), typeof(ValueProp))]
-	[HextechPatch("combat.near-death-feast.lose-hp", "濒死狂宴 / 敌方海克斯:濒死狂宴", Rune = typeof(NearDeathFeastRune), MonsterHexes = [MonsterHexKind.NearDeathFeast])]
-	private static class NearDeathFeastLoseHpPatch
-	{
-		[HarmonyPrefix]
-		[HarmonyPriority(Priority.Low)]
-		private static bool Prefix(Creature __instance, decimal amount, ValueProp props, ref DamageResult __result)
-		{
-			if (NearDeathFeastRune.ShouldInterceptLoseHp(__instance, amount))
-			{
-				__result = NearDeathFeastRune.LoseHpAllowingDying(__instance, amount, props);
-				return false;
-			}
-
-			if (HextechEnemyNearDeath.ShouldInterceptLoseHp(__instance, amount))
-			{
-				__result = HextechEnemyNearDeath.LoseHpAllowingDying(__instance, amount, props);
-				return false;
-			}
-
-			return true;
-		}
 	}
 
 	[HarmonyPatch(typeof(Creature), nameof(Creature.CurrentHp), MethodType.Setter)]

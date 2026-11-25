@@ -2,7 +2,7 @@ namespace HextechRunes;
 
 public sealed partial class SolidTimeRune
 {
-	// 原版 protected virtual CardModel.OnPlay(PlayerChoiceContext, CardPlay)(0.107.1~0.111.0)。经基类 MethodInfo 反射调用
+	// 原版 protected virtual CardModel.OnPlay(PlayerChoiceContext, CardPlay)(0.111.0)。经基类 MethodInfo 反射调用
 	// 按虚分派进入各卡的覆写，无需沿继承链逐级查找；缺失时进启动摘要，本次回放跳过 OnPlay。
 	private static readonly MethodInfo? CardOnPlayMethod = HextechHookReflection.TryGetMethod(
 		typeof(CardModel),

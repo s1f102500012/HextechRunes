@@ -81,7 +81,7 @@
   "WARRIOR_CONTRACT_CHOICE_RELIC.description": "スキルとパワーをすべて削除し、以後それらを獲得できなくなる。\n戦闘開始時、[gold]筋力[/gold]を[red]{InitialStrength}[/red]得る。エリートを[blue]1+X[/blue]体倒すたびに、この値が[blue]1[/blue]増える（Xはこれまでの増加回数）。\nスターターレリックをアップグレードする。",
   "WARRIOR_CONTRACT_CHOICE_RELIC.flavor": "戦士の契約: 技も権能も捨て去り、膨れ上がり続ける蛮力だけを残す。",
   "HUNTER_CONTRACT_CHOICE_RELIC.title": "狩人の契約：異蛇侵蝕",
-  "HUNTER_CONTRACT_CHOICE_RELIC.description": "[gold]蛇の噛みつき[/gold]を[blue]{Snakebites}[/blue]枚獲得する。そのコストは[blue]{CostReduction}[/blue]減少する。\nスキルを[blue]{SkillInterval}[/blue]枚プレイするたびに、デッキの[gold]蛇の噛みつき[/gold]1枚をランダムな敵に自動でプレイする（この回数には数えない）。\n戦闘[blue]{CombatInterval}[/blue]回ごとに、[gold]蛇の噛みつき[/gold]以外のカード1枚を[gold]蛇の噛みつき[/gold]に変える（アタックを優先）。",
+  "HUNTER_CONTRACT_CHOICE_RELIC.description": "[gold]蛇の咬みつき[/gold]を[blue]{Snakebites}[/blue]枚獲得する。そのコストは[blue]{CostReduction}[/blue]減少する。\nスキルを[blue]{SkillInterval}[/blue]枚プレイするたびに、デッキの[gold]蛇の咬みつき[/gold]1枚をランダムな敵に自動でプレイする（この回数には数えない）。\n戦闘[blue]{CombatInterval}[/blue]回ごとに、[gold]蛇の咬みつき[/gold]以外のカード1枚を[gold]蛇の咬みつき[/gold]に変える（アタックを優先）。",
   "HUNTER_CONTRACT_CHOICE_RELIC.flavor": "狩人の契約: 蛇毒は増殖し、デッキにもやがて鱗が生えてくる。",
   "REGENT_CONTRACT_CHOICE_RELIC.title": "リージェントの契約：無双剣術",
   "REGENT_CONTRACT_CHOICE_RELIC.description": "スターターレリックを[gold]剣術教本[/gold]に置き換える。\n[gold]刻印[/gold]が付与された[gold]剣聖[/gold]と[gold]パリィ[/gold]を獲得する。\n[gold]剣術教本[/gold]でしか鍛造できなくなる。",
