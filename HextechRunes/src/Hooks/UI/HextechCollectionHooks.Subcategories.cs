@@ -17,8 +17,8 @@ internal static partial class HextechCollectionHooks
 			return;
 		}
 
-		IReadOnlyList<RelicModel> genericRunes = HextechCatalog.GetCanonicalGenericVisibleRunes();
-		IReadOnlyList<HextechCatalog.RuneSeriesGroup> characterGroups = HextechCatalog.GetCharacterRuneGroups();
+		IReadOnlyList<RelicModel> genericRunes = HextechCollectionVisibility.GetGenericRunes();
+		IReadOnlyList<HextechCatalog.RuneSeriesGroup> characterGroups = HextechCollectionVisibility.GetCharacterRuneGroups();
 		HashSet<RelicModel> visibleHextechRelics = genericRunes
 			.Concat(characterGroups.SelectMany(static group => group.Relics))
 			.ToHashSet();

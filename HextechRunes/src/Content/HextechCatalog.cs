@@ -56,36 +56,6 @@ internal static partial class HextechCatalog
 		return PlayerRuneMetadata.IsConfigurable(runeType);
 	}
 
-	public static bool IsPlayerRuneTypeVisibleInCollection(Type runeType)
-	{
-		if (!PlayerRuneMetadata.AllTypes.Contains(runeType) || !IsPlayerRuneTypeShownInUi(runeType))
-		{
-			return false;
-		}
-
-		// 弑神不进任何池子；本机完成弑神后作为纪念出现在图鉴里。
-		if (runeType == typeof(GodslayerRune))
-		{
-			return HextechSignalNoise.HasSlain();
-		}
-
-		if (IsPlayerRuneTypeConfigurable(runeType))
-		{
-			return HextechRuneConfiguration.IsPlayerRuneEnabled(ModelDb.GetId(runeType).Entry);
-		}
-
-		return PlayerRuneMetadata.IsVisible(runeType);
-	}
-
-	public static IReadOnlyList<Type> GetGenericVisibleRuneTypes()
-	{
-		PlayerRuneMetadataCatalog metadata = PlayerRuneMetadata;
-		return metadata.AllTypes
-			.Where(IsPlayerRuneTypeVisibleInCollection)
-			.Where(type => !metadata.CharacterSpecificTypes.Contains(type))
-			.ToArray();
-	}
-
 	// 只决定界面上的来源标签（HEXTECH_POOL.<key>）与配置菜单排序，不参与发放。
 	public static string GetPlayerRunePoolKey(RelicModel relic)
 	{
@@ -107,15 +77,7 @@ internal static partial class HextechCatalog
 			}
 		}
 
-		// 额外拓展包沿用内置的"拓展包"标签，免得它为此单独发版；其他外部模组未指定时归为"通用"。
-		if (string.Equals(
-			HextechExternalContentRegistry.GetAssetModId(id),
-			HextechExternalContentRegistry.SponsorPackModId,
-			StringComparison.Ordinal))
-		{
-			return "SPONSOR_PACK";
-		}
-
+		// 外部模组（包括额外拓展包）未用 SetPlayerRunePoolLabel 指定标签时归为"通用"。
 		return "GENERIC";
 	}
 

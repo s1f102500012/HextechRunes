@@ -130,7 +130,7 @@ internal sealed class HextechRuneSelectionJournalState
 			.ToArray();
 		return JsonSerializer.Serialize(
 			new JournalJsonSnapshot(CurrentVersion, entries, _characterWeights),
-			HextechTelemetry.JsonOptions);
+			HextechMayhemSavedJson.Options);
 	}
 
 	public void Restore(string? json)
@@ -147,7 +147,7 @@ internal sealed class HextechRuneSelectionJournalState
 		{
 			snapshot = JsonSerializer.Deserialize<JournalJsonSnapshot>(
 				json,
-				HextechTelemetry.JsonOptions);
+				HextechMayhemSavedJson.Options);
 		}
 		catch (Exception ex)
 		{

@@ -38,6 +38,50 @@ internal static partial class Program
 		}
 	}
 
+	// 拓展包自己登记界面文字:本体不再按模组 ID 特判它。标签与分组标题的键在本体的 relic_collection 表里要有文字。
+	[HextechTest]
+	private static void SponsorCatalogRegistersItsOwnDisplayLabels()
+	{
+		Action[] restore =
+		[
+			CaptureStaticCollectionRestore(typeof(HextechExternalContentRegistry), "PlayerRuneRegistrations"),
+			CaptureStaticCollectionRestore(typeof(HextechExternalContentRegistry), "AssetModIdsByType"),
+			CaptureStaticCollectionRestore(typeof(HextechExternalContentRegistry), "PlayerRunePoolLabelKeysByType"),
+			CaptureStaticCollectionRestore(typeof(HextechExternalContentRegistry), "ConfigSectionTitleKeysByAssetModId"),
+			CaptureExternalRegistryVersionRestore()
+		];
+		try
+		{
+			HextechExternalContentRegistry.RegisterPlayerRune(
+				new PlayerRuneRegistration(typeof(RegretRune), HextechRarityTier.Prismatic),
+				HextechRunesSponsorPack.ModInfo.Id);
+			RegretRune rune = new();
+			Equal("GENERIC", HextechCatalog.GetPlayerRunePoolKey(rune), "no label before the pack registers one");
+
+			SponsorCatalog.RegisterDisplayLabels();
+			Equal(SponsorCatalog.PoolLabelKey, HextechCatalog.GetPlayerRunePoolKey(rune), "pack runes carry the expansion-pack label");
+			Equal(
+				SponsorCatalog.ConfigSectionTitleKey,
+				HextechExternalContentRegistry.GetConfigSectionTitleKey(HextechRunesSponsorPack.ModInfo.Id),
+				"pack content is grouped under the expansion-pack title");
+
+			string repoRoot = Path.GetFullPath(Path.Combine(FindTestsSourceDirectory(), "..", "..", ".."));
+			foreach (string language in new[] { "zhs", "eng", "jpn", "kor", "esp", "spa", "ptb", "rus", "tha" })
+			{
+				string table = File.ReadAllText(Path.Combine(repoRoot, "HextechRunes", "assets", "localization", language, "relic_collection.json"));
+				Expect(table.Contains($"\"HEXTECH_POOL.{SponsorCatalog.PoolLabelKey}\"", StringComparison.Ordinal), $"{language}: pool label text exists in the main mod");
+				Expect(table.Contains($"\"{SponsorCatalog.ConfigSectionTitleKey}\"", StringComparison.Ordinal), $"{language}: section title text exists in the main mod");
+			}
+		}
+		finally
+		{
+			foreach (Action action in restore.Reverse())
+			{
+				action();
+			}
+		}
+	}
+
 	// 排除规则的类型部分(纯函数,不触碰 Godot 资源层)。
 	[HextechTest]
 	private static void RandomEnchantmentPoolExcludesDeprecatedNegativeAndMarkerTypes()

@@ -372,7 +372,7 @@ public static void RegisterExtraActProvider(Func<IRunState, string?> provider);
 
 键不存在时不会报错，界面直接显示键名本身（如 `MY_MOD`），看到键名就说明本地化文件没生效。
 
-额外拓展包（`HextechRunesSponsorPack`）不调用这两个方法，也会保留“拓展包”来源标签和“额外拓展包”分组标题。
+额外拓展包（`HextechRunesSponsorPack`）也是用这两个方法登记自己的“拓展包”来源标签和“额外拓展包”分组标题，本体不按模组 ID 特判它（0.10.3 及更早的拓展包不登记，搭配更新的本体时会显示“通用”和“外部模组：HextechRunesSponsorPack”）。
 
 ## 四、联机须知
 

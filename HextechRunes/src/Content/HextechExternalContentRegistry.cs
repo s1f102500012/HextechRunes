@@ -4,8 +4,6 @@ namespace HextechRunes;
 
 internal static class HextechExternalContentRegistry
 {
-	internal const string SponsorPackModId = "HextechRunesSponsorPack";
-
 	private static readonly object SyncRoot = new();
 	private static readonly List<PlayerRuneRegistration> PlayerRuneRegistrations = new();
 	private static readonly List<ForgeRegistration> ForgeRegistrations = new();

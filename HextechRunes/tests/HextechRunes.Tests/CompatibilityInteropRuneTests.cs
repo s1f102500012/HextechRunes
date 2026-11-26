@@ -134,7 +134,7 @@ internal static partial class Program
 				"Compatibility.Interop");
 			HextechExternalContentRegistry.RegisterPlayerRune(
 				new PlayerRuneRegistration(typeof(CompatibilityInteropSponsorRune), HextechRarityTier.Silver),
-				HextechExternalContentRegistry.SponsorPackModId);
+				"HextechRunesSponsorPack");
 			HextechExternalContentRegistry.RegisterPlayerRune(
 				new PlayerRuneRegistration(
 					typeof(CompatibilityInteropCharacterRune),
@@ -144,8 +144,9 @@ internal static partial class Program
 			CompatibilityInteropStarterRune starter = new();
 			CompatibilityInteropCharacterRune character = new();
 
-			Equal("GENERIC", HextechCatalog.GetPlayerRunePoolKey(starter), "unlabelled external rune is generic, not the expansion pack");
-			Equal("SPONSOR_PACK", HextechCatalog.GetPlayerRunePoolKey(new CompatibilityInteropSponsorRune()), "expansion pack keeps its built-in label");
+			Equal("GENERIC", HextechCatalog.GetPlayerRunePoolKey(starter), "unlabelled external rune is generic");
+			// 本体不再按模组 ID 特判拓展包:它和其他外部模组一样靠自己登记标签(SponsorCatalog.RegisterDisplayLabels)。
+			Equal("GENERIC", HextechCatalog.GetPlayerRunePoolKey(new CompatibilityInteropSponsorRune()), "the expansion pack's mod id alone gets no built-in label");
 			Equal("SILENT", HextechCatalog.GetPlayerRunePoolKey(character), "character runes default to the character label");
 
 			HextechRunesInterop.SetPlayerRunePoolLabel(typeof(CompatibilityInteropStarterRune), " MY_MOD ");

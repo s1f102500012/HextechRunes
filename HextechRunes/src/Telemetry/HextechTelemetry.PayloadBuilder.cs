@@ -27,7 +27,8 @@ internal static partial class HextechTelemetry
 		]));
 
 		HextechMayhemModifier? modifier = HextechMayhemModifier.FindIn(runState);
-		IReadOnlyList<RuneChoiceRecord> runeChoices = modifier?.GetTelemetryChoiceRecords() ?? [];
+		// 选择记录是对局中枢随存档保存的事实，这里只读出来上报。
+		IReadOnlyList<HextechRuneChoiceRecord> runeChoices = modifier?.GetRuneChoiceRecords() ?? [];
 
 		return new RunEndedPayload(
 			TelemetrySchemaVersion,

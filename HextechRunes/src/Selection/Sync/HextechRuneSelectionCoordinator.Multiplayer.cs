@@ -108,7 +108,7 @@ internal static partial class HextechRuneSelectionCoordinator
 				RuneSelectionResult selectedResult = selectedRelics[i];
 				RelicModel selectedRelic = RequireCompletedSelection(
 					selectedResult.SelectedRelic,
-					$"multiplayer telemetry act={actIndex} ordinal={choiceOrdinal} player={selection.Player.NetId}");
+					$"multiplayer choice record act={actIndex} ordinal={choiceOrdinal} player={selection.Player.NetId}");
 				ModelId selectedId = selectedRelic.CanonicalId();
 				modifier.RecordRuneSelectionJournalSelection(
 					actIndex,
@@ -117,7 +117,7 @@ internal static partial class HextechRuneSelectionCoordinator
 					selectedId, (selectedRelic as IHextechGeneratedRune)?.ExportSelectionData() ?? "");
 				resolvedSelections.Add(new ResolvedRuneSelection(selection.Player, selectedRelic, Applied: false));
 				modifier.CommitCharacterRuneWeight(selection.Player, selectedResult.FinalOptions);
-				HextechTelemetry.RecordRuneChoice(runState, actIndex, rarity, selection.Player, selectedResult.FinalOptions, selectedRelic, selectedResult.RerollCount, choiceOrdinal);
+				modifier.RecordRuneChoice(actIndex, rarity, selection.Player, selectedResult.FinalOptions, selectedRelic, selectedResult.RerollCount, choiceOrdinal);
 			}
 
 			IReadOnlyList<MonsterHexKind> resolvedMonsterHexes = enemyHexSync != null
@@ -196,7 +196,7 @@ internal static partial class HextechRuneSelectionCoordinator
 				out HextechRuneSelectionJournalEntry journalEntry);
 			if (!hasJournalEntry)
 			{
-				hasJournalEntry = modifier.TryRecoverRuneSelectionJournalEntryFromTelemetry(
+				hasJournalEntry = modifier.TryRecoverRuneSelectionJournalEntryFromChoiceHistory(
 					actIndex,
 					choiceOrdinal,
 					player,
@@ -204,7 +204,7 @@ internal static partial class HextechRuneSelectionCoordinator
 				if (hasJournalEntry)
 				{
 					HextechLog.Info(
-						"Mayhem", $"RuneChoice journal rebuilt from saved telemetry: " +
+						"Mayhem", $"RuneChoice journal rebuilt from saved choice history: " +
 						$"act={actIndex} ordinal={choiceOrdinal} player={player.NetId}");
 				}
 			}

@@ -4,13 +4,13 @@ namespace HextechRunes;
 
 internal sealed class HextechMayhemChoiceHistoryState
 {
-	private string _telemetryChoicesJson = "";
+	private string _runeChoicesJson = "";
 	private string _seenPlayerRuneIdsJson = "";
 
 	public string SavedTelemetryChoicesJson
 	{
-		get => _telemetryChoicesJson;
-		set => _telemetryChoicesJson = value ?? "";
+		get => _runeChoicesJson;
+		set => _runeChoicesJson = value ?? "";
 	}
 
 	public string SavedSeenPlayerRuneIdsJson
@@ -21,37 +21,37 @@ internal sealed class HextechMayhemChoiceHistoryState
 
 	public void Reset()
 	{
-		_telemetryChoicesJson = "";
+		_runeChoicesJson = "";
 		_seenPlayerRuneIdsJson = "";
 	}
 
-	public IReadOnlyList<HextechTelemetry.RuneChoiceRecord> GetTelemetryChoiceRecords()
+	public IReadOnlyList<HextechRuneChoiceRecord> GetRuneChoiceRecords()
 	{
-		if (string.IsNullOrWhiteSpace(_telemetryChoicesJson))
+		if (string.IsNullOrWhiteSpace(_runeChoicesJson))
 		{
 			return [];
 		}
 
 		try
 		{
-			return JsonSerializer.Deserialize<List<HextechTelemetry.RuneChoiceRecord>>(_telemetryChoicesJson, HextechTelemetry.JsonOptions) ?? [];
+			return JsonSerializer.Deserialize<List<HextechRuneChoiceRecord>>(_runeChoicesJson, HextechMayhemSavedJson.Options) ?? [];
 		}
 		catch (Exception ex)
 		{
-			HextechLog.Warn("Mayhem", $"Telemetry choices decode failed: {ex.Message}");
+			HextechLog.Warn("Mayhem", $"Rune choice history decode failed: {ex.Message}");
 			return [];
 		}
 	}
 
-	public void RecordTelemetryChoice(HextechTelemetry.RuneChoiceRecord record)
+	public void RecordRuneChoice(HextechRuneChoiceRecord record)
 	{
-		List<HextechTelemetry.RuneChoiceRecord> records = GetTelemetryChoiceRecords().ToList();
+		List<HextechRuneChoiceRecord> records = GetRuneChoiceRecords().ToList();
 		records.RemoveAll(existing =>
 			existing.ActIndex == record.ActIndex
 			&& existing.PlayerSlot == record.PlayerSlot
 			&& existing.ChoiceOrdinal == record.ChoiceOrdinal);
 		records.Add(record);
-		_telemetryChoicesJson = JsonSerializer.Serialize(records, HextechTelemetry.JsonOptions);
+		_runeChoicesJson = JsonSerializer.Serialize(records, HextechMayhemSavedJson.Options);
 	}
 
 	public HashSet<ModelId> GetSeenPlayerRuneIds(Player player, RunState runState)
@@ -59,7 +59,7 @@ internal sealed class HextechMayhemChoiceHistoryState
 		int playerSlot = GetPlayerSlotIndex(player, runState);
 		HashSet<string> entries = GetSeenPlayerRuneEntries(playerSlot);
 
-		foreach (string entry in GetTelemetryChoiceRecords()
+		foreach (string entry in GetRuneChoiceRecords()
 			.Where(record => record.PlayerSlot == playerSlot)
 			.SelectMany(static record => record.Options))
 		{
@@ -122,7 +122,7 @@ internal sealed class HextechMayhemChoiceHistoryState
 					.ToDictionary(
 						static pair => pair.Key.ToString(),
 						static pair => pair.Value.OrderBy(static entry => entry, StringComparer.Ordinal).ToArray()),
-				HextechTelemetry.JsonOptions);
+				HextechMayhemSavedJson.Options);
 		}
 	}
 
@@ -147,7 +147,7 @@ internal sealed class HextechMayhemChoiceHistoryState
 
 		try
 		{
-			Dictionary<string, string[]>? decoded = JsonSerializer.Deserialize<Dictionary<string, string[]>>(_seenPlayerRuneIdsJson, HextechTelemetry.JsonOptions);
+			Dictionary<string, string[]>? decoded = JsonSerializer.Deserialize<Dictionary<string, string[]>>(_seenPlayerRuneIdsJson, HextechMayhemSavedJson.Options);
 			if (decoded == null)
 			{
 				return result;
