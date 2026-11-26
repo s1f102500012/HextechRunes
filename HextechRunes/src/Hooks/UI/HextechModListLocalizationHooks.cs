@@ -27,6 +27,10 @@ internal static class HextechModListLocalizationHooks
 	internal const string SponsorNameKey = "HEXTECH_SPONSOR_MOD_NAME";
 	internal const string SponsorDescriptionKey = "HEXTECH_SPONSOR_MOD_DESCRIPTION";
 
+	// 拓展包的模组 ID。本体只在这里认它：拓展包因本体缺失或版本不符而没能加载时，
+	// 模组列表里的名称与介绍也要有本地化，所以不能交给拓展包自己登记。
+	private const string SponsorPackModId = "HextechRunesSponsorPack";
+
 	// 原版场景节点名(0.111.0):NModMenuRow._Ready 取 "Title",
 	// NModInfoContainer._Ready 取 "ModTitle" / "ModDescription"。用公开的节点查找，不读私有字段 _title/_description。
 	private const string RowTitleNode = "Title";
@@ -42,7 +46,7 @@ internal static class HextechModListLocalizationHooks
 				nameKey = MainNameKey;
 				descriptionKey = MainDescriptionKey;
 				return true;
-			case HextechExternalContentRegistry.SponsorPackModId:
+			case SponsorPackModId:
 				nameKey = SponsorNameKey;
 				descriptionKey = SponsorDescriptionKey;
 				return true;

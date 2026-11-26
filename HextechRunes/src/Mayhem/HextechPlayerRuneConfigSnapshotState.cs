@@ -48,7 +48,7 @@ internal sealed class HextechPlayerRuneConfigSnapshotState
 		string[] ids = _disabledIds
 			.OrderBy(static id => id, StringComparer.Ordinal)
 			.ToArray();
-		return JsonSerializer.Serialize(ids, HextechTelemetry.JsonOptions);
+		return JsonSerializer.Serialize(ids, HextechMayhemSavedJson.Options);
 	}
 
 	public bool TryRestore(string? json, out string? errorMessage)
@@ -62,7 +62,7 @@ internal sealed class HextechPlayerRuneConfigSnapshotState
 
 		try
 		{
-			string[]? ids = JsonSerializer.Deserialize<string[]>(json, HextechTelemetry.JsonOptions);
+			string[]? ids = JsonSerializer.Deserialize<string[]>(json, HextechMayhemSavedJson.Options);
 			Set(ids);
 			return true;
 		}

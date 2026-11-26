@@ -136,11 +136,6 @@ internal static partial class HextechRuneConfigMenuHooks
 			return customTitle;
 		}
 
-		if (string.Equals(assetModId, HextechExternalContentRegistry.SponsorPackModId, StringComparison.Ordinal))
-		{
-			return L("HEXTECH_CONFIG_SOURCE_EXTRA_PACK");
-		}
-
 		return string.Format(L("HEXTECH_CONFIG_SOURCE_EXTERNAL"), assetModId);
 	}
 

@@ -204,7 +204,7 @@ internal static partial class Program
 			object legacyProjection = Activator.CreateInstance(
 				jsonType,
 				HextechRuneConfiguration.NormalizeSnapshot(runContext.RunConfigurationSnapshot!))!;
-			string legacyJson = JsonSerializer.Serialize(legacyProjection, jsonType, HextechTelemetry.JsonOptions);
+			string legacyJson = JsonSerializer.Serialize(legacyProjection, jsonType, HextechMayhemSavedJson.Options);
 			Equal(legacyJson, modifier.SavedHextechRunConfigurationSnapshotJson, $"{label}: snapshot JSON bytes");
 		}
 

@@ -15,22 +15,27 @@ internal static partial class HextechCatalog
 			.ToArray();
 	}
 
-	public static IReadOnlyList<RelicModel> GetCanonicalGenericVisibleRunes()
+	// 本类只负责“有哪些、怎么分组排序”。某个符文此刻该不该列出取决于配置开关与本机进度，
+	// 由调用方（HextechCollectionVisibility）以 isRuneVisible 传入，注册表不查配置与进度。
+	public static IReadOnlyList<RelicModel> GetCanonicalGenericRunes(Func<Type, bool> isRuneVisible)
 	{
-		return GetGenericVisibleRuneTypes()
+		PlayerRuneMetadataCatalog metadata = PlayerRuneMetadata;
+		return metadata.AllTypes
+			.Where(isRuneVisible)
+			.Where(type => !metadata.CharacterSpecificTypes.Contains(type))
 			.Select(static type => ModelDb.GetById<RelicModel>(ModelDb.GetId(type)))
 			.ToArray();
 	}
 
-	public static IReadOnlyList<RuneSeriesGroup> GetCharacterRuneGroups()
+	public static IReadOnlyList<RuneSeriesGroup> GetCharacterRuneGroups(Func<Type, bool> isRuneVisible)
 	{
 		return CharacterRunePools
 			.Where(static pool => HextechPlayerContextHelper.IsCharacterPoolPresentInGame(pool.Pool))
-			.Select(static pool => new RuneSeriesGroup(
+			.Select(pool => new RuneSeriesGroup(
 				$"CHARACTER.{pool.LocalizationKey}",
 				pool.RuneTypes
 					.Select(static (type, index) => new IndexedRuneType(type, index))
-					.Where(static rune => IsPlayerRuneTypeVisibleInCollection(rune.Type))
+					.Where(rune => isRuneVisible(rune.Type))
 					.OrderBy(static rune => PlayerRuneMetadata.GetRaritySortOrder(rune.Type))
 					.ThenBy(static rune => rune.Index)
 					.Select(static rune => ModelDb.GetById<RelicModel>(ModelDb.GetId(rune.Type)))
@@ -47,10 +52,10 @@ internal static partial class HextechCatalog
 			.ToArray();
 	}
 
-	public static IReadOnlyList<RelicModel> GetCanonicalVisibleCustomRelics()
+	public static IReadOnlyList<RelicModel> GetCanonicalCustomRelics(Func<Type, bool> isRuneVisible)
 	{
 		return AllCustomRelicTypes
-			.Where(static type => !PlayerRuneMetadata.AllTypes.Contains(type) || IsPlayerRuneTypeVisibleInCollection(type))
+			.Where(type => !PlayerRuneMetadata.AllTypes.Contains(type) || isRuneVisible(type))
 			.Where(IsForgeTypeShownInUi)
 			.Select(static type => TryGetCanonicalVisibleCustomRelic(type, out RelicModel? relic) ? relic : null)
 			.OfType<RelicModel>()

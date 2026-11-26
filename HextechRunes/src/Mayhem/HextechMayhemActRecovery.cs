@@ -17,7 +17,7 @@ internal static class HextechMayhemActRecovery
 			return HextechMayhemActRecoveryResult.None;
 		}
 
-		int telemetryRecoverThroughAct = GetHighestActResolvedByTelemetryChoices(
+		int choiceRecoverThroughAct = GetHighestActResolvedByRuneChoices(
 			runState,
 			choiceHistory,
 			recoveryCeiling,
@@ -27,7 +27,7 @@ internal static class HextechMayhemActRecovery
 			Math.Min(recoveryCeiling, currentStageIndex == 0 ? 0 : currentStageIndex - 1),
 			hexCountRecoveryBaseline,
 			playerHexCountsByAct);
-		int recoverThroughAct = Math.Max(telemetryRecoverThroughAct, countRecoverThroughAct);
+		int recoverThroughAct = Math.Max(choiceRecoverThroughAct, countRecoverThroughAct);
 		if (recoverThroughAct < 0)
 		{
 			return HextechMayhemActRecoveryResult.None;
@@ -38,14 +38,14 @@ internal static class HextechMayhemActRecovery
 		{
 			changed |= actState.TryMarkResolved(actIndex);
 
-			if (TryInferRarityForActFromTelemetryChoices(choiceHistory, actIndex, out HextechRarityTier rarity)
+			if (TryInferRarityForActFromRuneChoices(choiceHistory, actIndex, out HextechRarityTier rarity)
 				|| TryInferRarityForActFromPlayerRelics(runState, hexCountRecoveryBaseline, playerHexCountsByAct, actIndex, out rarity))
 			{
 				changed |= actState.TrySetRarityIfMissing(actIndex, rarity);
 			}
 		}
 
-		return new HextechMayhemActRecoveryResult(changed, recoverThroughAct, telemetryRecoverThroughAct, countRecoverThroughAct);
+		return new HextechMayhemActRecoveryResult(changed, recoverThroughAct, choiceRecoverThroughAct, countRecoverThroughAct);
 	}
 
 	public static string DescribePlayerHexCounts(RunState runState)
@@ -53,9 +53,9 @@ internal static class HextechMayhemActRecovery
 		return string.Join(",", runState.Players.Select(player => $"{player.NetId}:{player.Relics.Count(HextechCatalog.IsHextechRelic)}"));
 	}
 
-	public static string DescribeTelemetryChoiceCounts(HextechMayhemChoiceHistoryState choiceHistory)
+	public static string DescribeRuneChoiceCounts(HextechMayhemChoiceHistoryState choiceHistory)
 	{
-		return string.Join(",", choiceHistory.GetTelemetryChoiceRecords()
+		return string.Join(",", choiceHistory.GetRuneChoiceRecords()
 			.GroupBy(static record => record.ActIndex)
 			.OrderBy(static group => group.Key)
 			.Select(static group => $"{group.Key}:{group.Count()}"));
@@ -73,14 +73,14 @@ internal static class HextechMayhemActRecovery
 		return minHexCount == int.MaxValue ? 0 : minHexCount;
 	}
 
-	private static int GetHighestActResolvedByTelemetryChoices(
+	private static int GetHighestActResolvedByRuneChoices(
 		RunState runState,
 		HextechMayhemChoiceHistoryState choiceHistory,
 		int maxActIndex,
 		IReadOnlyList<int> playerHexCountsByAct)
 	{
 
-		IReadOnlyList<HextechTelemetry.RuneChoiceRecord> records = choiceHistory.GetTelemetryChoiceRecords();
+		IReadOnlyList<HextechRuneChoiceRecord> records = choiceHistory.GetRuneChoiceRecords();
 		if (records.Count == 0)
 		{
 			return -1;
@@ -95,7 +95,7 @@ internal static class HextechMayhemActRecovery
 				break;
 			}
 
-			ILookup<int, HextechTelemetry.RuneChoiceRecord> choicesByPlayerSlot = records
+			ILookup<int, HextechRuneChoiceRecord> choicesByPlayerSlot = records
 				.Where(record => record.ActIndex == actIndex)
 				.ToLookup(static record => record.PlayerSlot);
 			bool allPlayersRecorded = true;
@@ -107,7 +107,7 @@ internal static class HextechMayhemActRecovery
 					.ToHashSet(StringComparer.Ordinal);
 				for (int choiceOrdinal = 0; choiceOrdinal < requiredChoices; choiceOrdinal++)
 				{
-					HextechTelemetry.RuneChoiceRecord[] matchingChoices = choicesByPlayerSlot[playerSlot]
+					HextechRuneChoiceRecord[] matchingChoices = choicesByPlayerSlot[playerSlot]
 						.Where(record => record.ChoiceOrdinal == choiceOrdinal)
 						.Take(2)
 						.ToArray();
@@ -172,12 +172,12 @@ internal static class HextechMayhemActRecovery
 		return highest;
 	}
 
-	private static bool TryInferRarityForActFromTelemetryChoices(
+	private static bool TryInferRarityForActFromRuneChoices(
 		HextechMayhemChoiceHistoryState choiceHistory,
 		int actIndex,
 		out HextechRarityTier rarity)
 	{
-		foreach (HextechTelemetry.RuneChoiceRecord record in choiceHistory.GetTelemetryChoiceRecords().Where(record => record.ActIndex == actIndex))
+		foreach (HextechRuneChoiceRecord record in choiceHistory.GetRuneChoiceRecords().Where(record => record.ActIndex == actIndex))
 		{
 			if (Enum.TryParse(record.Rarity, ignoreCase: true, out rarity))
 			{
@@ -236,7 +236,7 @@ internal static class HextechMayhemActRecovery
 internal readonly record struct HextechMayhemActRecoveryResult(
 	bool Changed,
 	int RecoverThroughAct,
-	int TelemetryRecoverThroughAct,
+	int ChoiceRecoverThroughAct,
 	int CountRecoverThroughAct)
 {
 	public static HextechMayhemActRecoveryResult None => new(false, -1, -1, -1);

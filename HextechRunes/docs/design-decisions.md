@@ -200,6 +200,9 @@
 - **额外怪物行动（珠光护手、连拨击锤）的收尾补上“死亡后移除能力并调用 `AfterRemoved`”。** 0.114.0 起原版在怪物行动或攻击途中死亡时不再当场移除能力，留到 `MonsterModel.PerformMove` / `AttackCommand.Execute` 收尾；照抄 `PerformMove` 的这段跟着补。更早的版本击杀时已经移除，这一步取到空集合。`HextechCombatHooks.PerformExtraMonsterMove`
 - **敌方“升级：实验体”对疼痛戳刺的“死前摘除 + 回合边界清理”只留在 0.111.0 / 0.113.0 变体。** 这两个版本的原版 `PainfulStabsPower` 让持有者死后留场、能力不移除，尸体会继续排意图，所以模组在死前把它摘掉。0.114.0 原版删了这两个覆写，尸体与能力走标准移除链，0.114.0 变体不再编入这段；差别是敌人攻击途中被反伤打死时，0.114.0 照原版塞伤口，旧版本不塞。`TestSubjectEnemyHex.Legacy.cs`
 - **移除我方“引吭高歌”（愚者专属，回合开始时获得一种随机旋律）。** 0.10.1 起已默认禁用；原版 0.114.0 把调音重写成新的“获得旋律时”效果后，它补结算的名单还得再跟一次，不值得继续维护。随它一起删掉的还有两个“升级”海克斯里只给它用的“任意旋律都触发”查询；愚者池其余条目的图鉴顺序各前移一位。旧存档与遥测名称表的处理同之前移除的海克斯（名称表保留条目）。
+- **海克斯选择记录是对局中枢的存档数据，不属于遥测。** 记录类型 `HextechRuneChoiceRecord` 与存档 JSON 的序列化选项 `HextechMayhemSavedJson` 放在 `src/Mayhem/`，读档恢复、已见海克斯与选择日志重建都只依赖它们；遥测在对局结束时读取这份记录上报，对局中枢不再引用遥测模块。存档属性名 `SavedTelemetryChoicesJson` 是历史遗留，属性名与 JSON 结构都没变。
+- **图鉴与检视列表“此刻列出哪些海克斯”的口径放在 `HextechCollectionVisibility`，注册表不查配置与进度。** `HextechCatalog` 只回答有哪些、怎么分组排序，可见性（配置开关、弑神进度）由界面层以判定函数传入。
+- **本体不再按模组 ID 给额外拓展包内置来源标签与配置分组标题，拓展包自己用 `SetPlayerRunePoolLabel` / `RegisterConfigSectionTitle` 登记。** 两段文字仍在本体的 `relic_collection` 表里，拓展包只引用键。代价：0.10.3 及更早的拓展包搭配更新的本体时，来源标签显示“通用”、分组标题显示“外部模组：HextechRunesSponsorPack”，所以本体与拓展包要一起发版。模组列表里拓展包名称与介绍的本地化仍由本体负责（拓展包没能加载时也要显示），这是本体唯一还认拓展包 ID 的地方。`SponsorCatalog.RegisterDisplayLabels`
 
 ## 待实机验证
 

@@ -192,7 +192,7 @@ internal sealed partial class HextechMayhemModifier
 			EnemyHexCountsByAct = _runContext.EnemyHexCounts.Snapshot,
 			DisabledPlayerRuneIds = _runContext.PlayerRuneConfig.CopySnapshotOrNull() ?? snapshot.DisabledPlayerRuneIds
 		});
-		return JsonSerializer.Serialize(new RunConfigurationSnapshotJson(normalized), HextechTelemetry.JsonOptions);
+		return JsonSerializer.Serialize(new RunConfigurationSnapshotJson(normalized), HextechMayhemSavedJson.Options);
 	}
 
 	private sealed record RunConfigurationSnapshotJson(
@@ -294,7 +294,7 @@ internal sealed partial class HextechMayhemModifier
 			HextechRunConfigurationSnapshot? snapshot;
 			if (usesActRarityConfig)
 			{
-				snapshot = JsonSerializer.Deserialize<HextechRunConfigurationSnapshot>(json, HextechTelemetry.JsonOptions);
+				snapshot = JsonSerializer.Deserialize<HextechRunConfigurationSnapshot>(json, HextechMayhemSavedJson.Options);
 				if (snapshot != null && !hasGoldenRerollChance)
 				{
 					snapshot = snapshot with
@@ -305,7 +305,7 @@ internal sealed partial class HextechMayhemModifier
 			}
 			else if (usesSingleRarityConfig)
 			{
-				PreviousRunConfigurationSnapshotJson? previous = JsonSerializer.Deserialize<PreviousRunConfigurationSnapshotJson>(json, HextechTelemetry.JsonOptions);
+				PreviousRunConfigurationSnapshotJson? previous = JsonSerializer.Deserialize<PreviousRunConfigurationSnapshotJson>(json, HextechMayhemSavedJson.Options);
 				HextechRarityWeights[] weightsByAct = previous == null
 					? HextechRuneConfiguration.GetDefaultRuneRarityWeightsByAct()
 					: [ previous.RuneRarityWeights, previous.RuneRarityWeights, previous.RuneRarityWeights ];
@@ -329,7 +329,7 @@ internal sealed partial class HextechMayhemModifier
 			}
 			else
 			{
-				LegacyRunConfigurationSnapshotJson? legacy = JsonSerializer.Deserialize<LegacyRunConfigurationSnapshotJson>(json, HextechTelemetry.JsonOptions);
+				LegacyRunConfigurationSnapshotJson? legacy = JsonSerializer.Deserialize<LegacyRunConfigurationSnapshotJson>(json, HextechMayhemSavedJson.Options);
 				snapshot = legacy == null
 					? null
 					: new HextechRunConfigurationSnapshot(

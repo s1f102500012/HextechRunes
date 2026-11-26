@@ -155,7 +155,7 @@ internal static class HextechInspectHooks
 		[HarmonyPostfix]
 		private static void Postfix(ref IEnumerable<RelicModel> __result)
 		{
-			__result = __result.Concat(HextechCatalog.GetCanonicalVisibleCustomRelics()).Distinct();
+			__result = __result.Concat(HextechCollectionVisibility.GetCustomRelics()).Distinct();
 		}
 	}
 

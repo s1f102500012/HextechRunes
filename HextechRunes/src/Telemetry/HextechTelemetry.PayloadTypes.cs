@@ -4,15 +4,6 @@ namespace HextechRunes;
 
 internal static partial class HextechTelemetry
 {
-	public sealed record RuneChoiceRecord(
-		int ActIndex,
-		int PlayerSlot,
-		int ChoiceOrdinal,
-		string Rarity,
-		IReadOnlyList<string> Options,
-		string? Selected,
-		int RerollCount);
-
 	internal sealed record TelemetryConfig(bool Enabled, string Endpoint);
 
 	private sealed record RunEndedPayload(
@@ -25,7 +16,7 @@ internal static partial class HextechTelemetry
 		string UploadedAtUtc,
 		RunTelemetry Run,
 		IReadOnlyList<PlayerTelemetry> Players,
-		IReadOnlyList<RuneChoiceRecord> RuneChoices,
+		IReadOnlyList<HextechRuneChoiceRecord> RuneChoices,
 		IReadOnlyList<MonsterHexTelemetry> MonsterHexes);
 
 	private sealed record RunTelemetry(

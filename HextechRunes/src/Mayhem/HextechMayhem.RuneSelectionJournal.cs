@@ -30,7 +30,7 @@ internal sealed partial class HextechMayhemModifier
 			out entry);
 	}
 
-	internal bool TryRecoverRuneSelectionJournalEntryFromTelemetry(
+	internal bool TryRecoverRuneSelectionJournalEntryFromChoiceHistory(
 		int actIndex,
 		int choiceOrdinal,
 		Player player,
@@ -43,7 +43,7 @@ internal sealed partial class HextechMayhemModifier
 			return false;
 		}
 
-		HextechTelemetry.RuneChoiceRecord[] matchingRecords = ChoiceHistory.GetTelemetryChoiceRecords()
+		HextechRuneChoiceRecord[] matchingRecords = ChoiceHistory.GetRuneChoiceRecords()
 			.Where(record =>
 				record.ActIndex == actIndex
 				&& record.ChoiceOrdinal == choiceOrdinal
@@ -56,7 +56,7 @@ internal sealed partial class HextechMayhemModifier
 			return false;
 		}
 
-		HextechTelemetry.RuneChoiceRecord matchingRecord = matchingRecords[0];
+		HextechRuneChoiceRecord matchingRecord = matchingRecords[0];
 		if (matchingRecord.Selected is not string selectedEntry
 			|| !matchingRecord.Options.Contains(selectedEntry, StringComparer.Ordinal)
 			|| !Enum.TryParse(

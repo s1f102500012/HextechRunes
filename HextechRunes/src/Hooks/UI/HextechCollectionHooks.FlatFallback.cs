@@ -51,8 +51,8 @@ internal static partial class HextechCollectionHooks
 
 	private static List<RelicModel> GetFlatFallbackRelics()
 	{
-		return HextechCatalog.GetCanonicalGenericVisibleRunes()
-			.Concat(HextechCatalog.GetCharacterRuneGroups().SelectMany(static group => group.Relics))
+		return HextechCollectionVisibility.GetGenericRunes()
+			.Concat(HextechCollectionVisibility.GetCharacterRuneGroups().SelectMany(static group => group.Relics))
 			.Concat(HextechCatalog.GetCanonicalForges())
 			.Distinct()
 			.ToList();

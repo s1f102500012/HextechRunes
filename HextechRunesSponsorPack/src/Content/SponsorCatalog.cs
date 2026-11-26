@@ -13,6 +13,10 @@ internal static class SponsorCatalog
 {
 	private const string LogTag = "Registration";
 
+	// 本体 relic_collection 表里的键:HEXTECH_POOL.SPONSOR_PACK 与 HEXTECH_CONFIG_SOURCE_EXTRA_PACK。
+	internal const string PoolLabelKey = "SPONSOR_PACK";
+	internal const string ConfigSectionTitleKey = "HEXTECH_CONFIG_SOURCE_EXTRA_PACK";
+
 	// 迁移壳 SponsorCompositeEnchantment 仍带 [SavedProperty],载体注册保留;它不再有图标(不注册、不进随机附魔池)。
 	private static readonly Type[] SavedPropertyCarriers =
 	[
@@ -140,6 +144,8 @@ internal static class SponsorCatalog
 			Register("player rune", rune, failed, () => HextechRunesApi.RegisterPlayerRune(rune, rarity, tagKey: tagKey, assetModId: ModInfo.Id));
 		}
 
+		RegisterDisplayLabels();
+
 		// 信徒的锻造器售价修正走本体公开登记点;本体过旧(没有该方法)时只记失败,不影响其他内容。
 		Register("forge shop price modifier", typeof(BelieverRune), failed, RegisterBelieverForgePriceModifier);
 
@@ -174,6 +180,28 @@ internal static class SponsorCatalog
 		{
 			failed.Add(type);
 			SponsorLog.Warn(LogTag, $"Failed to register {kind} {type.Name}: {ex.GetType().Name}: {ex.Message}");
+		}
+	}
+
+	/// <summary>
+	/// 登记界面文字:符文在选择界面上的来源标签(“拓展包”)与配置菜单里本包内容的分组标题(“额外拓展包”)。
+	/// 两段文字都在本体的 relic_collection 表里(九种语言已有),这里只引用键。
+	/// 只影响显示:登记失败只记日志,不算内容注册失败。
+	/// </summary>
+	internal static void RegisterDisplayLabels()
+	{
+		try
+		{
+			foreach ((Type rune, _, _) in PlayerRunes)
+			{
+				HextechRunesInterop.SetPlayerRunePoolLabel(rune, PoolLabelKey);
+			}
+
+			HextechRunesInterop.RegisterConfigSectionTitle(ModInfo.Id, ConfigSectionTitleKey);
+		}
+		catch (Exception ex)
+		{
+			SponsorLog.Warn(LogTag, $"Failed to register display labels: {ex.GetType().Name}: {ex.Message}");
 		}
 	}
 

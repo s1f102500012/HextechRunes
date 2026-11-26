@@ -405,7 +405,7 @@ internal static partial class HextechRuneSelectionCoordinator
 		RelicModel selected = RequireCompletedSelection(
 			selection.SelectedRelic,
 			$"singleplayer act={actIndex} ordinal={choiceOrdinal} player={player.NetId}");
-		HextechTelemetry.RecordRuneChoice(runState, actIndex, rarity, player, selection.FinalOptions, selected, selection.RerollCount, choiceOrdinal);
+		modifier.RecordRuneChoice(actIndex, rarity, player, selection.FinalOptions, selected, selection.RerollCount, choiceOrdinal);
 		modifier.CommitCharacterRuneWeight(player, selection.FinalOptions);
 		await RelicCmd.Obtain(selected, player);
 		// 拾取效果（如棱彩海克斯的连续锻造三选一）在 Obtain 内等待玩家操作；保存并退出会取消这些界面并让这里续跑。

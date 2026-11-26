@@ -86,7 +86,7 @@ internal sealed partial class HextechMayhemModifier
 			stageIndex);
 		if (recovery.Changed)
 		{
-			HextechLog.Info("Mayhem", $"Recovered resolved stages from saved choices/player relics: reason={reason} currentAct={RunState.CurrentActIndex} currentStage={stageIndex} recoverThrough={recovery.RecoverThroughAct} telemetryThrough={recovery.TelemetryRecoverThroughAct} countThrough={recovery.CountRecoverThroughAct} baseline={HexCountRecoveryBaseline} {ActState.Describe()} counts={DescribePlayerHexCounts()} choices={DescribeTelemetryChoiceCounts()}");
+			HextechLog.Info("Mayhem", $"Recovered resolved stages from saved choices/player relics: reason={reason} currentAct={RunState.CurrentActIndex} currentStage={stageIndex} recoverThrough={recovery.RecoverThroughAct} telemetryThrough={recovery.ChoiceRecoverThroughAct} countThrough={recovery.CountRecoverThroughAct} baseline={HexCountRecoveryBaseline} {ActState.Describe()} counts={DescribePlayerHexCounts()} choices={DescribeRuneChoiceCounts()}");
 		}
 
 		return recovery.Changed;

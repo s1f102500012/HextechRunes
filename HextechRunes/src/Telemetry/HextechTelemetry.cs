@@ -13,7 +13,8 @@ internal static partial class HextechTelemetry
 	// 上报载荷结构版本(服务端按它解析);改字段结构时递增。
 	private const int TelemetrySchemaVersion = 1;
 
-	internal static readonly JsonSerializerOptions JsonOptions = new(JsonSerializerDefaults.Web);
+	// 只用于遥测自己的配置文件与上报载荷；对局存档的 JSON 用 HextechMayhemSavedJson。
+	private static readonly JsonSerializerOptions JsonOptions = new(JsonSerializerDefaults.Web);
 
 	// 进程内防重:同一局可能从多条结束路径(胜利/失败结算、放弃)各触发一次 OnRunEnded。
 	// 有意不清理——每局只多一个 RunId 字符串,进程生命周期内的增长可忽略,清掉反而会让重复上传重新可能。
@@ -28,42 +29,6 @@ internal static partial class HextechTelemetry
 		catch (Exception ex)
 		{
 			HextechLog.Warn("Mayhem", $"Telemetry config init failed: {ex.Message}");
-		}
-	}
-
-	public static void RecordRuneChoice(
-		RunState runState,
-		int actIndex,
-		HextechRarityTier rarity,
-		Player player,
-		IReadOnlyList<RelicModel> options,
-		RelicModel selected,
-		int rerollCount,
-		int choiceOrdinal = 0)
-	{
-		try
-		{
-			HextechMayhemModifier? modifier = HextechMayhemModifier.FindIn(runState);
-			if (modifier == null)
-			{
-				return;
-			}
-
-			// 原版 GetPlayerSlotIndex 就是 Players.IndexOf(Player 不重写相等性,即按引用);找不到时沿用旧口径记到 0 号槽。
-			int playerSlot = Math.Max(0, runState.GetPlayerSlotIndex(player));
-			RuneChoiceRecord record = new(
-				actIndex,
-				playerSlot,
-				Math.Max(0, choiceOrdinal),
-				rarity.ToString(),
-				options.Select(GetRelicId).ToArray(),
-				GetRelicId(selected),
-				Math.Max(0, rerollCount));
-			modifier.RecordTelemetryChoice(record);
-		}
-		catch (Exception ex)
-		{
-			HextechLog.Warn("Mayhem", $"Telemetry choice record failed: {ex.Message}");
 		}
 	}
 
